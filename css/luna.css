@@ -1,3 +1,15 @@
+@media(min-width:1025px) {
+    :root {
+        --ContainWidth: 1000px;
+    }
+}
+
+@media(max-width:1025px) and (min-width:825px) {
+    :root {
+        --ContainWidth: 800px;
+    }
+}
+
 @media(min-width:825px) {
     .header section[sub="learning"]::after {
         content: "Learning";
@@ -27,6 +39,10 @@ html {
     scrollbar-width: none;
 }
 
+html::-webkit-scrollbar{
+    display: none;
+}
+
 ::selection {
     color: #000;
     background: #ddd;
@@ -52,16 +68,14 @@ body {
     line-height: 1.6;
     color: #343a40;
     margin: 0px;
-    padding: 0px;   
+    padding: 0px;
 }
-::-webkit-scrollbar {
-    display: none;
-}
+
 .header {
     display: inline-flex;
     flex-direction: row;
     width: 98%;
-    max-width: 800px;
+    max-width: var(--ContainWidth);
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px #eee solid;
@@ -91,6 +105,7 @@ body {
 
 .footer p:last-child {
     padding-bottom: 8px;
+    margin-block-end: 0px;
 }
 
 .container {
@@ -102,7 +117,7 @@ body {
 .archive {
     vertical-align: baseline;
     width: 98%;
-    max-width: 800px;
+    max-width: var(--ContainWidth);
 }
 
 .posts .post {
@@ -123,7 +138,6 @@ body {
 .readmore {
     font-size: 0.8rem !important;
     font-weight: normal !important;
-    ;
 }
 
 .post a {
@@ -168,13 +182,37 @@ body {
     margin-block-start: 0.8em;
 }
 
-.archive p {
+.archive p , .archive details{
     margin-block-end: 0.9em;
     margin-block-start: 0.9em;
 }
 
-.archive code,.archive pre {
-    font-family: 'Courier New', Courier, monospace;
+.archive code,
+.archive pre {
+    font-family: 'Fira Code', 'Courier New', '微软雅黑', Courier, monospace;
+
+}
+
+.archive textarea {
+    width: 98%;
+    height: 800px;
+    font-family: 'Fira Code', 'Courier New', '微软雅黑', Courier, monospace;
+    resize: vertical;
+    overflow-x: scroll;
+}
+
+.archive code {
+    background-color: #EEEEEE;
+    padding: 0px 4px;
+    border-radius: 0px 4px 4px 0px;
+    border-left: thick solid gray;
+}
+.archive p>code{
+    border-radius: 4px;
+    border: none;
+}
+.archive q {
+    font-style: italic;
 }
 
 a[rel="license"] {
@@ -218,4 +256,8 @@ a[rel="license"] {
 
 .footer a:first-child {
     margin-left: 0px;
+}
+
+.archive summary {
+    outline: none;
 }
