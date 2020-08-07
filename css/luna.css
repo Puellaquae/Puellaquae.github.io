@@ -15,8 +15,8 @@
         content: "Learning";
     }
 
-    .header section[sub="Thinking"]::after {
-        content: "Thinking";
+    .header section[sub="experiment"]::after {
+        content: "Experiment";
     }
 
     .create.date::before {
