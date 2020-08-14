@@ -34,6 +34,45 @@
     }
 }
 
+:root {
+    --backgroundcolor: #fff;
+    --fontColor: #343a40;
+    --myBlue: #1b6ec2;
+    --myRed: #cc5252;
+    --lettleList: "小列表";
+    --bigList: "大列表";
+    --codeFont: 'Fira Code', 'Courier New', '微软雅黑', Courier, monospace;
+}
+
+[for="tag-cpp"]::before {
+    content: "C++";
+}
+
+[for="tag-multithread"]::before {
+    content: "多线程";
+}
+
+[for="tag-crud"]::before {
+    content: "CRUD";
+}
+
+#filter-on:checked~input~* .post {
+    display: none;
+}
+
+#filter-on:checked~* label[for^="filter"]::before,
+#filter-on:checked~input#tag-cpp:checked~* [for="tag-cpp"]::before,
+#filter-on:checked~input#tag-multithread:checked~* [for="tag-multithread"]::before,
+#filter-on:checked~input#tag-crud:checked~* [for="tag-crud"]::before {
+    color: var(--myRed);
+}
+
+#filter-on:checked~input#tag-cpp:checked~* [tag~="cpp"],
+#filter-on:checked~input#tag-multithread:checked~* [tag~="multithread"],
+#filter-on:checked~input#tag-crud:checked~* [tag~="crud"] {
+    display: unset;
+}
+
 html {
     font-size: 20px;
     scrollbar-width: none;
@@ -50,7 +89,7 @@ html::-webkit-scrollbar {
 
 a {
     text-decoration: none;
-    color: #1b6ec2;
+    color: var(--myBlue);
     cursor: pointer;
 }
 
@@ -59,29 +98,42 @@ a {
 }
 
 .header a:hover {
-    color: #1b6ec2;
+    color: var(--myBlue);
 }
 
 body {
     text-align: center;
     font-family: Optima, "Lucida Sans", Calibri, Candara, Arial, source-han-serif-sc, "Source Han Serif SC", "Source Han Serif CN", "Source Han Serif TC", "Source Han Serif TW", "Source Han Serif", "Songti SC", "Microsoft YaHei", sans-serif;
     line-height: 1.6;
-    color: #343a40;
+    color: var(--fontColor);
     margin: 0px;
     padding: 0px;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .header {
     display: inline-flex;
     flex-direction: row;
-    width: 98%;
-    max-width: var(--ContainWidth);
+    width: 100%;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px #eee solid;
+    position: sticky;
+    top: 0px;
+    background-color: var(--backgroundcolor);
+    z-index: 99999;
+}
+
+.header:hover {
+    border-bottom: 1px #abc solid;
 }
 
 .header>.navbar-left {
+    padding-left: calc((100% - var(--ContainWidth))/2);
     justify-self: left;
 }
 
@@ -90,12 +142,36 @@ body {
 }
 
 .header>.navbar-right {
+    padding-right: calc((100% - var(--ContainWidth))/2);
     justify-self: right;
+}
+
+label[for="timeLine"]::before {
+    content: var(--lettleList);
+}
+
+input#timeLine:checked~* label[for="timeLine"]::before {
+    content: var(--bigList);
+}
+
+input#filter-off:checked~* label[for="filter-on"],
+input#filter-on:checked~* label[for="filter-off"] {
+    display: unset;
+}
+
+input#filter-off:checked~* label[for="filter-off"],
+input#filter-on:checked~* label[for="filter-on"] {
+    display: none;
+}
+
+label[for^="filter"]::before {
+    content: "筛选";
 }
 
 .footer {
     border-top: 1px #eee solid;
     background-color: #eee;
+    width: 100vw;
 }
 
 .footer p {
@@ -109,21 +185,88 @@ body {
 }
 
 .container {
-    display: flex;
-    justify-content: center;
+    width: 98%;
+    max-width: var(--ContainWidth);
+    flex: 1;
 }
 
 .posts,
 .archive {
     vertical-align: baseline;
-    width: 98%;
+    width: 100%;
     max-width: var(--ContainWidth);
+}
+
+.posts {
+    display: flex;
+    flex-direction: column-reverse;
 }
 
 .posts .post {
     text-align: left;
-    padding-bottom: 1em;
+    padding-bottom: 0.5em;
     border-bottom: 1px #eee solid;
+    position: relative;
+}
+
+input#timeLine:checked~input#filter-on:checked~#tag-cpp:checked~* .posts .post[tag~="cpp"],
+input#timeLine:checked~input#filter-on:checked~#tag-multithread:checked~* .posts .post[tag~="multithread"],
+input#timeLine:checked~input#filter-on:checked~#tag-crud:checked~* .posts .post[tag~="crud"],
+input#timeLine:checked~* .posts .post {
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    padding: 0px;
+    border: none;
+}
+
+input#timeLine:checked~input#filter-on:checked~* .posts .post,
+input#timeLine:checked~* .posts .post .meta {
+    display: none;
+}
+
+input#timeLine:checked~* .posts .post .date {
+    font-size: 1em;
+    padding: 0px 1em 1px 0px;
+    order: -1;
+}
+
+input#timeLine:checked~* .posts .post .date:before {
+    content: "\2022";
+    padding-right: 0.2em;
+}
+
+input#timeLine:checked~* .posts .post a {
+    font-size: 1em;
+    font-weight: normal;
+    color: var(--fontColor);
+}
+
+input#timeLine:checked~* .posts .post:hover {
+    padding-bottom: 0px;
+    box-shadow: none;
+}
+
+#filter-on:checked~* div.filterTag {
+    display: inline-block;
+}
+
+#filter-off:checked~* div.filterTag {
+    display: none;
+}
+
+.posts .post+.post {
+    padding-top: 0.25em;
+}
+
+.posts .post:last-child {
+    padding-bottom: 0.75em;
+}
+
+.posts .post:hover {
+    padding-bottom: calc(0.5em+1px);
+    box-shadow: 1px 1px 1px #abc;
 }
 
 .archive {
@@ -133,11 +276,6 @@ body {
 
 .posts .post:last-child {
     border-bottom: none;
-}
-
-.readmore {
-    font-size: 0.8rem !important;
-    font-weight: normal !important;
 }
 
 .post a {
@@ -191,7 +329,7 @@ body {
 
 .archive code,
 .archive pre {
-    font-family: 'Fira Code', 'Courier New', '微软雅黑', Courier, monospace;
+    font-family: var(--codeFont);
     background-color: #EEEEEE;
     padding: 0px 4px;
     border-radius: 0px 4px 4px 0px;
@@ -202,12 +340,13 @@ body {
 .archive .entry>pre {
     padding: 0px;
 }
+
 .archive .entry>pre:hover {
     background-color: #FFEEEE;
 }
 
 .archive .entry>pre:hover::before {
-    color:#FEEEEE;
+    color: #FEEEEE;
 }
 
 .archive .entry>pre::before {
@@ -216,7 +355,7 @@ body {
     background-color: gray;
     margin-right: 4px;
     padding-left: 8px;
-    color:snow;
+    color: snow;
     padding: 4px 4px;
 }
 
@@ -227,7 +366,7 @@ body {
 .archive textarea {
     width: 98%;
     height: 800px;
-    font-family: 'Fira Code', 'Courier New', '微软雅黑', Courier, monospace;
+    font-family: var(--codeFont);
     resize: vertical;
     overflow-x: scroll;
 }
