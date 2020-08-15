@@ -32,6 +32,18 @@
     .modified.date {
         display: none !important;
     }
+
+    .header>.navbar-left {
+        padding-left: 1% !important;
+    }
+
+    .header>.navbar-right {
+        padding-right: 1% !important;
+    }
+
+    .container {
+        width: 98% !important;
+    }
 }
 
 :root {
@@ -56,20 +68,26 @@
     content: "CRUD";
 }
 
+[for="tag-htmlcss"]::before {
+    content: "HTML/CSS";
+}
+
 #filter-on:checked~input~* .post {
     display: none;
 }
 
 #filter-on:checked~* label[for^="filter"]::before,
-#filter-on:checked~input#tag-cpp:checked~* [for="tag-cpp"]::before,
-#filter-on:checked~input#tag-multithread:checked~* [for="tag-multithread"]::before,
-#filter-on:checked~input#tag-crud:checked~* [for="tag-crud"]::before {
+#filter-on:checked~#tag-cpp:checked~* [for="tag-cpp"]::before,
+#filter-on:checked~#tag-multithread:checked~* [for="tag-multithread"]::before,
+#filter-on:checked~#tag-crud:checked~* [for="tag-crud"]::before,
+#filter-on:checked~#tag-htmlcss:checked~* [for="tag-htmlcss"]::before {
     color: var(--myRed);
 }
 
-#filter-on:checked~input#tag-cpp:checked~* [tag~="cpp"],
-#filter-on:checked~input#tag-multithread:checked~* [tag~="multithread"],
-#filter-on:checked~input#tag-crud:checked~* [tag~="crud"] {
+#filter-on:checked~#tag-cpp:checked~* [tag~="cpp"],
+#filter-on:checked~#tag-multithread:checked~* [tag~="multithread"],
+#filter-on:checked~#tag-crud:checked~* [tag~="crud"],
+#filter-on:checked~#tag-htmlcss:checked~* [tag~="htmlcss"] {
     display: unset;
 }
 
@@ -133,6 +151,7 @@ body {
 }
 
 .header>.navbar-left {
+    display: inline-block;
     padding-left: calc((100% - var(--ContainWidth))/2);
     justify-self: left;
 }
@@ -142,6 +161,7 @@ body {
 }
 
 .header>.navbar-right {
+    display: inline-block;
     padding-right: calc((100% - var(--ContainWidth))/2);
     justify-self: right;
 }
@@ -150,17 +170,17 @@ label[for="timeLine"]::before {
     content: var(--lettleList);
 }
 
-input#timeLine:checked~* label[for="timeLine"]::before {
+#timeLine:checked~* label[for="timeLine"]::before {
     content: var(--bigList);
 }
 
-input#filter-off:checked~* label[for="filter-on"],
-input#filter-on:checked~* label[for="filter-off"] {
+#filter-off:checked~* label[for="filter-on"],
+#filter-on:checked~* label[for="filter-off"] {
     display: unset;
 }
 
-input#filter-off:checked~* label[for="filter-off"],
-input#filter-on:checked~* label[for="filter-on"] {
+#filter-off:checked~* label[for="filter-off"],
+#filter-on:checked~* label[for="filter-on"] {
     display: none;
 }
 
@@ -185,7 +205,7 @@ label[for^="filter"]::before {
 }
 
 .container {
-    width: 98%;
+    width: 100%;
     max-width: var(--ContainWidth);
     flex: 1;
 }
@@ -209,10 +229,11 @@ label[for^="filter"]::before {
     position: relative;
 }
 
-input#timeLine:checked~input#filter-on:checked~#tag-cpp:checked~* .posts .post[tag~="cpp"],
-input#timeLine:checked~input#filter-on:checked~#tag-multithread:checked~* .posts .post[tag~="multithread"],
-input#timeLine:checked~input#filter-on:checked~#tag-crud:checked~* .posts .post[tag~="crud"],
-input#timeLine:checked~* .posts .post {
+#timeLine:checked~#filter-on:checked~#tag-cpp:checked~* .posts .post[tag~="cpp"],
+#timeLine:checked~#filter-on:checked~#tag-multithread:checked~* .posts .post[tag~="multithread"],
+#timeLine:checked~#filter-on:checked~#tag-crud:checked~* .posts .post[tag~="crud"],
+#timeLine:checked~#filter-on:checked~#tag-htmlcss:checked~* .posts .post[tag~="htmlcss"],
+#timeLine:checked~* .posts .post {
     display: inline-flex;
     flex-direction: row;
     justify-content: left;
@@ -221,29 +242,29 @@ input#timeLine:checked~* .posts .post {
     border: none;
 }
 
-input#timeLine:checked~input#filter-on:checked~* .posts .post,
-input#timeLine:checked~* .posts .post .meta {
+#timeLine:checked~#filter-on:checked~* .posts .post,
+#timeLine:checked~* .posts .post .meta {
     display: none;
 }
 
-input#timeLine:checked~* .posts .post .date {
+#timeLine:checked~* .posts .post .date {
     font-size: 1em;
     padding: 0px 1em 1px 0px;
     order: -1;
 }
 
-input#timeLine:checked~* .posts .post .date:before {
+#timeLine:checked~* .posts .post .date:before {
     content: "\2022";
     padding-right: 0.2em;
 }
 
-input#timeLine:checked~* .posts .post a {
+#timeLine:checked~* .posts .post a {
     font-size: 1em;
     font-weight: normal;
     color: var(--fontColor);
 }
 
-input#timeLine:checked~* .posts .post:hover {
+#timeLine:checked~* .posts .post:hover {
     padding-bottom: 0px;
     box-shadow: none;
 }
@@ -284,7 +305,7 @@ input#timeLine:checked~* .posts .post:hover {
     font-weight: 600;
 }
 
-.archive a {
+.archive>a {
     display: block;
     font-size: 1.6rem;
     font-weight: 600;
@@ -341,6 +362,10 @@ input#timeLine:checked~* .posts .post:hover {
     padding: 0px;
 }
 
+.archive .entry>pre:nth-of-type(even) {
+    background-color: #ddd;
+}
+
 .archive .entry>pre:hover {
     background-color: #FFEEEE;
 }
@@ -351,7 +376,7 @@ input#timeLine:checked~* .posts .post:hover {
 
 .archive .entry>pre::before {
     counter-increment: codeline;
-    content: counter(codeline);
+    content: counter(codeline, decimal-leading-zero);
     background-color: gray;
     margin-right: 4px;
     padding-left: 8px;
@@ -378,6 +403,10 @@ input#timeLine:checked~* .posts .post:hover {
 
 .archive q {
     font-style: italic;
+}
+
+.entry a {
+    text-decoration: underline;
 }
 
 a[rel="license"] {
