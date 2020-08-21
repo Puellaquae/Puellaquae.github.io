@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>错误与弯路集</title>
+    <link rel="stylesheet" href="../css/luna.css" />
+    <style>
+        h2::before{
+            content: '#' attr(id) '.';
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <section sub="learning" class="navbar-left title">
+            Puelloc
+        </section>
+        <section class="navbar-right">
+            <a href="../index.html">首页</a>
+            <a href="#">关于</a>
+        </section>
+    </header>
+    <div class="container">
+        <div class="archive">
+            <a>错误与弯路集</a>
+            <div class="modified date">
+                2020/08/21
+            </div>
+            <div class="create date">
+                2020/08/21
+            </div>
+            <div class="entry">
+                <p><b>正确都是相似的，错误各有各的错法。</b>对于遇到的阐述所需篇幅较短的问题都会集中在这里。</p>
+                <h2 id="1">MBR 程序在 bochs 可以正常运行但是在 VMware 中表现异常</h2>
+                <p>经尝试后大致推测原因为没有设定<code>SS</code>和<code>SP</code>的值，导致<code>ret</code>时<code>IP</code>寄存器被被赋予了未定义的值。但是此问题在 bochs 中并没有表现出来。</p>
+                <h2 id="2">ret 返回到了一个错误的地址</h2>
+                <p>当时程序表现为引导程序持续重启，后调试发现某次<code>ret</code>后跳转至了内存<code>0x81e9</code>处，而此地址不在引导程序的范围内。检查堆栈发现此程序使用<code>0x7c00</code>作为栈底，<code>0x81e9</code>恰好于程序头两个字节一致。最后检查代码发现实为原本应该用<code>call</code>的地方误用了<code>jmp</code>，导致<code>ret</code>时发生错误。</p>
+                <h2 id="3">《30天自制操作系统》中为何引导程序要跳转至 0xc200 处</h2>
+                <p>起初简单认为是某个约定的值，但在自己实践时始终无法成功跳出 MBR 进入后续部分。后来我认为是书中所使用的镜像制作工具有特殊操作导致的，但经实验被证否，使用 WinImage 和书中的程序是可以正常运行的。了解 FAT12 文件系统的结构后发现其数据区从偏移 <code>0x4200</code> 处开始，而且数据被从头开始加载至 <code>0x8000</code> 处，两者叠加就有了 <code>0xc200</code>。若直接将软盘 <code>0x4200</code> 偏移处的数据加载至 <code>0x8000</code> 处，则直接 <code>jmp 0x8000</code>就可以了。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+        <p rel="contact">
+            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="https://github.com/Puellaquae">Github</a>
+        </p>
+    </div>
+</body>
+
+</html>
