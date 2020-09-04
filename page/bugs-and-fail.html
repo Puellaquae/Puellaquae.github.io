@@ -16,7 +16,7 @@
 
 <body>
     <header class="header">
-        <section sub="learning" class="navbar-left title">
+        <section sub="Learning" class="navbar-left title">
             Puelloc
         </section>
         <section class="navbar-right">
@@ -41,6 +41,8 @@
                 <p>当时程序表现为引导程序持续重启，后调试发现某次<code>ret</code>后跳转至了内存<code>0x81e9</code>处，而此地址不在引导程序的范围内。检查堆栈发现此程序使用<code>0x7c00</code>作为栈底，<code>0x81e9</code>恰好于程序头两个字节一致。最后检查代码发现实为原本应该用<code>call</code>的地方误用了<code>jmp</code>，导致<code>ret</code>时发生错误。</p>
                 <h2 id="3">《30天自制操作系统》中为何引导程序要跳转至 0xc200 处</h2>
                 <p>起初简单认为是某个约定的值，但在自己实践时始终无法成功跳出 MBR 进入后续部分。后来我认为是书中所使用的镜像制作工具有特殊操作导致的，但经实验被证否，使用 WinImage 和书中的程序是可以正常运行的。了解 FAT12 文件系统的结构后发现其数据区从偏移 <code>0x4200</code> 处开始，而且数据被从头开始加载至 <code>0x8000</code> 处，两者叠加就有了 <code>0xc200</code>。若直接将软盘 <code>0x4200</code> 偏移处的数据加载至 <code>0x8000</code> 处，则直接 <code>jmp 0x8000</code>就可以了。</p>
+                <h2 id="4">使用 BIOS INT 0x15 AX=0xe820 获取内存结构失败</h2>
+                <p>这里的失败不是中断按照约定返回了一个错误码，而是导致程序不正常运行或给出了不正常的数据。经过多次试验，现发现当<code>ES:DI</code>指向的缓冲区在当前程序数据内，且偏移小于<code>0xff</code>时（即使通过变换段寄存器的值使<code>DI</code>的值大于等于<code>0xff</code>也会失败），就会根据<code>DI</code>的具体数值触发诸如宕机，在 BIOS 代码内死循环，底端内存被全部覆写为<code>0x8a</code>，返回数据为乱码等问题。导致此情况的原因未知。最后采用将数据段置于代码段之后（拉高偏移值）的方法。</p>
             </div>
         </div>
     </div>
