@@ -11,32 +11,41 @@
 
 <body>
     <input type="checkbox" id="timeLine" hidden>
-    <input type="radio" name="filter" id="filter-on" hidden>
+    <!--input type="radio" name="filter" id="filter-on" hidden>
     <input type="radio" name="filter" id="filter-off" checked hidden>
     <input type="checkbox" id="tag-cpp" hidden>
     <input type="checkbox" id="tag-multithread" hidden>
     <input type="checkbox" id="tag-crud" hidden>
-    <input type="checkbox" id="tag-htmlcss" hidden>
+    <input type="checkbox" id="tag-htmlcss" hidden-->
     <header class="header">
         <section class="navbar-left title">
             Puelloc
         </section>
         <section class="navbar-right">
-            <label for="filter-on"></label>
+            <!--label for="filter-on"></label>
             <label for="filter-off"></label>
             <div class="filterTag">
                 <label class="cpp" for="tag-cpp"></label>
                 <label class="multithread" for="tag-multithread"></label>
                 <label class="crud" for="tag-crud"></label>
                 <label class="htmlcss" for="tag-htmlcss"></label>
-            </div>
-            <label for="timeLine"></label>
+            </div-->
+            <label for="timeLine" tabindex="0"></label>
             <a href="index.html">首页</a>
-            <a href="#">关于</a>
+            <a href="page/about.html">关于</a>
         </section>
     </header>
     <div class="container">
         <div class="posts">
+            <div class="post" style="order: 999999;">
+                <a href="page/bugs-and-fail.html">错误与弯路集</a>
+                <div class="date">2020/08/21</div>
+            </div>
+            <div class="post" style="order: 200815;" tag="htmlcss">
+                <a href="page/css-filter.html">CSS 选择器与&lt;input&gt;标签的联用</a>
+                <div class="date">2020/08/15</div>
+                <label class="meta" for="tag-htmlcss"></label>
+            </div>
             <div class="post" style="order: 200807;" tag="cpp multithread">
                 <a href="page/std-thread.html">C++多线程 std::thread join 与 detach</a>
                 <div class="date">2020/08/07</div>
@@ -54,15 +63,6 @@
                 <div class="date">2020/07/15</div>
                 <label class="meta" for="tag-cpp"></label>
                 <label class="meta" for="tag-crud"></label>
-            </div>
-            <div class="post" style="order: 200815;" tag="htmlcss">
-                <a href="page/css-filter.html">CSS 选择器与&lt;input&gt;标签的联用</a>
-                <div class="date">2020/08/15</div>
-                <label class="meta" for="tag-htmlcss"></label>
-            </div>
-            <div class="post" style="order: 999999;">
-                <a href="page/bugs-and-fail.html">错误与弯路集</a>
-                <div class="date">2020/08/21</div>
             </div>
         </div>
     </div>

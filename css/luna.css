@@ -50,8 +50,8 @@
     --selectedFontColor: #fff;
     --selectedBgColor: #1f1f1f;
     --postTitleColor: #141414;
-    --linkerColor: #f5222d;
-    --highlightColor: #f5222d;
+    --linkerColor: #1919D0;
+    --highlightColor: #1919D0;
     --codeEvenBgColor: #fafafa;
     --codeBgColor: #f0f0f0;
     --codeLineNumBgColor: #595959;
@@ -61,7 +61,28 @@
     --splitLineColor: #eee;
     --lettleList: "小列表";
     --bigList: "大列表";
-    --codeFont: 'Fira Code', 'Courier New', '微软雅黑', Courier, monospace;
+    --codeFont: 'Fira Code', "Noto Sans CJK SC", monospace;
+}
+
+@media(prefers-color-scheme: dark) {
+    :root {
+        --navbarBgColor: #111;
+        --bgColor: #222;
+        --tagBgColor: #444;
+        --fontColor: #fafafa;
+        --selectedFontColor: #000;
+        --selectedBgColor: #f1f1f1;
+        --postTitleColor: #eee;
+        --linkerColor: #cdf;
+        --highlightColor: #cdf;
+        --codeEvenBgColor: #333;
+        --codeBgColor: #444;
+        --codeLineNumBgColor: #555;
+        --codeLineNumColor: #ffffff;
+        --codeHoverBgColor: #fff1f0;
+        --splitLineHoverColor: #caa;
+        --splitLineColor: #888;
+    }
 }
 
 [for="tag-cpp"]::before {
@@ -133,7 +154,7 @@ a {
 
 body {
     text-align: center;
-    font-family: Optima, "Lucida Sans", Calibri, Candara, Arial, source-han-serif-sc, "Source Han Serif SC", "Source Han Serif CN", "Source Han Serif TC", "Source Han Serif TW", "Source Han Serif", "Songti SC", "Microsoft YaHei", sans-serif;
+    font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", "Source Han Serif TC", "Source Han Serif TW", "Source Han Serif", "Songti SC", sans-serif, "Microsoft YaHei";
     line-height: 1.6;
     color: var(--fontColor);
     margin: 0px;
@@ -171,12 +192,22 @@ body {
 
 .title {
     font-size: 2rem;
+    font-weight: bold;
 }
 
 .header>.navbar-right {
     display: inline-block;
     padding-right: calc((100% - var(--ContainWidth))/2);
     justify-self: right;
+}
+
+label[for="timeLine"] {
+    cursor: pointer;
+    outline: none;
+}
+
+label[for="timeLine"]:hover {
+    color: var(--highlightColor);
 }
 
 label[for="timeLine"]::before {
@@ -318,14 +349,6 @@ label[for^="filter"]::before {
     font-weight: 600;
 }
 
-.archive>a {
-    display: block;
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: inherit;
-    cursor: default;
-}
-
 .post .date,
 .archive .date {
     display: inline-block;
@@ -343,15 +366,16 @@ label[for^="filter"]::before {
 }
 
 .archive h1 {
-    font-size: 1.4em;
-    margin-block-end: 0.7em;
-    margin-block-start: 0.7em;
+    font-size: 2em;
+    line-height: 2em;
+    margin: 0;
+    letter-spacing: 0.1em;
 }
 
 .archive h2 {
-    font-size: 1.2em;
-    margin-block-end: 0.8em;
-    margin-block-start: 0.8em;
+    font-size: 1.4em;
+    line-height: 1.4em;
+    margin: 0;
 }
 
 .archive p,
