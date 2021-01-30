@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>对 nlohmann-json 构造函数的分析</title>
+    <link rel="stylesheet" href="../css/luna.css" />
+</head>
+
+<body>
+    <header class="header">
+        <section sub="Learning" class="navbar-left title">
+            Puelloc
+        </section>
+        <section class="navbar-right">
+            <a href="../index.html">首页</a>
+            <a href="about.html">关于</a>
+        </section>
+    </header>
+    <div class="container">
+        <div class="archive">
+            <h1>对 nlohmann-json 构造函数的分析</h1>
+            <div class="modified date">
+                2021/01/30
+            </div>
+            <div class="create date">
+                2021/01/30
+            </div>
+            <span class="meta">C++</span>
+            <div class="entry">
+                <p>之前看到 nlohmann 的 json 库中<code>json</code>的构造函数实现的很有意思。可以实现<code>json{{"Array":{"Str",1,2.0,false,nullptr}},{"Object",{}}}</code>这种所见即所得的效果。</p>
+                <p>看了源码以及经过几次试验后发现这个构造函数的关键在于这两个重载：</p>
+                <code>template&lt;class... T&gt; Json(T...); // 记为重载 1</code>
+                <br>
+                <code>Json(initializer_list&lt;Json&gt;); // 记为重载 2</code>
+                <p>以<code>Json{1,{2},{{nullptr,true},{}}}</code>为例，根据程序输出的结果来看</p>
+                <p>首先因为花括号里的元素类型不一致，参数传入重载 1，但是这里我发现传递进去的参数包只会有零个或一个，所以 1 被传入，源对象变为<code>{Json@1,{2},{{nullptr,true},{}}}</code></p>
+                <p>对于<code>{2}</code>先进入重载 1，花括号里类型全部变成<code>Json</code>类型，可以被重载 2 接受，源对象变为<code>{Json@1,Json@list_Json@2,{{nullptr,true},{}}}</code></p>
+                <p>如此反复递归，直到最后花括号内类型全部转化为<code>Json</code>类型被重载 2 接受。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+        <p rel="contact">
+            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="https://github.com/Puellaquae">Github</a>
+        </p>
+    </div>
+</body>
+
+</html>
