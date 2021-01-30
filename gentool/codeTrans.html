@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Trans</title>
+    <script>
+        function trans() {
+            var incode = document.getElementById("incode");
+            var outcode = document.getElementById("outcode");
+            var codes = incode.value.split("\n");
+            outcode.value = "";
+            codes.forEach(line => {
+                var ans = "<pre>" + line.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</pre>\n"
+                outcode.value += ans;
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <textarea id="incode"></textarea>
+    <button onclick="trans()">Trans</button>
+    <textarea id="outcode"></textarea>
+</body>
+
+</html>

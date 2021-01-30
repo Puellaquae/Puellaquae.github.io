@@ -62,6 +62,7 @@
     --lettleList: "小列表";
     --bigList: "大列表";
     --codeFont: 'Fira Code', "Noto Sans CJK SC", monospace;
+    --font: "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", "Source Han Serif TC", "Source Han Serif TW", "Source Han Serif", "Songti SC", sans-serif, "Microsoft YaHei";
 }
 
 @media(prefers-color-scheme: dark) {
@@ -154,7 +155,7 @@ a {
 
 body {
     text-align: center;
-    font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", "Source Han Serif TC", "Source Han Serif TW", "Source Han Serif", "Songti SC", sans-serif, "Microsoft YaHei";
+    font-family: var(--font);
     line-height: 1.6;
     color: var(--fontColor);
     margin: 0px;

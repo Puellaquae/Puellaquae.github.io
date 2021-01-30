@@ -81,7 +81,7 @@ ostream& operator&lt;&lt;(ostream& out, const Account& r)
 {
     return out &lt;&lt; r.卡号 &lt;&lt; "\t" &lt;&lt; r.姓名 &lt;&lt; "\t" &lt;&lt; r.身份证号 &lt;&lt; "\t" &lt;&lt; r.开户银行 &lt;&lt; "\t" &lt;&lt; r.信用额度 &lt;&lt; "\t" &lt;&lt; r.消费金额 &lt;&lt; "\t" &lt;&lt; r.信用积分;
 }
-istream& operator&gt;&gt;istream& in, Account& r)
+istream& operator&gt;&gt;(istream& in, Account& r)
 {
     return in &gt;&gt; r.卡号 &gt;&gt; r.姓名 &gt;&gt; r.身份证号 &gt;&gt; r.开户银行 &gt;&gt; r.信用额度 &gt;&gt; r.消费金额 &gt;&gt; r.信用积分;
 }
