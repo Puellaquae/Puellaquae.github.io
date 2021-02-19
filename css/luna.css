@@ -179,6 +179,9 @@ body {
     top: 0px;
     background-color: var(--navbarBgColor);
     z-index: 99999;
+    opacity: 0.75;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .header:hover {
