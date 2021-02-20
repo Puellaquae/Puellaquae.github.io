@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>留言功能测试页</title>
+    <link rel="stylesheet" href="../css/luna.css" />
+    <script src="one.js"></script>
+    <script>
+        function time2s(time) {
+            let d = new Date(time)
+            let s =
+                d.getFullYear() + '/' +
+                (d.getMonth() + 1) + '/' +
+                d.getDate() + ' ' +
+                d.getHours() + ':' +
+                d.getMinutes() + ':' +
+                d.getSeconds()
+            return s
+        }
+
+        function Display(comments) {
+            let display = document.getElementById('display')
+            display.innerHTML = ''
+            comments.forEach(element => {
+                let date = document.createElement('dt')
+                date.innerText = time2s(element.date)
+                let comment = document.createElement('dd')
+                comment.innerText = element.text
+                display.appendChild(date)
+                display.appendChild(comment)
+            });
+        }
+
+        var one = new One(
+            '58c536e5-d57e-4160-abc8-83a11e040807',
+            '0.AAAAw-Tm2HMNF0SB8xEuIxtV1OU2xVh-1WBBq8iDoR4ECAdwAJs.AgABAAAAAAD--DLA3VO7QrddgJg7WevrAgDs_wQA9P__PPCVHlCrMdhuLLlYN_7FJfqGOMiy2JbmfoJmMXb7amB1T357FBWSV5sOIQz0ClX50uJyEdIx63lQel41_qSZbNuPP6xmPi9BXWfQ54Ii37UN-dmq0r9lr713FoPq5t3YnsZK6EWJ3Lft63bYSL1iVpEX3QVnwDGaNHsWPVcDyXokbMlnoTT4xYgkwStg9Np8yqRZVNtmsQR863DnYrn78_h-RdBl9ojz41FvQl_uO9WqU_oUXp3Ssnjz0kYnlG4vspmO7pe2mvApeYMjTNJ04pEYcEirPGBZQGhat4CmmAKFnEa7uLT67HkkikQpmkwQkskWAHEXYQl3NJ6Otlv4TqqHUJSZmZAzbuI198hQoS1N2-QgKehEd6Ufu0u3Tnq17TECvB6GQ-uZZ5RK1r6zvjkaq1Fq0sfEMdZ1E--aMhREZvPwx9VQLRd2BS-pKcGpCYXCsfx6vFFduxk7VmVg6VAX7dKVj3K2oPI_cl5rzTkCwRYiCFPcxsc-rKzM7OryCoKR8lkE8Az7wsA3kfaE_9TYzVj14U_cuBgS8dpcjYrqqsgQAztpNChXq4lCb0xipI-2taNFC_8cwhwHh6tW6RuvOJbF-26G8G91oGNCRMHAIYaMqrtiZHHHy2R_5vUW6m2J5lVSlbsxaAkS-cHvceAMfqnYxse2qTwyo4EWp3QZg1ah8X1RKDr7jMNr5YG3QBo59xmG2yM2k_zIm2fuAeCXix7QMC4h3TlfOz7ckwz8dfKETeoYa5_KxnSpZtKTfNEhVXeVmNesQKonoIxCuQ1sxmIgmFl65HDapKL-2VkMjEG_PH_m5pd1Vh1Hs_UhDwXq4QZnorgPUXWCq-bjddqlifKUFg18-nc27iwCIUap4ZohzXFkU5-Vr1mA-MZGluLfE79uwbVcXrU3XGTnfIEwiZNzLd1nAWutg1vSCEYmlMfg0X0zCpTl-STXNIJomiOWJhRrybu4__sHge4RJ3BUsdCr8zcMF2v1wS-3xVhgjzjTqlIEPL7GpHzgjigA',
+            'comments.json',
+            Display
+        )
+
+        function Poll() {
+            document.getElementById('display').innerText = '加载中'
+            one.Poll()
+        }
+
+        function Push() {
+            let time = new Date()
+            let newc = {
+                'date': time.getTime(),
+                'text': document.getElementById('comment').value
+            }
+            one.content.push(newc);
+            let date = document.createElement('dt')
+            date.innerText = time2s(newc.date)
+            let comment = document.createElement('dd')
+            comment.innerText = newc.text
+            let display = document.getElementById('display')
+            display.appendChild(date)
+            display.appendChild(comment)
+            one.Update()
+            document.getElementById('comment').value = ''
+        }
+    </script>
+</head>
+
+<body>
+    <header class="header">
+        <section sub="Demo" class="navbar-left title">
+            Puelloc
+        </section>
+        <section class="navbar-right">
+            <a href="../index.html">首页</a>
+            <a href="about.html">关于</a>
+        </section>
+    </header>
+    <div class="container">
+        <div class="archive">
+            <h1>留言功能测试页</h1>
+            <div class="modified date">
+                2021/02/20
+            </div>
+            <div class="create date">
+                2021/02/20
+            </div>
+            <span class="meta">JS</span>
+            <div class="entry">
+                <p>说明：此功能依赖于 Azure, Microsoft Graph 和 OneDrive。注意：刷新留言时会完全重绘 DOM。</p>
+                <dl id="display">加载中</dl>
+                <textarea id="comment" style="height: 3rem;overflow: unset;"></textarea>
+                <button onclick="Poll()">刷新</button>
+                <button onclick="Push()">发布</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+        <p rel="contact">
+            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="https://github.com/Puellaquae">Github</a>
+        </p>
+    </div>
+</body>
+
+</html>
