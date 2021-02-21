@@ -33,7 +33,7 @@ jobs:
           client_secret: ${{ secrets.CLIENT_SECRET }}
         run: |
           npm install node-fetch
-          nodejs demo/refresh.js
+          node demo/refresh.js
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.0.0
