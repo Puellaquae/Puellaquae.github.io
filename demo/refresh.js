@@ -1,9 +1,15 @@
 var fs = require('fs')
 var fetch = require('node-fetch');
+
+function abort() {
+     process.emit("exit")
+     process.reallyExit(10)
+}
+
 fs.readFile('demo/token.js', (err, data) => {
      if (err) {
           console.error(err)
-          throw new Error(err)
+          abort()
      } else {
           let t = data.toString()
           eval(t)
@@ -21,14 +27,14 @@ fs.readFile('demo/token.js', (err, data) => {
                     refreshToken = res.refresh_token
                     if (refreshToken == null || refreshToken == undefined) {
                          console.log(JSON.stringify(res, null, 2))
-                         throw new Error(JSON.stringify(res, null, 2))
+                         abort()
                     } else {
                          console.log('got new token')
                          console.log(refreshToken)
                          fs.writeFile('demo/token.js', 'var clientId = "' + clientId + '"\nvar refreshToken = "' + refreshToken + '"', e => {
                               if (e) {
                                    console.log(e)
-                                   throw new Error(e)
+                                   abort()
                               } else {
                                    console.log('saved!')
                               }
