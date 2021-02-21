@@ -29,8 +29,6 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Refresh Token
-        env:
-          client_secret: ${{ secrets.CLIENT_SECRET }}
         run: |
           npm install node-fetch
           node demo/refresh.js

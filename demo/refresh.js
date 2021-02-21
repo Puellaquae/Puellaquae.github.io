@@ -17,9 +17,10 @@ fs.readFile('demo/token.js', (err, data) => {
           console.log(refreshToken)
           fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
                     headers: {
-                         'Content-Type': 'application/x-www-form-urlencoded'
+                         'Content-Type': 'application/x-www-form-urlencoded',
+                         'Origin':'http://localhost/index.html'
                     },
-                    body: 'client_id=' + clientId + '&scope=offline_access Files.ReadWrite&refresh_token=' + refreshToken + '&client_secret=' + process.env.client_secret + '&grant_type=refresh_token',
+                    body: 'client_id=' + clientId + '&scope=offline_access Files.ReadWrite&refresh_token=' + refreshToken + '&grant_type=refresh_token',
                     method: 'POST'
                })
                .then(r => r.json())
