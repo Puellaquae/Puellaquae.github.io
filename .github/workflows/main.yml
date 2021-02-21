@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Auto Refresh Token
 
 # Controls when the action will run. 
 on:
@@ -34,3 +34,4 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project
+          ls
