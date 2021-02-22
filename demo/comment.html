@@ -98,11 +98,16 @@
         }
 
         function AddToken() {
-            let token = prompt("拥有 gist 权限的 Personal access token")
+            let token = prompt('拥有 gist 权限的 Personal access token')
             if (token != undefined && token != null) {
                 localStorage.setItem('authToken', token)
             }
         }
+
+        document.getElementById('poll').onclick = Poll
+        document.getElementById('push').onclick = Push
+        document.getElementById('addToken').onclick = AddToken
+
     </script>
 </head>
 
@@ -127,12 +132,12 @@
             </div>
             <span class="meta">JS</span>
             <div class="entry">
-                <p>说明：此功能依赖于 Azure, Microsoft Graph 和 OneDrive。注意：刷新留言时会完全重绘 DOM。</p>
+                <p>说明：此功能依赖于 Gist, Azure, Microsoft Graph 和 OneDrive。<br>注意：刷新留言时会完全重绘 DOM；对上述服务的调用完成于本地浏览器，注意可访问性。</p>
                 <dl id="display">加载中</dl>
                 <textarea id="comment" style="height: 3rem;overflow: unset;"></textarea>
-                <button onclick="Poll()">刷新</button>
-                <button onclick="Push()">发布</button>
-                <button onclick="AddToken()">绑定 Token</button>
+                <button id="poll" onclick="Poll()">刷新</button>
+                <button id="push" onclick="Push()">发布</button>
+                <button id="addToken" onclick="AddToken()">绑定 Token</button>
             </div>
         </div>
     </div>
