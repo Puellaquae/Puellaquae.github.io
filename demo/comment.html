@@ -7,9 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>留言功能测试页</title>
     <link rel="stylesheet" href="../css/luna.css" />
-    <script src="token.js"></script>
     <script src="one.js"></script>
-    <script>
+    <script type="module">
+        import { Octokit } from "https://cdn.skypack.dev/@octokit/core"
         function time2s(time) {
             let d = new Date(time)
             let s =
@@ -35,34 +35,73 @@
             });
         }
 
-        var one = new One(
-            clientId,
-            refreshToken,
-            'comments.json',
-            Display
-        )
+        var clientId = "58c536e5-d57e-4160-abc8-83a11e040807"
+        var refreshToken = null
+
+        var one = null
+
+        var token = localStorage.getItem('authToken')
+
+        if (token == null) {
+            alert('建议绑定 TOKEN 防止 API 受限')
+        }
+
+        var octokit = new Octokit({
+            auth: token
+        })
+
+        octokit.request('GET /gists/{gist_id}', {
+                gist_id: 'c4ab586d153ecf56b386ac2db0728263'
+            })
+            .then(r => r.data)
+            .then(r => {
+                refreshToken = r.files["token.txt"].content
+                one = new One(
+                    clientId,
+                    refreshToken,
+                    'comments.json',
+                    Display
+                )
+            })
+            .catch(e => {
+                document.getElementById('display').innerText = '加载失败'
+                console.log(e)
+            })
 
         function Poll() {
-            document.getElementById('display').innerText = '加载中'
-            one.Poll()
+            if (one != null) {
+                document.getElementById('display').innerText = '加载中'
+                one.Poll()
+            } else {
+                document.getElementById('display').innerText = '加载失败'
+            }
         }
 
         function Push() {
-            let time = new Date()
-            let newc = {
-                'date': time.getTime(),
-                'text': document.getElementById('comment').value
+            if (one != null) {
+                let time = new Date()
+                let newc = {
+                    'date': time.getTime(),
+                    'text': document.getElementById('comment').value
+                }
+                one.content.push(newc);
+                let date = document.createElement('dt')
+                date.innerText = time2s(newc.date)
+                let comment = document.createElement('dd')
+                comment.innerText = newc.text
+                let display = document.getElementById('display')
+                display.appendChild(date)
+                display.appendChild(comment)
+                one.Update()
+                document.getElementById('comment').value = ''
             }
-            one.content.push(newc);
-            let date = document.createElement('dt')
-            date.innerText = time2s(newc.date)
-            let comment = document.createElement('dd')
-            comment.innerText = newc.text
-            let display = document.getElementById('display')
-            display.appendChild(date)
-            display.appendChild(comment)
-            one.Update()
-            document.getElementById('comment').value = ''
+        }
+
+        function AddToken() {
+            let token = prompt("拥有 gist 权限的 Personal access token")
+            if (token != undefined && token != null) {
+                localStorage.setItem('authToken', token)
+            }
         }
     </script>
 </head>
@@ -93,6 +132,7 @@
                 <textarea id="comment" style="height: 3rem;overflow: unset;"></textarea>
                 <button onclick="Poll()">刷新</button>
                 <button onclick="Push()">发布</button>
+                <button onclick="AddToken()">绑定 Token</button>
             </div>
         </div>
     </div>

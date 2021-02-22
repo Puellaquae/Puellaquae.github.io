@@ -7,8 +7,8 @@ on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  schedule:
+    - corn: '* 10,22 * * * *'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -29,12 +29,15 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Refresh Token
+        env:
+          GistAuth: ${{ secrets.GISTAUTH }}
         run: |
           npm install node-fetch
+          npm install @octokit/core
           node demo/refresh.js
 
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.0.0
-        with:
-          branch: master
-          folder: .
+      #- name: Deploy
+      #  uses: JamesIves/github-pages-deploy-action@4.0.0
+      #  with:
+      #    branch: master
+      #    folder: .
