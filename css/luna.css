@@ -43,7 +43,7 @@
 }
 
 :root {
-    --navbarBgColor: #fafafa;
+    --navbarBgColor: #fafafaa2;
     --bgColor: #ffffff;
     --tagBgColor: #f0f0f0;
     --fontColor: #1f1f1f;
@@ -179,7 +179,6 @@ body {
     top: 0px;
     background-color: var(--navbarBgColor);
     z-index: 99999;
-    opacity: 0.75;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(10px);
 }
@@ -373,7 +372,6 @@ label[for^="filter"]::before {
     font-size: 2em;
     line-height: 2em;
     margin: 0;
-    letter-spacing: 0.1em;
 }
 
 .archive h2 {
