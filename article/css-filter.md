@@ -1,11 +1,14 @@
 # CSS 选择器与`<input>`标签的联用
 
+__本文有交互式内容，建议前往[网面版本](https://puellaquae.github.io/page/css-filter.html)查看__
+
 CSS 的选择器与`<input>`标签的联用可以代替 JS 实现一些简单功能，如标签筛选、可折叠菜单栏等。
 
 ## 主要想法
 
 利用`checkbox`、`radio`等控件的`:checked`伪类，配合 CSS 的选择器切换目标的`display`属性实现。
 
+```html
 <style>
     .item {display: none;}
     #tagall:checked~.item, #tag1:checked~.tag1,
@@ -66,11 +69,13 @@ CSS 的选择器与`<input>`标签的联用可以代替 JS 实现一些简单功
     <div class="item tag2 tag3">item with tag2, tag3</div>
     <div class="item tag1 tag2 tag3">item with tag1, tag2, tag3</div>
 </div>
+```
 
 ## 拓展
 
 `<label>`元素也可以根据`:checked`显示或隐藏，从而实现类似`radio`与`checkbox`相结合的效果。
 
+```html
 <div class="interact" id="interact2">
     <style>
         #interact2 .item {
@@ -175,11 +180,13 @@ CSS 的选择器与`<input>`标签的联用可以代替 JS 实现一些简单功
     <div class="item atag2 atag3">item with tag2, tag3</div>
     <div class="item atag1 atag2 atag3">item with tag1, tag2, tag3</div>
 </div>
+```
 
 当然，这种作法是不推荐用于实际情况的，`n`个标签就需要`2^n`个`radio`记录状态和`n2^n`个label控制状态的转移。这会导致代码十分冗长，而且标签的切换需要频繁地重排页面，以及伪类选择器的大量使用（属性选择器可以预先展开为 id 选择器），都会降低页面的性能。
 
 根据这个原理，只要是可以抽象为有限状态机模型的理论上都是可以利用用 CSS 实现的，此外利用 animation 产生时间差切换显示不同的label还可以模拟出伪随机的状态游走（效果会受限于浏览器的时间精度和刷新策略）。
 
+```html
 <div class="interact" id="interact3">
     <style>
         #interact3 {
@@ -266,6 +273,7 @@ CSS 的选择器与`<input>`标签的联用可以代替 JS 实现一些简单功
         <label id="lgreen" for="green"></label>
     </div>
 </div>
+```
 
 HTML + CSS3 是被认为图灵完备的，因为它可以实现元胞自动机 Rule 110，这里有一个实现的例子。因为无论是 HTML 还是 CSS 都无法自行改变元素的属性，所以每一步计算都需要人为介入，十分繁琐。
 

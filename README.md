@@ -1,5 +1,6 @@
 # Puelloc Blog
 
+- [正则表达式转化为自动机](article/regex.md)
 - [对 nlonhmann-json 构造函数的分析](article/nlohmann-construct.md)
 - [错误与弯路集](article/bugs-and-fail.md)
 - [CSS 选择器与`<input>`标签](article/css-filter.md)
