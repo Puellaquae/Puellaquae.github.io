@@ -1,14 +1,3 @@
-!Sub: Learning
-!Date: 2020/08/21
-
-```include
-<style>
-    h2::before{
-        content: '#' attr(id) '.';
-    }
-</style>
-```
-
 # 错误与弯路集
 
 **正确都是相似的，错误各有各的错法**。对于遇到的阐述所需篇幅较短的问题都会集中在这里。
