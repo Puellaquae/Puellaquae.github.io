@@ -20,6 +20,7 @@
 
 ```rust
 pub fn regex2post(r: &str) -> Vec<RegexToken> {
+    use RegexToken::{Alter, Cat, Bracket, Closure, Char};
     let mut stack = Vec::new();
     let mut post = Vec::new();
     let mut add_cat = false; // 表示是否需要一个连接符
@@ -27,38 +28,38 @@ pub fn regex2post(r: &str) -> Vec<RegexToken> {
         match c {
             '|' => {
                 add_cat = false; // 新的双目运算符直接取代了连接符
-                stack.push(RegexToken::Alter);
+                stack.push(Alter);
             }
             '(' => {
                 if add_cat {
-                    stack.push(RegexToken::Cat);
+                    stack.push(Cat);
                     add_cat = false; // 一个左括号可以连接前面的，但不能连接后面的
                 }
-                stack.push(RegexToken::Bracket);
+                stack.push(Bracket);
             }
             ')' => {
                 if !add_cat { unreachable!(); }
-                while !matches!(stack.last(), Some(RegexToken::Bracket) | None) {
+                while !matches!(stack.last(), Some(Bracket) | None) {
                     post.push(stack.pop().unwrap());
                 }
                 stack.pop();
             }
             '*' => { // 单目运算符不影响状态
-                post.push(RegexToken::Closure);
+                post.push(Closure);
             }
             'ε' => {
                 if add_cat {
-                    stack.push(RegexToken::Cat);
+                    stack.push(Cat);
                 }
                 add_cat = true;
-                post.push(RegexToken::Epsilon);
+                post.push(Epsilon);
             }
             _ => {
                 if add_cat {
-                    stack.push(RegexToken::Cat);
+                    stack.push(Cat);
                 }
                 add_cat = true; // 字符即可连接前面也可连接后面
-                post.push(RegexToken::Char(c));
+                post.push(Char(c));
             }
         }
     }
@@ -101,7 +102,7 @@ RegexToken::Epsilon => {
 
 对于连接符，弹出两个块，块甲和块乙（注意先后）。连接乙的出和甲的入（这条边是可以确定下来存入 NFA 中的），再压入乙的入和甲的出。
 
-```
+```text
       +---+    +---+
 in -> | B | -> | A | -> out 
       +---+    +---+
@@ -118,7 +119,7 @@ RegexToken::Cat => {
 
 对于选择符，弹出两个块，需要两个新节点做辅助，并可确定四条边。
 
-```
+```text
               +---+
         +---> | A | --->+
       +---+   +---+   +---+
@@ -144,7 +145,7 @@ RegexToken::Alter => {
 
 对于星号，弹出一个块，需要一个新节点做辅助，并可确定两条边。
 
-```
+```text
               +---+
         +---> | A |
       +---+   +---+
@@ -248,7 +249,7 @@ pub fn determinize(nfa: &NFA) -> DFA {
 最小化 DFA 使用的是 Hopcroft 算法，但是不同于网上算法，这里首先求出了状态的划分，再重新建立跳转表。划分状态首先要判断两个状态是否可区分（distinguish）,即能否有串能被甲状态接受而不被乙状态接受。如果甲、乙接受一个字符跳转到的状态丙、丁是可区分的，那么甲、乙是可区分的。根据定义，一个终结状态和一个非终结状态一定是可区分的（终结状态可接受 ε 而非终结状态不能）。由此可以递归地求出任意两个状态是否是可区分的。
 
 例如：
-```
+```text
    | a | b |
  0 | 2 | 1 |
  1 | 2 | 1 |
@@ -267,7 +268,10 @@ pub fn distinguishable(&self, p: usize, q: usize) -> bool {
         if p == q {
             return false;
         }
-        let mut accepts: Vec<_> = self.accepts.iter().map(|a| Some(*a)).collect();
+        let mut accepts: Vec<_> = self.accepts
+            .iter()
+            .map(|a| Some(*a))
+            .collect();
         accepts.push(None);
         for a in accepts {
             let r = self.get_trans(p, a);
@@ -317,7 +321,10 @@ pub fn minimize(&self) -> DFA {
             table,
             start: *rename.get(&self.start).unwrap(),
             out: {
-                let mut o: Vec<_> = self.out.iter().map(|x| *rename.get(x).unwrap()).collect();
+                let mut o: Vec<_> = self.out
+                    .iter()
+                    .map(|x| *rename.get(x).unwrap())
+                    .collect();
                 o.sort_unstable();
                 o.dedup();
                 o

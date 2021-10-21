@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>关于</title>
+    <title>{{metadata["title"]|e}}</title>
     <link rel="stylesheet" href="../css/luna.css" />
     <link rel="stylesheet" href="../css/codecolor.css" />
 </head>
 
 <body>
     <header class="header">
-        <section sub="" class="navbar-left title">
+        <section sub="{{metadata['subtype']}}" class="navbar-left title">
             Puelloc
         </section>
         <section class="navbar-right">
@@ -21,18 +21,18 @@
     </header>
     <div class="container">
         <div class="archive">
-            <h1>关于</h1>
-
+            {{metadata["titleHtml"]}}
             <div class="modified date">
-                2021/10/21
+                {{metadata["mdate"]}}
             </div>
             <div class="create date">
-                2021/10/21
+                {{metadata["cdate"]}}
             </div>
-            
+            {% for tag in metadata["tags"] %}
+            <span class="meta">{{tag}}</span>
+            {% endfor %}
             <div class="entry">
-                <p></p>
-
+                {{content}}
             </div>
         </div>
     </div>

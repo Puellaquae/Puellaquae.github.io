@@ -86,41 +86,6 @@
     }
 }
 
-[for="tag-cpp"]::before {
-    content: "C++";
-}
-
-[for="tag-multithread"]::before {
-    content: "多线程";
-}
-
-[for="tag-crud"]::before {
-    content: "CRUD";
-}
-
-[for="tag-htmlcss"]::before {
-    content: "HTML/CSS";
-}
-
-#filter-on:checked~input~* .post {
-    display: none;
-}
-
-#filter-on:checked~* label[for^="filter"]::before,
-#filter-on:checked~#tag-cpp:checked~* [for="tag-cpp"]::before,
-#filter-on:checked~#tag-multithread:checked~* [for="tag-multithread"]::before,
-#filter-on:checked~#tag-crud:checked~* [for="tag-crud"]::before,
-#filter-on:checked~#tag-htmlcss:checked~* [for="tag-htmlcss"]::before {
-    color: var(--highlightColor);
-}
-
-#filter-on:checked~#tag-cpp:checked~* [tag~="cpp"],
-#filter-on:checked~#tag-multithread:checked~* [tag~="multithread"],
-#filter-on:checked~#tag-crud:checked~* [tag~="crud"],
-#filter-on:checked~#tag-htmlcss:checked~* [tag~="htmlcss"] {
-    display: unset;
-}
-
 html {
     font-size: 20px;
     scrollbar-width: none;
@@ -221,20 +186,6 @@ label[for="timeLine"]::before {
     content: var(--bigList);
 }
 
-#filter-off:checked~* label[for="filter-on"],
-#filter-on:checked~* label[for="filter-off"] {
-    display: unset;
-}
-
-#filter-off:checked~* label[for="filter-off"],
-#filter-on:checked~* label[for="filter-on"] {
-    display: none;
-}
-
-label[for^="filter"]::before {
-    content: "筛选";
-}
-
 .footer {
     border-top: 1px var(--splitLineColor) solid;
     background-color: var(--tagBgColor);
@@ -266,7 +217,7 @@ label[for^="filter"]::before {
 
 .posts {
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
 }
 
 .posts .post {
@@ -384,55 +335,20 @@ label[for^="filter"]::before {
 .archive details {
     margin-block-end: 0.9em;
     margin-block-start: 0.9em;
-    counter-reset: codeline;
 }
 
-.archive code,
 .archive pre {
     font-family: var(--codeFont);
-    background-color: var(--codeBgColor);
     padding: 0px 4px;
-    border-radius: 0px 4px 4px 0px;
-    border-left: thick solid var(--codeLineNumBgColor);
-    margin-bottom: 0px;
+    border-radius: 4px;
+}
+
+.archive code {
+    font-family: var(--codeFont);
 }
 
 .archive .entry>pre {
     padding: 0px;
-}
-
-.archive .entry>pre:nth-of-type(even) {
-    background-color: var(--codeEvenBgColor);
-}
-
-.archive .entry>pre:hover {
-    background-color: var(--codeHoverBgColor);
-}
-
-.archive .entry>pre:hover::before {
-    color: var(--codeHoverBgColor);
-}
-
-.archive .entry>pre::before {
-    counter-increment: codeline;
-    content: counter(codeline, decimal-leading-zero);
-    background-color: var(--codeLineNumBgColor);
-    margin-right: 4px;
-    padding-left: 8px;
-    color: var(--codeLineNumColor);
-    padding: 4px 4px;
-}
-
-.archive pre~pre {
-    margin-top: 0px;
-}
-
-.archive textarea {
-    width: 98%;
-    height: 800px;
-    font-family: var(--codeFont);
-    resize: vertical;
-    overflow-x: scroll;
 }
 
 .archive p>code {

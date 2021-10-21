@@ -1,0 +1,7 @@
+# Puelloc Blog
+
+{% for md in articles %}
+{% if md["hideIndex"] != "md" and md["hideIndex"] != "both" %}
+- [{{md["titleMd"]}}](article/{{md["path"]}}.md)
+{% endif %}
+{% endfor %}

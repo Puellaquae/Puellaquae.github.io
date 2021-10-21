@@ -1,3 +1,8 @@
+<!---
+cdate: 2021/01/30
+mdate: 2021/01/30
+--->
+
 # 对 nlohmann-json 构造函数的分析
 
 之前看到 nlohmann 的 json 库中`json`的构造函数实现的很有意思。可以实现`json{{"Array":{"Str",1,2.0,false,nullptr}},{"Object",{}}}`这种所见即所得的效果。

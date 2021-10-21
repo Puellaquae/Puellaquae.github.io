@@ -1,19 +1,28 @@
+<!---
+cdate: 2020/07/27
+mdate: 2020/07/27
+--->
+
 # C++ 多线程 volatile 限定符
 
 有线程 A 和 B，线程 B 需要中断等待线程 A 触发特定条件，线程 B 只需保证不早于线程 A 触发特定条件继续执行即可。如果使用一个`flag`变量和`while`忙查，如下代码
 
 ```c
-    while(flag)
-    //do something
+while(flag)
+//do something
 ```
 
 会导致编译不能检测到`flag`在线程 A 中的读写操作，而导致优化后的代码和源代码的表现不一致，每次判断都从寄存器里直接取值，变成一个死循环。
 
 ```asm
-000000 mov  eax, dword ptr [flag]
-000001 test eax, eax 
-000002 je   000001h    ;这里只跳转到test指令处，没有从内存中更新值 
-000003 nop             ;do something
+;000000 
+mov  eax, dword ptr [flag]
+;000001
+test eax, eax 
+;000002
+je   000001h    ;这里只跳转到test指令处，没有从内存中更新值 
+;000003
+nop             ;do something
 ```
 
 对于这种情况，就需要在变量`flag`上加上`volatile`限定符，阻止编译器对此变量的优化。

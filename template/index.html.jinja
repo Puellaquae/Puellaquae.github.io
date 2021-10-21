@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Puelloc Blog</title>
+    <link rel="stylesheet" href="css/luna.css" />
+</head>
+
+<body>
+    <input type="checkbox" id="timeLine" hidden>
+    <header class="header">
+        <section class="navbar-left title">
+            Puelloc
+        </section>
+        <section class="navbar-right">
+            <label for="timeLine" tabindex="0"></label>
+            <a href="page/about.html">关于</a>
+        </section>
+    </header>
+    <div class="container">
+        <div class="posts">
+            {% for article in articles %}
+            {% if article["hideIndex"] != "html" and article["hideIndex"] != "both" %}
+            <div class="post">
+                <a href="page/{{article['path']}}.html">{{article["title"]|e}}</a>
+                <div class="date">{{article["cdate"]}}</div>
+                {% for tag in article["tags"] %}
+                    <label class="meta">{{tag}}</label>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="footer">
+        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+        <p rel="contact">
+            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="https://github.com/Puellaquae">Github</a>
+        </p>
+    </div>
+</body>
+
+</html>
