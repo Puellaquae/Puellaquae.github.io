@@ -1,7 +1,9 @@
 # Puelloc Blog
 
+[__网页版本__](https://puellaquae.github.io/)
+
 {% for md in articles %}
-{% if md["hideIndex"] != "md" and md["hideIndex"] != "both" %}
+{%- if md["hideIndex"] != "md" and md["hideIndex"] != "both" %}
 - [{{md["titleMd"]}}](article/{{md["path"]}}.md)
-{% endif %}
+{%- endif -%}
 {% endfor %}

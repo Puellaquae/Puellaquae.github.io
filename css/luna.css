@@ -1,44 +1,28 @@
-@media(min-width:1025px) {
+@media(min-width: 1020px) {
     :root {
         --ContainWidth: 1000px;
+        font-size: 20px;
     }
-}
 
-@media(max-width:1025px) and (min-width:825px) {
-    :root {
-        --ContainWidth: 800px;
-    }
-}
-
-@media(min-width:825px) {
     .header section[sub]::after {
         content: attr(sub);
     }
+}
 
-    .create.date::before {
-        content: "创建于";
+@media(min-width: 816px) and (max-width: 1020px) {
+    :root {
+        --ContainWidth: 800px;
+        font-size: 16px;
     }
 
-    .modified.date::before {
-        content: "最后修改于";
+    .header section[sub]::after {
+        content: attr(sub);
     }
 }
 
-@media(max-width:825px) {
-    .modified.date {
-        display: none !important;
-    }
-
-    .header>.navbar-left {
-        padding-left: 1% !important;
-    }
-
-    .header>.navbar-right {
-        padding-right: 1% !important;
-    }
-
-    .container {
-        width: 98% !important;
+@media(max-width: 816px) {
+    :root {
+        --ContainWidth: 98%;
     }
 }
 
@@ -52,17 +36,12 @@
     --postTitleColor: #141414;
     --linkerColor: #1919D0;
     --highlightColor: #1919D0;
-    --codeEvenBgColor: #fafafa;
-    --codeBgColor: #f0f0f0;
-    --codeLineNumBgColor: #595959;
-    --codeLineNumColor: #ffffff;
-    --codeHoverBgColor: #fff1f0;
     --splitLineHoverColor: #caa;
     --splitLineColor: #eee;
     --lettleList: "小列表";
     --bigList: "大列表";
     --codeFont: 'Fira Code', "Noto Sans CJK SC", monospace;
-    --font: "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", "Source Han Serif TC", "Source Han Serif TW", "Source Han Serif", "Songti SC", sans-serif, "Microsoft YaHei";
+    --font: "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", "Source Han Serif TC", "Source Han Serif TW", "Source Han Serif", "Songti SC", serif;
 }
 
 @media(prefers-color-scheme: dark) {
@@ -76,18 +55,12 @@
         --postTitleColor: #eee;
         --linkerColor: #cdf;
         --highlightColor: #cdf;
-        --codeEvenBgColor: #333;
-        --codeBgColor: #444;
-        --codeLineNumBgColor: #555;
-        --codeLineNumColor: #ffffff;
-        --codeHoverBgColor: #fff1f0;
         --splitLineHoverColor: #caa;
         --splitLineColor: #888;
     }
 }
 
 html {
-    font-size: 20px;
     scrollbar-width: none;
 }
 
@@ -118,6 +91,16 @@ a {
     color: var(--highlightColor);
 }
 
+.entry a {
+    text-decoration: underline;
+}
+
+a[rel="license"] {
+    font-size: 1em;
+    display: initial;
+    cursor: pointer;
+}
+
 body {
     text-align: center;
     font-family: var(--font);
@@ -126,7 +109,6 @@ body {
     margin: 0px;
     padding: 0px;
     display: flex;
-    min-height: 100vh;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -158,32 +140,15 @@ body {
     justify-self: left;
 }
 
-.title {
-    font-size: 2rem;
-    font-weight: bold;
-}
-
 .header>.navbar-right {
     display: inline-block;
     padding-right: calc((100% - var(--ContainWidth))/2);
     justify-self: right;
 }
 
-label[for="timeLine"] {
-    cursor: pointer;
-    outline: none;
-}
-
-label[for="timeLine"]:hover {
-    color: var(--highlightColor);
-}
-
-label[for="timeLine"]::before {
-    content: var(--lettleList);
-}
-
-#timeLine:checked~* label[for="timeLine"]::before {
-    content: var(--bigList);
+.title {
+    font-size: 2rem;
+    font-weight: bold;
 }
 
 .footer {
@@ -203,8 +168,7 @@ label[for="timeLine"]::before {
 }
 
 .container {
-    width: 100%;
-    max-width: var(--ContainWidth);
+    width: var(--ContainWidth);
     flex: 1;
 }
 
@@ -225,54 +189,6 @@ label[for="timeLine"]::before {
     padding-bottom: 0.5em;
     border-bottom: 1px var(--splitLineColor) solid;
     position: relative;
-}
-
-#timeLine:checked~#filter-on:checked~#tag-cpp:checked~* .posts .post[tag~="cpp"],
-#timeLine:checked~#filter-on:checked~#tag-multithread:checked~* .posts .post[tag~="multithread"],
-#timeLine:checked~#filter-on:checked~#tag-crud:checked~* .posts .post[tag~="crud"],
-#timeLine:checked~#filter-on:checked~#tag-htmlcss:checked~* .posts .post[tag~="htmlcss"],
-#timeLine:checked~* .posts .post {
-    display: inline-flex;
-    flex-direction: row;
-    justify-content: left;
-    align-items: center;
-    padding: 0px;
-    border: none;
-}
-
-#timeLine:checked~#filter-on:checked~* .posts .post,
-#timeLine:checked~* .posts .post .meta {
-    display: none;
-}
-
-#timeLine:checked~* .posts .post .date {
-    font-size: 1em;
-    padding: 0px 1em 1px 0px;
-    order: -1;
-}
-
-#timeLine:checked~* .posts .post .date:before {
-    content: "\2022";
-    padding-right: 0.2em;
-}
-
-#timeLine:checked~* .posts .post a {
-    font-size: 1em;
-    font-weight: normal;
-    color: var(--fontColor);
-}
-
-#timeLine:checked~* .posts .post:hover {
-    padding-bottom: 0px;
-    box-shadow: none;
-}
-
-#filter-on:checked~* div.filterTag {
-    display: inline-block;
-}
-
-#filter-off:checked~* div.filterTag {
-    display: none;
 }
 
 .posts .post+.post {
@@ -341,33 +257,84 @@ label[for="timeLine"]::before {
     font-family: var(--codeFont);
     padding: 0px 4px;
     border-radius: 4px;
+    overflow: auto;
 }
 
 .archive code {
     font-family: var(--codeFont);
 }
 
-.archive .entry>pre {
-    padding: 0px;
-}
-
-.archive p>code {
-    border-radius: 4px;
-    border: none;
-}
-
 .archive q {
     font-style: italic;
 }
 
-.entry a {
-    text-decoration: underline;
+.archive summary {
+    outline: none;
 }
 
-a[rel="license"] {
-    font-size: 1em;
-    display: initial;
+.create.date::before {
+    content: "创建于";
+}
+
+.modified.date::before {
+    content: "最后修改于";
+}
+
+label[for="timeLine"] {
     cursor: pointer;
+    outline: none;
+}
+
+label[for="timeLine"]:hover {
+    color: var(--highlightColor);
+}
+
+label[for="timeLine"]::before {
+    content: var(--lettleList);
+}
+
+#timeLine:checked~* label[for="timeLine"]::before {
+    content: var(--bigList);
+}
+
+#timeLine:checked~#filter-on:checked~#tag-cpp:checked~* .posts .post[tag~="cpp"],
+#timeLine:checked~#filter-on:checked~#tag-multithread:checked~* .posts .post[tag~="multithread"],
+#timeLine:checked~#filter-on:checked~#tag-crud:checked~* .posts .post[tag~="crud"],
+#timeLine:checked~#filter-on:checked~#tag-htmlcss:checked~* .posts .post[tag~="htmlcss"],
+#timeLine:checked~* .posts .post {
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    padding: 0px;
+    border: none;
+}
+
+#timeLine:checked~#filter-on:checked~* .posts .post,
+#timeLine:checked~* .posts .post .meta {
+    display: none;
+}
+
+#timeLine:checked~* .posts .post .date {
+    font-size: 1em;
+    padding: 0px 1em 1px 0px;
+    order: -1;
+}
+
+#timeLine:checked~* .posts .post .date:before {
+    content: "\2022";
+    padding-right: 0.2em;
+}
+
+#timeLine:checked~* .posts .post a {
+    font-size: 1em;
+    font-weight: normal;
+    color: var(--fontColor);
+}
+
+#timeLine:checked~* .posts .post:hover {
+    padding-bottom: 0px;
+    box-shadow: none;
 }
 
 .footer>p[rel="using"] {
@@ -405,8 +372,4 @@ a[rel="license"] {
 
 .footer a:first-child {
     margin-left: 0px;
-}
-
-.archive summary {
-    outline: none;
 }
