@@ -1,6 +1,7 @@
 <!---
 cdate: 2020/08/07
 mdate: 2020/08/07
+tags: C++
 --->
 
 # C++ 多线程 std::thread join 与 detach

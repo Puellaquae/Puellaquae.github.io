@@ -1,3 +1,19 @@
+:root {
+    --navbarBgColor: #03a9f433;
+    --bgColor: #fdfdfd;
+    --tagBgColor: #f0f0f0;
+    --fontColor: #1f1f1f;
+    --selectedFontColor: #fff;
+    --selectedBgColor: #1f1f1f;
+    --postTitleColor: #141414;
+    --linkerColor: #1919D0;
+    --highlightColor: #ff5722;
+    --lettleList: "小列表";
+    --bigList: "大列表";
+    --codeFont: 'Fira Code', "Noto Sans CJK SC", monospace;
+    --font: "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", "Source Han Serif TC", "Source Han Serif TW", "Source Han Serif", "Songti SC", serif;
+}
+
 @media(min-width: 1020px) {
     :root {
         --ContainWidth: 1000px;
@@ -9,9 +25,10 @@
     }
 }
 
-@media(min-width: 816px) and (max-width: 1020px) {
+@media(min-width: 832px) and (max-width: 1020px) {
     :root {
         --ContainWidth: 800px;
+        --font: "Noto Sans CJK SC", "Source Han Sans SC", "Source Han Sans CN", "Source Han Sans TC", "Source Han Sans TW", "Source Han Sans", sans-serif;
         font-size: 16px;
     }
 
@@ -20,30 +37,14 @@
     }
 }
 
-@media(max-width: 816px) {
+@media(max-width: 832px) {
     :root {
-        --ContainWidth: 98%;
+        --ContainWidth: 96%;
+        --font: "Noto Sans CJK SC", "Source Han Sans SC", "Source Han Sans CN", "Source Han Sans TC", "Source Han Sans TW", "Source Han Sans", sans-serif;
     }
 }
 
-:root {
-    --navbarBgColor: #fafafaa2;
-    --bgColor: #ffffff;
-    --tagBgColor: #f0f0f0;
-    --fontColor: #1f1f1f;
-    --selectedFontColor: #fff;
-    --selectedBgColor: #1f1f1f;
-    --postTitleColor: #141414;
-    --linkerColor: #1919D0;
-    --highlightColor: #1919D0;
-    --splitLineHoverColor: #caa;
-    --splitLineColor: #eee;
-    --lettleList: "小列表";
-    --bigList: "大列表";
-    --codeFont: 'Fira Code', "Noto Sans CJK SC", monospace;
-    --font: "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", "Source Han Serif TC", "Source Han Serif TW", "Source Han Serif", "Songti SC", serif;
-}
-
+/*
 @media(prefers-color-scheme: dark) {
     :root {
         --navbarBgColor: #111;
@@ -59,6 +60,7 @@
         --splitLineColor: #888;
     }
 }
+*/
 
 html {
     scrollbar-width: none;
@@ -87,7 +89,7 @@ a {
     color: inherit;
 }
 
-.header a:hover {
+a:hover {
     color: var(--highlightColor);
 }
 
@@ -121,17 +123,13 @@ body {
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px var(--splitLineColor) solid;
     position: sticky;
     top: 0px;
     background-color: var(--navbarBgColor);
     z-index: 99999;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(10px);
-}
-
-.header:hover {
-    border-bottom: 1px var(--splitLineHoverColor) solid;
+    box-shadow: 0px 0px 8px 0px var(--navbarBgColor);
 }
 
 .header>.navbar-left {
@@ -152,7 +150,6 @@ body {
 }
 
 .footer {
-    border-top: 1px var(--splitLineColor) solid;
     background-color: var(--tagBgColor);
     width: 100vw;
 }
@@ -179,16 +176,9 @@ body {
     max-width: var(--ContainWidth);
 }
 
-.posts {
-    display: flex;
-    flex-direction: column;
-}
-
 .posts .post {
     text-align: left;
     padding-bottom: 0.5em;
-    border-bottom: 1px var(--splitLineColor) solid;
-    position: relative;
 }
 
 .posts .post+.post {
@@ -200,8 +190,7 @@ body {
 }
 
 .posts .post:hover {
-    padding-bottom: calc(0.5em+1px);
-    box-shadow: 1px 1px 1px var(--splitLineHoverColor);
+    box-shadow: none;
 }
 
 .archive {
@@ -231,8 +220,8 @@ body {
     display: inline-block;
     font-size: 0.75rem;
     background-color: var(--tagBgColor);
-    border-radius: 2px;
-    padding: 0px 1px;
+    border-radius: 8px;
+    padding: 0px 3px;
 }
 
 .archive h1 {

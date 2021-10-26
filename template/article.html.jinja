@@ -5,8 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{metadata["title"]|e}}</title>
-    <link rel="stylesheet" href="../css/luna.css" />
+    <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/codecolor.css" />
+    {%- if metadata["hasTex"] -%}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.19/dist/katex.css" integrity="sha384-WIA8PXZs4di2BJiKfcuR39gE8uoWaMQy4koqQrMh4kxe62f/nlGFxHIVi3TGNuUF" crossorigin="anonymous"/>
+    {%- endif %}
 </head>
 
 <body>

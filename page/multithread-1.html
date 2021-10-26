@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>C++ 多线程 volatile 限定符</title>
-    <link rel="stylesheet" href="../css/luna.css" />
+    <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/codecolor.css" />
 </head>
 
@@ -29,6 +29,8 @@
             <div class="create date">
                 2020/07/27
             </div>
+            
+            <span class="meta">C++</span>
             
             <div class="entry">
                 <p>有线程 A 和 B，线程 B 需要中断等待线程 A 触发特定条件，线程 B 只需保证不早于线程 A 触发特定条件继续执行即可。如果使用一个<code>flag</code>变量和<code>while</code>忙查，如下代码</p>

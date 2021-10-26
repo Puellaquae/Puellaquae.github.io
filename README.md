@@ -2,7 +2,6 @@
 
 [__网页版本__](https://puellaquae.github.io/)
 
-
 - [正则表达式转化为自动机](article/regex.md)
 - [对 nlohmann-json 构造函数的分析](article/nlohmann-construct.md)
 - [错误与弯路集](article/bugs-and-fail.md)

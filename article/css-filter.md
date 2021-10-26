@@ -2,6 +2,7 @@
 title: CSS 选择器与 <input> 标签的联用
 cdate: 2020/08/14
 mdate: 2020/08/14
+tags: CSS
 --->
 
 # CSS 选择器与 `<input>` 标签的联用
