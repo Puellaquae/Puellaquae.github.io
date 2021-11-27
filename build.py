@@ -1,12 +1,65 @@
 import markdown2
-from jinja2 import Environment, FileSystemLoader
 import re
 import os
 import time
 import sys
-
+from jinja2 import Environment, FileSystemLoader
 
 jinjaEnv = Environment(loader=FileSystemLoader("template"))
+
+def pageGen(srcDir, desDir):
+    articles = scanArticle(srcDir)
+    print([str(a) for a in articles])
+    htmldatas = [h.genHtml(desDir) for h in articles]
+    metadatas = sorted([h.metadata for h in htmldatas], key=lambda art: art["cdate"], reverse=True)
+    for h in htmldatas:
+        writeFile(h, metadatas)
+
+class Article:
+    root: str
+    relpath: str
+    filename: str
+
+    def __init__(self, root, relativePath, filename) -> None:
+        self.root = root
+        self.relpath = relativePath
+        self.filename = filename
+
+    def genHtml(self, outDir: str):
+        name, type = os.path.splitext(self.filename)
+        if type == '.md':
+            fullpath = os.path.join(self.root, self.relpath, self.filename)
+            html = mdfile2html(fullpath)
+            if not 'outdir' in html.metadata:
+                html.metadata['outdir'] = os.path.join(outDir, self.relpath)
+            html.metadata['srcfile'] = os.path.join(self.root, self.relpath, name)
+            _, type = os.path.splitext(html.metadata['template'])
+            html.metadata['path'] = os.path.join(html.metadata['outdir'], name) + type
+            return html
+
+    def __str__(self) -> str:
+        return os.path.join(self.root, self.relpath, self.filename)
+
+
+def scanArticle(srcDir: str) -> list[Article]:
+    articles = []
+    for root, dirs, files in os.walk(srcDir):
+        for file in files:
+            articles.append(
+                Article(srcDir, os.path.relpath(root, srcDir), file))
+    return articles
+
+
+def writeFile(html, metadatas):
+    outdir = html.metadata['outdir']
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    metadata = html.metadata
+    template = jinjaEnv.get_template(metadata["template"] + '.jinja')
+    print(metadata['path'])
+    fileout = open(metadata['path'], mode="w", encoding="utf-8")
+    fileout.write(template.render(content=html, metadata=metadata, articles=metadatas))
+    fileout.close()
 
 
 def jscall(file, func, args):
@@ -64,6 +117,7 @@ def mdfile2html(filepath: str, encoding: str = "utf-8"):
             for i in range(1, len(sline)):
                 ss = sline[i].split("$`")
                 ss[0] = renderTexInline(ss[0])
+                hasTex = True
                 sline[i] = "".join(ss)
             md += "".join(sline)
     mdfile.close()
@@ -79,7 +133,7 @@ def mdfile2html(filepath: str, encoding: str = "utf-8"):
     if not "cdate" in html.metadata:
         html.metadata["cdate"] = time.strftime("%Y/%m/%d", cdate)
     if not "template" in html.metadata:
-        html.metadata["template"] = "article.html.jinja"
+        html.metadata["template"] = "article.html"
     if not "hideIndex" in html.metadata:
         html.metadata["hideIndex"] = "none"
     if not "hasTex" in html.metadata:
@@ -90,35 +144,5 @@ def mdfile2html(filepath: str, encoding: str = "utf-8"):
     return html
 
 
-def genhtmls(srcDir, desDir, genIndex=False):
-    articles = []
-    for file in os.listdir(srcDir):
-        if not file.endswith(".md"):
-            continue
-        html = mdfile2html(srcDir + "/" + file)
-        metadata = html.metadata
-        template = jinjaEnv.get_template(metadata["template"])
-        fileout = open(desDir + "/" + file.replace(".md", ".html"),
-                       mode="w", encoding="utf-8")
-        fileout.write(template.render(content=html, metadata=metadata))
-        fileout.close()
-        metadata["path"] = file.replace(".md", "")
-        articles.append(metadata)
-    if genIndex:
-        articles = sorted(articles, key=lambda art: art["cdate"], reverse=True)
-        indexTemplate = jinjaEnv.get_template("index.html.jinja")
-        indexout = open("index.html", mode="w", encoding="utf-8")
-        indexout.write(indexTemplate.render(articles=articles))
-        indexout.close()
-
-        readmeTemplate = jinjaEnv.get_template("readme.md.jinja")
-        readmeOut = open("README.md", mode="w", encoding="utf-8")
-        readmeOut.write(readmeTemplate.render(articles=articles))
-        readmeOut.close()
-
-
-if __name__ == "__main__":
-    if "writing" in sys.argv:
-        genhtmls("writing", "writing")
-    if "release" in sys.argv:
-        genhtmls("article", "page", True)
+if __name__ == '__main__' :
+    pageGen(sys.argv[1], sys.argv[2])

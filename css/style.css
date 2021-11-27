@@ -1,17 +1,19 @@
 :root {
-    --navbarBgColor: #03a9f433;
+    --navbarBgColor: #a0fff9cc;
     --bgColor: #fdfdfd;
     --tagBgColor: #f0f0f0;
     --fontColor: #1f1f1f;
     --selectedFontColor: #fff;
     --selectedBgColor: #1f1f1f;
     --postTitleColor: #141414;
-    --linkerColor: #1919D0;
-    --highlightColor: #ff5722;
+    --linkerColor: #0000a0;
+    --highlightColor: #ff7f27;
+    --pay: #74f466;
+    --nako: #ff6e90;
     --lettleList: "小列表";
     --bigList: "大列表";
-    --codeFont: 'Fira Code', "Noto Sans CJK SC", monospace;
-    --font: "Noto Serif CJK SC", "Source Han Serif SC", "Source Han Serif CN", "Source Han Serif TC", "Source Han Serif TW", "Source Han Serif", "Songti SC", serif;
+    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans", "思源黑体", "Noto Sans CJK SC", monospace;
+    --font: "Source Han Serif", "思源宋体", "Noto Serif CJK SC",  serif;
 }
 
 @media(min-width: 1020px) {
@@ -28,7 +30,7 @@
 @media(min-width: 832px) and (max-width: 1020px) {
     :root {
         --ContainWidth: 800px;
-        --font: "Noto Sans CJK SC", "Source Han Sans SC", "Source Han Sans CN", "Source Han Sans TC", "Source Han Sans TW", "Source Han Sans", sans-serif;
+        --font: "Source Han Sans", "思源黑体", "Noto Sans CJK SC", sans-serif;
         font-size: 16px;
     }
 
@@ -40,7 +42,7 @@
 @media(max-width: 832px) {
     :root {
         --ContainWidth: 96%;
-        --font: "Noto Sans CJK SC", "Source Han Sans SC", "Source Han Sans CN", "Source Han Sans TC", "Source Han Sans TW", "Source Han Sans", sans-serif;
+        --font: "Source Han Sans", "思源黑体", "Noto Sans CJK SC", sans-serif;
     }
 }
 

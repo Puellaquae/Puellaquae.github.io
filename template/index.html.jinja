@@ -23,16 +23,16 @@
     <div class="container">
         <div class="posts">
             {% for article in articles %}
-            {% if article["hideIndex"] != "html" and article["hideIndex"] != "both" %}
+            {%- if article["hideIndex"] != "html" and article["hideIndex"] != "both" -%}
             <div class="post">
-                <a href="page/{{article['path']}}.html">{{article["title"]|e}}</a>
+                <a href="{{article['path']}}">{{article["title"]|e}}</a>
                 <div class="date">{{article["cdate"]}}</div>
-                {% for tag in article["tags"] %}
-                    <label class="meta">{{tag}}</label>
-                {% endfor %}
+                {%- for tag in article["tags"] %}
+                <label class="meta">{{tag}}</label>
+                {%- endfor %}
             </div>
             {% endif %}
-            {% endfor %}
+            {%- endfor -%}
         </div>
     </div>
     <div class="footer">
