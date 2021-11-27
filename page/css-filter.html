@@ -39,22 +39,24 @@
 
 <p>利用<code>checkbox</code>、<code>radio</code>等控件的<code>:checked</code>伪类，配合 CSS 的选择器切换目标的<code>display</code>属性实现。</p>
 
-<pre><code>&lt;style&gt;
-    .item {display: none;}
-    #tagall:checked~.item, #tag1:checked~.tag1,
-    #tag2:checked~.tag2, #tag3:checked~.tag3
-    {display: unset;}
-&lt;/style&gt;
-&lt;input type="radio" name="filter" id="tagall" checked hidden&gt;
-&lt;input type="radio" name="filter" id="tag1" hidden&gt;
-&lt;input type="radio" name="filter" id="tag2" hidden&gt;
-&lt;label for="tagall"&gt;all&lt;/label&gt;
-&lt;label for="tag1"&gt;tag1&lt;/label&gt;
-&lt;label for="tag2"&gt;tag2&lt;/label&gt;
-&lt;div class="item tag1"&gt;item with tag1&lt;/div&gt;
-&lt;div class="item tag2"&gt;item with tag2&lt;/div&gt;
-&lt;div class="item tag1 tag2"&gt;item with tag1 tag2&lt;/div&gt;
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="p">&lt;</span><span class="nt">style</span><span class="p">&gt;</span>
+    <span class="p">.</span><span class="nc">item</span> <span class="p">{</span><span class="k">display</span><span class="p">:</span> <span class="kc">none</span><span class="p">;}</span>
+    <span class="p">#</span><span class="nn">tagall</span><span class="p">:</span><span class="nd">checked</span><span class="o">~</span><span class="p">.</span><span class="nc">item</span><span class="o">,</span> <span class="p">#</span><span class="nn">tag1</span><span class="p">:</span><span class="nd">checked</span><span class="o">~</span><span class="p">.</span><span class="nc">tag1</span><span class="o">,</span>
+    <span class="p">#</span><span class="nn">tag2</span><span class="p">:</span><span class="nd">checked</span><span class="o">~</span><span class="p">.</span><span class="nc">tag2</span><span class="o">,</span> <span class="p">#</span><span class="nn">tag3</span><span class="p">:</span><span class="nd">checked</span><span class="o">~</span><span class="p">.</span><span class="nc">tag3</span>
+    <span class="p">{</span><span class="k">display</span><span class="p">:</span> <span class="kc">unset</span><span class="p">;}</span>
+<span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;radio&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;filter&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;tagall&quot;</span> <span class="na">checked</span> <span class="na">hidden</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;radio&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;filter&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;tag1&quot;</span> <span class="na">hidden</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;radio&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;filter&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;tag2&quot;</span> <span class="na">hidden</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;tagall&quot;</span><span class="p">&gt;</span>all<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;tag1&quot;</span><span class="p">&gt;</span>tag1<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;tag2&quot;</span><span class="p">&gt;</span>tag2<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;item tag1&quot;</span><span class="p">&gt;</span>item with tag1<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;item tag2&quot;</span><span class="p">&gt;</span>item with tag2<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;item tag1 tag2&quot;</span><span class="p">&gt;</span>item with tag1 tag2<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></div>
+
+
 
 <div class="interact" id="interact1">
     <style>

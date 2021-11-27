@@ -37,13 +37,13 @@
 
 <p>先前在 cppreference 中看到了<code>copy</code>函数和输入迭代器的巧妙利用。</p>
 
-<pre><code>copy(vector.begin(), vector.end(), ostream_iterator&lt;int&gt;(cout, " "));
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">copy</span><span class="p">(</span><span class="n">vector</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">vector</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span><span class="w"> </span><span class="n">ostream_iterator</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">cout</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">));</span><span class="w"></span>
+</code></pre></div>
 
 <p>将输入流视为一个特殊的容器，把<code>vector</code>容器中的内容复制到输出流中，可以实现数据的快速输出。同样地，输入流也可以被视作一个容器，用这种方法实现快速的输入。</p>
 
-<pre><code>copy(istream_iterator&lt;int&gt;(cin), istream_iterator&lt;int&gt;(), back_inserter(vector));
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">copy</span><span class="p">(</span><span class="n">istream_iterator</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">cin</span><span class="p">),</span><span class="w"> </span><span class="n">istream_iterator</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">back_inserter</span><span class="p">(</span><span class="n">vector</span><span class="p">));</span><span class="w"></span>
+</code></pre></div>
 
 <p>再结合算法库中的<code>remove_if</code>，<code>sort</code>等函数，就可用较短的代码实现一个完整课设内容。</p>
 
@@ -62,87 +62,87 @@
 
 <p><strong>详细代码</strong>：</p>
 
-<pre><code>#include &lt;fstream&gt;
-#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;iterator&gt;
-#include &lt;algorithm&gt;
-using namespace std;
-#define ForEach(Container) (Container).begin(), (Container).end()
-#define QueryByItem(Item)\
-    cout &lt;&lt; #Item "?\n";\
-    decltype(Account::Item) Item##Q;\
-    cin &gt;&gt; Item##Q;\
-    copy_if(ForEach(accounts), ostream_iterator&lt;Account&gt;(cout, "\n"),[=](Account r) { return r.Item == Item##Q; })
-#define SortByItem(Item) sort(ForEach(accounts), [](const Account&amp; a, const Account&amp; b) { return a.##Item &lt; b.##Item; })
-template&lt;class T&gt; T Input(const string&amp; placeholder, T&amp; var) { cout &lt;&lt; placeholder; cin &gt;&gt; var; return var; }
-struct Account
-{
-    int 卡号{};
-    string 姓名{}, 身份证号{}, 开户银行{};
-    double 信用额度{}, 消费金额{}, 信用积分{};
-};
-ostream&amp; operator&lt;&lt;(ostream&amp; out, const Account&amp; r)
-{
-    return out &lt;&lt; r.卡号 &lt;&lt; "\t" &lt;&lt; r.姓名 &lt;&lt; "\t" &lt;&lt; r.身份证号 &lt;&lt; "\t" &lt;&lt; r.开户银行 &lt;&lt; "\t" &lt;&lt; r.信用额度 &lt;&lt; "\t" &lt;&lt; r.消费金额 &lt;&lt; "\t" &lt;&lt; r.信用积分;
-}
-istream&amp; operator&gt;&gt;(istream&amp; in, Account&amp; r)
-{
-    return in &gt;&gt; r.卡号 &gt;&gt; r.姓名 &gt;&gt; r.身份证号 &gt;&gt; r.开户银行 &gt;&gt; r.信用额度 &gt;&gt; r.消费金额 &gt;&gt; r.信用积分;
-}
-int main()
-{
-    vector&lt;Account&gt; accounts;
-    ifstream infile("data.txt");
-    copy(istream_iterator&lt;Account&gt;(infile), istream_iterator&lt;Account&gt;(), back_inserter(accounts));
-    infile.close();
-    for (int cmd = -1, mIntVar; cmd != 0; system("pause"))
-    {
-        if (Input("\033[H\033[J欢迎使用【信用卡客户管理系统】\n1.查\n2.增\n3.改\n4.删\n5.排序\n0.退出\n", cmd) == 1)
-        {
-            if (Input("1.按卡号\n2.按姓名\n3.按身份证\n4.按信用积分\n5.全部显示\n", cmd) == 1) { QueryByItem(卡号); }
-            else if (cmd == 2) { QueryByItem(姓名); }
-            else if (cmd == 3) { QueryByItem(身份证号); }
-            else if (cmd == 4) { QueryByItem(信用积分); }
-            else if (cmd == 5) { copy(ForEach(accounts), ostream_iterator&lt;Account&gt;(cout, "\n")); }
-        }
-        else if (cmd == 2)
-        {
-            Input("几条?\n", mIntVar);
-            cout &lt;&lt; "卡号、用户姓名、身份证号码、开户银行、信用额度、消费金额、信用积分\n";
-            copy_n(istream_iterator&lt;Account&gt;(cin), mIntVar, back_inserter(accounts));
-        }
-        else if (cmd == 3)
-        {
-            Input("卡号?\n", mIntVar);
-            if (Input("1.修改信用额度\n2.兑换积分\n", cmd) == 1)
-            {
-                cin &gt;&gt; find_if(ForEach(accounts), [=](const Account&amp; r) { return r.卡号 == mIntVar; })-&gt;信用额度;
-            }
-            else if (cmd == 2)
-            {
-                decltype(Account::信用积分) fidemD;
-                find_if(ForEach(accounts), [=](const Account&amp; r) { return r.卡号 == mIntVar; })-&gt;信用积分 -= Input("", fidemD);
-            }
-        }
-        else if (cmd == 4)
-        {
-            Input("卡号?", mIntVar);
-            accounts.erase(remove_if(ForEach(accounts), [=](const Account&amp; r) { return r.卡号 == mIntVar; }), accounts.end());
-        }
-        else if (cmd == 5)
-        {
-            if (Input("1.卡号\n2.消费金额\n3.信用额度\n4.信用积分\n", cmd) == 1) { SortByItem(卡号); }
-            else if (cmd == 2) { SortByItem(消费金额); }
-            else if (cmd == 3) { SortByItem(信用额度); }
-            else if (cmd == 4) { SortByItem(信用积分); }
-        }
-    }
-    ofstream outfile("data.txt");
-    copy(ForEach(accounts), ostream_iterator&lt;Account&gt;(outfile, "\n"));
-    outfile.close();
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;fstream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iterator&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;algorithm&gt;</span><span class="cp"></span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span><span class="w"></span>
+<span class="cp">#define ForEach(Container) (Container).begin(), (Container).end()</span>
+<span class="cp">#define QueryByItem(Item)\</span>
+<span class="cp">    cout &lt;&lt; #Item &quot;?\n&quot;;\</span>
+<span class="cp">    decltype(Account::Item) Item##Q;\</span>
+<span class="cp">    cin &gt;&gt; Item##Q;\</span>
+<span class="cp">    copy_if(ForEach(accounts), ostream_iterator&lt;Account&gt;(cout, &quot;\n&quot;),[=](Account r) { return r.Item == Item##Q; })</span>
+<span class="cp">#define SortByItem(Item) sort(ForEach(accounts), [](const Account&amp; a, const Account&amp; b) { return a.##Item &lt; b.##Item; })</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">Input</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">placeholder</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">var</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">placeholder</span><span class="p">;</span><span class="w"> </span><span class="n">cin</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">var</span><span class="p">;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">var</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="k">struct</span> <span class="nc">Account</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="err">卡号</span><span class="p">{};</span><span class="w"></span>
+<span class="w">    </span><span class="n">string</span><span class="w"> </span><span class="err">姓名</span><span class="p">{},</span><span class="w"> </span><span class="err">身份证号</span><span class="p">{},</span><span class="w"> </span><span class="err">开户银行</span><span class="p">{};</span><span class="w"></span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="err">信用额度</span><span class="p">{},</span><span class="w"> </span><span class="err">消费金额</span><span class="p">{},</span><span class="w"> </span><span class="err">信用积分</span><span class="p">{};</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+<span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Account</span><span class="o">&amp;</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">卡号</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">姓名</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">身份证号</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">开户银行</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">信用额度</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">消费金额</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">信用积分</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="n">istream</span><span class="o">&amp;</span><span class="w"> </span><span class="k">operator</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">istream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">Account</span><span class="o">&amp;</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">卡号</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">姓名</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">身份证号</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">开户银行</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">信用额度</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">消费金额</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">信用积分</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Account</span><span class="o">&gt;</span><span class="w"> </span><span class="n">accounts</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">ifstream</span><span class="w"> </span><span class="nf">infile</span><span class="p">(</span><span class="s">&quot;data.txt&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">copy</span><span class="p">(</span><span class="n">istream_iterator</span><span class="o">&lt;</span><span class="n">Account</span><span class="o">&gt;</span><span class="p">(</span><span class="n">infile</span><span class="p">),</span><span class="w"> </span><span class="n">istream_iterator</span><span class="o">&lt;</span><span class="n">Account</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">back_inserter</span><span class="p">(</span><span class="n">accounts</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="n">infile</span><span class="p">.</span><span class="n">close</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">cmd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="n">mIntVar</span><span class="p">;</span><span class="w"> </span><span class="n">cmd</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">system</span><span class="p">(</span><span class="s">&quot;pause&quot;</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">Input</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\033</span><span class="s">[H</span><span class="se">\033</span><span class="s">[J欢迎使用【信用卡客户管理系统】</span><span class="se">\n</span><span class="s">1.查</span><span class="se">\n</span><span class="s">2.增</span><span class="se">\n</span><span class="s">3.改</span><span class="se">\n</span><span class="s">4.删</span><span class="se">\n</span><span class="s">5.排序</span><span class="se">\n</span><span class="s">0.退出</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cmd</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">Input</span><span class="p">(</span><span class="s">&quot;1.按卡号</span><span class="se">\n</span><span class="s">2.按姓名</span><span class="se">\n</span><span class="s">3.按身份证</span><span class="se">\n</span><span class="s">4.按信用积分</span><span class="se">\n</span><span class="s">5.全部显示</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cmd</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">QueryByItem</span><span class="p">(</span><span class="err">卡号</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">QueryByItem</span><span class="p">(</span><span class="err">姓名</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">QueryByItem</span><span class="p">(</span><span class="err">身份证号</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">QueryByItem</span><span class="p">(</span><span class="err">信用积分</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">ForEach</span><span class="p">(</span><span class="n">accounts</span><span class="p">),</span><span class="w"> </span><span class="n">ostream_iterator</span><span class="o">&lt;</span><span class="n">Account</span><span class="o">&gt;</span><span class="p">(</span><span class="n">cout</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">));</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">Input</span><span class="p">(</span><span class="s">&quot;几条?</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mIntVar</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;卡号、用户姓名、身份证号码、开户银行、信用额度、消费金额、信用积分</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="n">copy_n</span><span class="p">(</span><span class="n">istream_iterator</span><span class="o">&lt;</span><span class="n">Account</span><span class="o">&gt;</span><span class="p">(</span><span class="n">cin</span><span class="p">),</span><span class="w"> </span><span class="n">mIntVar</span><span class="p">,</span><span class="w"> </span><span class="n">back_inserter</span><span class="p">(</span><span class="n">accounts</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">Input</span><span class="p">(</span><span class="s">&quot;卡号?</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mIntVar</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">Input</span><span class="p">(</span><span class="s">&quot;1.修改信用额度</span><span class="se">\n</span><span class="s">2.兑换积分</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cmd</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">cin</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">find_if</span><span class="p">(</span><span class="n">ForEach</span><span class="p">(</span><span class="n">accounts</span><span class="p">),</span><span class="w"> </span><span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Account</span><span class="o">&amp;</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">卡号</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">mIntVar</span><span class="p">;</span><span class="w"> </span><span class="p">})</span><span class="o">-&gt;</span><span class="err">信用额度</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">decltype</span><span class="p">(</span><span class="n">Account</span><span class="o">::</span><span class="err">信用积分</span><span class="p">)</span><span class="w"> </span><span class="n">fidemD</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="n">find_if</span><span class="p">(</span><span class="n">ForEach</span><span class="p">(</span><span class="n">accounts</span><span class="p">),</span><span class="w"> </span><span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Account</span><span class="o">&amp;</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">卡号</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">mIntVar</span><span class="p">;</span><span class="w"> </span><span class="p">})</span><span class="o">-&gt;</span><span class="err">信用积分</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">Input</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">fidemD</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">Input</span><span class="p">(</span><span class="s">&quot;卡号?&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">mIntVar</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">accounts</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">remove_if</span><span class="p">(</span><span class="n">ForEach</span><span class="p">(</span><span class="n">accounts</span><span class="p">),</span><span class="w"> </span><span class="p">[</span><span class="o">=</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Account</span><span class="o">&amp;</span><span class="w"> </span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="err">卡号</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">mIntVar</span><span class="p">;</span><span class="w"> </span><span class="p">}),</span><span class="w"> </span><span class="n">accounts</span><span class="p">.</span><span class="n">end</span><span class="p">());</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">Input</span><span class="p">(</span><span class="s">&quot;1.卡号</span><span class="se">\n</span><span class="s">2.消费金额</span><span class="se">\n</span><span class="s">3.信用额度</span><span class="se">\n</span><span class="s">4.信用积分</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cmd</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">SortByItem</span><span class="p">(</span><span class="err">卡号</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">SortByItem</span><span class="p">(</span><span class="err">消费金额</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">SortByItem</span><span class="p">(</span><span class="err">信用额度</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">SortByItem</span><span class="p">(</span><span class="err">信用积分</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">ofstream</span><span class="w"> </span><span class="n">outfile</span><span class="p">(</span><span class="s">&quot;data.txt&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">copy</span><span class="p">(</span><span class="n">ForEach</span><span class="p">(</span><span class="n">accounts</span><span class="p">),</span><span class="w"> </span><span class="n">ostream_iterator</span><span class="o">&lt;</span><span class="n">Account</span><span class="o">&gt;</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="n">outfile</span><span class="p">.</span><span class="n">close</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
             </div>
         </div>

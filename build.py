@@ -28,17 +28,17 @@ class Article:
     def genHtml(self, outDir: str):
         name, type = os.path.splitext(self.filename)
         if type == '.md':
-            fullpath = os.path.join(self.root, self.relpath, self.filename)
+            fullpath = os.path.normpath(os.path.join(self.root, self.relpath, self.filename))
             html = mdfile2html(fullpath)
             if not 'outdir' in html.metadata:
-                html.metadata['outdir'] = os.path.join(outDir, self.relpath)
-            html.metadata['srcfile'] = os.path.join(self.root, self.relpath, name)
+                html.metadata['outdir'] = os.path.normpath(os.path.join(outDir, self.relpath))
+            html.metadata['srcfile'] = os.path.normpath(os.path.join(self.root, self.relpath, name))
             _, type = os.path.splitext(html.metadata['template'])
-            html.metadata['path'] = os.path.join(html.metadata['outdir'], name) + type
+            html.metadata['path'] = os.path.normpath(os.path.join(html.metadata['outdir'], name)) + type
             return html
 
     def __str__(self) -> str:
-        return os.path.join(self.root, self.relpath, self.filename)
+        return os.path.normpath(os.path.join(self.root, self.relpath, self.filename))
 
 
 def scanArticle(srcDir: str) -> list[Article]:

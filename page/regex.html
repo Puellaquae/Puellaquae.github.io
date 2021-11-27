@@ -24,10 +24,10 @@
             <h1>正则表达式转化为自动机</h1>
 
             <div class="modified date">
-                2021/11/27
+                2021/10/26
             </div>
             <div class="create date">
-                2021/11/27
+                2021/10/14
             </div>
             
             <span class="meta">Rust</span>
@@ -55,142 +55,142 @@
 
 <p>根据 <a href="https://swtch.com/~rsc/regexp/regexp1.html"><em>Regular Expression Matching Can Be Simple And Fast</em></a> 这篇文章。预先将正则表达式预处理为后缀表达式再转化到 NFA 更方便。对于省略的连接运算符，相邻两个字符，字符与括号，星号和字符之间都需要额外补上。例如 <code>aa(((bc)|(de))*)f</code> 补上省略的连接符（用加号表示）<code>a+a+(((b+c)|(d+e))*)+f</code>，转为后缀 <code>aabc+de+|*f+++</code>。</p>
 
-<pre><code>pub fn regex2post(r: &amp;str) -&gt; Vec&lt;RegexToken&gt; {
-    use RegexToken::{Alter, Cat, Bracket, Closure, Char};
-    let mut stack = Vec::new();
-    let mut post = Vec::new();
-    let mut add_cat = false; // 表示是否需要一个连接符
-    for c in r.chars() {
-        match c {
-            '|' =&gt; {
-                add_cat = false; // 新的双目运算符直接取代了连接符
-                stack.push(Alter);
-            }
-            '(' =&gt; {
-                if add_cat {
-                    stack.push(Cat);
-                    add_cat = false; // 一个左括号可以连接前面的，但不能连接后面的
-                }
-                stack.push(Bracket);
-            }
-            ')' =&gt; {
-                if !add_cat { unreachable!(); }
-                while !matches!(stack.last(), Some(Bracket) | None) {
-                    post.push(stack.pop().unwrap());
-                }
-                stack.pop();
-            }
-            '*' =&gt; { // 单目运算符不影响状态
-                post.push(Closure);
-            }
-            'ε' =&gt; {
-                if add_cat {
-                    stack.push(Cat);
-                }
-                add_cat = true;
-                post.push(Epsilon);
-            }
-            _ =&gt; {
-                if add_cat {
-                    stack.push(Cat);
-                }
-                add_cat = true; // 字符即可连接前面也可连接后面
-                post.push(Char(c));
-            }
-        }
-    }
-    if !add_cat { unreachable!(); }
-    while let Some(r) = stack.pop() {
-        post.push(r);
-    }
-    post
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">regex2post</span><span class="p">(</span><span class="n">r</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">RegexToken</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">RegexToken</span>::<span class="p">{</span><span class="n">Alter</span><span class="p">,</span><span class="w"> </span><span class="n">Cat</span><span class="p">,</span><span class="w"> </span><span class="n">Bracket</span><span class="p">,</span><span class="w"> </span><span class="n">Closure</span><span class="p">,</span><span class="w"> </span><span class="n">Char</span><span class="p">};</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">stack</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span>::<span class="n">new</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">post</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span>::<span class="n">new</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">add_cat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// 表示是否需要一个连接符</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">chars</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="sc">&#39;|&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">add_cat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// 新的双目运算符直接取代了连接符</span>
+<span class="w">                </span><span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">Alter</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="sc">&#39;(&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">add_cat</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">Cat</span><span class="p">);</span><span class="w"></span>
+<span class="w">                    </span><span class="n">add_cat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// 一个左括号可以连接前面的，但不能连接后面的</span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">Bracket</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="sc">&#39;)&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">add_cat</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="fm">unreachable!</span><span class="p">();</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="k">while</span><span class="w"> </span><span class="o">!</span><span class="fm">matches!</span><span class="p">(</span><span class="n">stack</span><span class="p">.</span><span class="n">last</span><span class="p">(),</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">Bracket</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nb">None</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">post</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">().</span><span class="n">unwrap</span><span class="p">());</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">();</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="sc">&#39;*&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 单目运算符不影响状态</span>
+<span class="w">                </span><span class="n">post</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">Closure</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="sc">&#39;ε&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">add_cat</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">Cat</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="n">add_cat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="n">post</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">Epsilon</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">add_cat</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">Cat</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="n">add_cat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"> </span><span class="c1">// 字符即可连接前面也可连接后面</span>
+<span class="w">                </span><span class="n">post</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">Char</span><span class="p">(</span><span class="n">c</span><span class="p">));</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">add_cat</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="fm">unreachable!</span><span class="p">();</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">post</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">r</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="n">post</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 <h3>后缀表达式转 NFA</h3>
 
 <p>rust 用指针不是很方便，所以这里用数组来存放 NFA 的图结构。</p>
 
-<pre><code>pub struct NFA {
-    pub nodes: Vec&lt;Option&lt;char&gt;&gt;,
-    pub edges: Vec&lt;(usize, usize)&gt;,
-    pub start: usize,
-    pub out: usize,
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">NFA</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">nodes</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Option</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">edges</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="kt">usize</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">start</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">out</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 <p>用一个栈来存放后缀表达式转化到 NFA 中临时的图，使用边来表示（即想象将这个图的入口和出口用一条有向边直接连起来），暂且称之为块。</p>
 
 <p>对于字符，直接向图中添加新节点，压入下标。</p>
 
-<pre><code>RegexToken::Char(c) =&gt; {
-    let idx = nfa.add_node(NFANode::new(Some(*c)));
-    stack.push((idx, idx));
-}
+<div class="codehilite"><pre><span></span><code><span class="n">RegexToken</span>::<span class="n">Char</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">NFANode</span>::<span class="n">new</span><span class="p">(</span><span class="nb">Some</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">)));</span><span class="w"></span>
+<span class="w">    </span><span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">((</span><span class="n">idx</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-RegexToken::Epsilon =&gt; {
-    let idx = nfa.add_node(NFANode::new(None));
-    stack.push((idx, idx));
-}
-</code></pre>
+<span class="n">RegexToken</span>::<span class="n">Epsilon</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">NFANode</span>::<span class="n">new</span><span class="p">(</span><span class="nb">None</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">((</span><span class="n">idx</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 <p>对于连接符，弹出两个块，块甲和块乙（注意先后）。连接乙的出和甲的入（这条边是可以确定下来存入 NFA 中的），再压入乙的入和甲的出。</p>
 
-<pre><code>      +---+    +---+
+<div class="codehilite"><pre><span></span><code>      +---+    +---+
 in -&gt; | B | -&gt; | A | -&gt; out 
       +---+    +---+
-</code></pre>
+</code></pre></div>
 
-<pre><code>RegexToken::Cat =&gt; {
-    let (e2_start, e2_out) = stack.pop().unwrap();
-    let (e1_start, e1_out) = stack.pop().unwrap();
-    nfa.add_edge(e1_out, e2_start);
-    stack.push((e1_start, e2_out));
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">RegexToken</span>::<span class="n">Cat</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">e2_start</span><span class="p">,</span><span class="w"> </span><span class="n">e2_out</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">e1_start</span><span class="p">,</span><span class="w"> </span><span class="n">e1_out</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">e1_out</span><span class="p">,</span><span class="w"> </span><span class="n">e2_start</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">((</span><span class="n">e1_start</span><span class="p">,</span><span class="w"> </span><span class="n">e2_out</span><span class="p">));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 <p>对于选择符，弹出两个块，需要两个新节点做辅助，并可确定四条边。</p>
 
-<pre><code>              +---+
+<div class="codehilite"><pre><span></span><code>              +---+
         +---&gt; | A | ---&gt;+
       +---+   +---+   +---+
 in -&gt; |   |           |   | -&gt; out
       +---+   +---+   +---+
         +---&gt; | B | ---&gt;+
               +---+
-</code></pre>
+</code></pre></div>
 
-<pre><code>RegexToken::Alter =&gt; {
-    let (e2_start, e2_out) = stack.pop().unwrap();
-    let (e1_start, e1_out) = stack.pop().unwrap();
-    let a_start = nfa.add_node(NFANode::new(None));
-    let a_out = nfa.add_node(NFANode::new(None));
-    nfa.add_edge(a_start, e1_start);
-    nfa.add_edge(a_start, e2_start);
-    nfa.add_edge(e1_out, a_out);
-    nfa.add_edge(e2_out, a_out);
-    stack.push((a_start, a_out));
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">RegexToken</span>::<span class="n">Alter</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">e2_start</span><span class="p">,</span><span class="w"> </span><span class="n">e2_out</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">e1_start</span><span class="p">,</span><span class="w"> </span><span class="n">e1_out</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">NFANode</span>::<span class="n">new</span><span class="p">(</span><span class="nb">None</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">NFANode</span>::<span class="n">new</span><span class="p">(</span><span class="nb">None</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">a_start</span><span class="p">,</span><span class="w"> </span><span class="n">e1_start</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">a_start</span><span class="p">,</span><span class="w"> </span><span class="n">e2_start</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">e1_out</span><span class="p">,</span><span class="w"> </span><span class="n">a_out</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">e2_out</span><span class="p">,</span><span class="w"> </span><span class="n">a_out</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">((</span><span class="n">a_start</span><span class="p">,</span><span class="w"> </span><span class="n">a_out</span><span class="p">));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 <p>对于星号，弹出一个块，需要一个新节点做辅助，并可确定两条边。</p>
 
-<pre><code>              +---+
+<div class="codehilite"><pre><span></span><code>              +---+
         +---&gt; | A |
       +---+   +---+
 in -&gt; |   | &lt;---+  
       +---+
         +---&gt; out
-</code></pre>
+</code></pre></div>
 
-<pre><code>RegexToken::Closure =&gt; {
-    let idx = nfa.add_node(NFANode::new(None));
-    let (e_start, e_out) = stack.pop().unwrap();
-    nfa.add_edge(idx, e_start);
-    nfa.add_edge(e_out, idx);
-    stack.push((idx, idx));
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">RegexToken</span>::<span class="n">Closure</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">NFANode</span>::<span class="n">new</span><span class="p">(</span><span class="nb">None</span><span class="p">));</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">e_start</span><span class="p">,</span><span class="w"> </span><span class="n">e_out</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stack</span><span class="p">.</span><span class="n">pop</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="w"> </span><span class="n">e_start</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">nfa</span><span class="p">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">e_out</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">stack</span><span class="p">.</span><span class="n">push</span><span class="p">((</span><span class="n">idx</span><span class="p">,</span><span class="w"> </span><span class="n">idx</span><span class="p">));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 <p>最后栈里剩下的一个块就是完整的图了，两个下标分别就是 NFA 的初始状态和接收状态，后缀表达式到 NFA 的转化就做完了。</p>
 
@@ -198,77 +198,77 @@ in -&gt; |   | &lt;---+
 
 <p>NFA 转 DFA 使用子集构造法，这需要为 NFA 增加一个 <code>get_reach</code> 函数计算一个状态消耗一个字符可到达的状态的集合。另外 DFA 没有采用 NFA 一样的数据结构，而是直接使用了一个二维数组表示。</p>
 
-<pre><code>pub struct DFA {
-    pub accepts: Vec&lt;char&gt;,
-    pub table: Vec&lt;Vec&lt;Option&lt;usize&gt;&gt;&gt;,
-    pub start: usize,
-    pub out: Vec&lt;usize&gt;,
-}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">DFA</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">accepts</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">table</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Option</span><span class="o">&lt;</span><span class="kt">usize</span><span class="o">&gt;&gt;&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">start</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">out</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">usize</span><span class="o">&gt;</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 <p>以 <code>nfa.get_reach(nfa.start, None)</code> 作为初始状态，求新的状态，直到没有新的状态产生为止。所有包含了原终结状态的新状态都作为 DFA 的终结状态。</p>
 
-<pre><code>pub fn determinize(nfa: &amp;NFA) -&gt; DFA {
-    let start = nfa.get_reach(nfa.start, None);
-    let mut table = Vec::new();
-    let mut states = vec![start.clone()];
-    let accepts: Vec&lt;_&gt; = nfa
-        .get_accepts()
-        .into_iter()
-        .filter(|x| matches!(x, Some(_)))
-        .map(|x| x.unwrap())
-        .collect(); // 输入符号集合
-    while !states.is_empty() {
-        let state = states.pop().unwrap();
-        let new_states: Vec&lt;_&gt; = accepts
-            .iter()
-            .map(|a| {
-                let mut new_state: Vec&lt;_&gt; = state
-                    .iter()
-                    .map(|s| nfa.get_reach(*s, Some(*a)))
-                    .flatten()
-                    .collect();
-                new_state.sort_unstable();
-                new_state.dedup();
-                new_state
-            })
-            .collect();
-        table.push((state, new_states.clone()));
-        for new_state in new_states {
-            if !new_state.is_empty()
-                &amp;&amp; !table.iter().any(|s| s.0 == new_state)
-                &amp;&amp; !states.contains(&amp;new_state)
-            {
-                states.push(new_state) // 只有新的状态才加入计算队列
-            }
-        }
-    }
+<div class="codehilite"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">determinize</span><span class="p">(</span><span class="n">nfa</span>: <span class="kp">&amp;</span><span class="nc">NFA</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">DFA</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nfa</span><span class="p">.</span><span class="n">get_reach</span><span class="p">(</span><span class="n">nfa</span><span class="p">.</span><span class="n">start</span><span class="p">,</span><span class="w"> </span><span class="nb">None</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">table</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span>::<span class="n">new</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">states</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="n">start</span><span class="p">.</span><span class="n">clone</span><span class="p">()];</span><span class="w"></span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">accepts</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nfa</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">get_accepts</span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">into_iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">filter</span><span class="p">(</span><span class="o">|</span><span class="n">x</span><span class="o">|</span><span class="w"> </span><span class="fm">matches!</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">_</span><span class="p">)))</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">x</span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">unwrap</span><span class="p">())</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span><span class="w"> </span><span class="c1">// 输入符号集合</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="o">!</span><span class="n">states</span><span class="p">.</span><span class="n">is_empty</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">states</span><span class="p">.</span><span class="n">pop</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">new_states</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">accepts</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">a</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">new_state</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="w"></span>
+<span class="w">                    </span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">                    </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">s</span><span class="o">|</span><span class="w"> </span><span class="n">nfa</span><span class="p">.</span><span class="n">get_reach</span><span class="p">(</span><span class="o">*</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">)))</span><span class="w"></span>
+<span class="w">                    </span><span class="p">.</span><span class="n">flatten</span><span class="p">()</span><span class="w"></span>
+<span class="w">                    </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span><span class="w"></span>
+<span class="w">                </span><span class="n">new_state</span><span class="p">.</span><span class="n">sort_unstable</span><span class="p">();</span><span class="w"></span>
+<span class="w">                </span><span class="n">new_state</span><span class="p">.</span><span class="n">dedup</span><span class="p">();</span><span class="w"></span>
+<span class="w">                </span><span class="n">new_state</span><span class="w"></span>
+<span class="w">            </span><span class="p">})</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">table</span><span class="p">.</span><span class="n">push</span><span class="p">((</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">new_states</span><span class="p">.</span><span class="n">clone</span><span class="p">()));</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">new_state</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">new_states</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">new_state</span><span class="p">.</span><span class="n">is_empty</span><span class="p">()</span><span class="w"></span>
+<span class="w">                </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">table</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">any</span><span class="p">(</span><span class="o">|</span><span class="n">s</span><span class="o">|</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">new_state</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">states</span><span class="p">.</span><span class="n">contains</span><span class="p">(</span><span class="o">&amp;</span><span class="n">new_state</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">states</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">new_state</span><span class="p">)</span><span class="w"> </span><span class="c1">// 只有新的状态才加入计算队列</span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    let rename: HashMap&lt;Vec&lt;usize&gt;, usize&gt; = table
-        .iter()
-        .enumerate()
-        .map(|(i, s)| (s.0.clone(), i))
-        .collect();
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">rename</span>: <span class="nc">HashMap</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">usize</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="kt">usize</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">enumerate</span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="mf">0.</span><span class="n">clone</span><span class="p">(),</span><span class="w"> </span><span class="n">i</span><span class="p">))</span><span class="w"></span>
+<span class="w">        </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span><span class="w"></span>
 
-    DFA {
-        accepts,
-        table: table
-            .into_iter()
-            .map(|(_, ns)| {
-                ns.iter()
-                    .map(|n| rename.get(n).copied())
-                    .collect::&lt;Vec&lt;_&gt;&gt;()
-            })
-            .collect(),
-        start: *rename.get(&amp;start).unwrap(),
-        out: rename
-            .into_iter()
-            .filter(|(s, _)| s.contains(&amp;nfa.out))
-            .map(|(_, i)| i)
-            .collect(),
-    }
-}
-</code></pre>
+<span class="w">    </span><span class="n">DFA</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">accepts</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="n">table</span>: <span class="nc">table</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">into_iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">ns</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">ns</span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">                    </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">n</span><span class="o">|</span><span class="w"> </span><span class="n">rename</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="p">).</span><span class="n">copied</span><span class="p">())</span><span class="w"></span>
+<span class="w">                    </span><span class="p">.</span><span class="n">collect</span>::<span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;&gt;</span><span class="p">()</span><span class="w"></span>
+<span class="w">            </span><span class="p">})</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">collect</span><span class="p">(),</span><span class="w"></span>
+<span class="w">        </span><span class="n">start</span>: <span class="o">*</span><span class="n">rename</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="o">&amp;</span><span class="n">start</span><span class="p">).</span><span class="n">unwrap</span><span class="p">(),</span><span class="w"></span>
+<span class="w">        </span><span class="n">out</span>: <span class="nc">rename</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">into_iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">filter</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">contains</span><span class="p">(</span><span class="o">&amp;</span><span class="n">nfa</span><span class="p">.</span><span class="n">out</span><span class="p">))</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="n">i</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">collect</span><span class="p">(),</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 <h2>最小化 DFA</h2>
 
@@ -276,87 +276,87 @@ in -&gt; |   | &lt;---+
 
 <p>例如：</p>
 
-<pre><code>   | a | b |
+<div class="codehilite"><pre><span></span><code>   | a | b |
  0 | 2 | 1 |
  1 | 2 | 1 |
  2 | 2 | 1 |
-</code></pre>
+</code></pre></div>
 
 <p>其中 0 是初始状态，1 是终结状态。这里的 0 和 2 就是不可区分的两个状态，因为没有一个串可以被 0 接受而不被 2 接受。所以状态就被划分为 {0, 2} 和 1。</p>
 
-<pre><code>pub fn distinguishable(&amp;self, p: usize, q: usize) -&gt; bool {
-        use TransRes::{Accept, Next, Unaccept};
-        let p_out = self.out.contains(&amp;p);
-        let q_out = self.out.contains(&amp;q);
-        if p_out ^ q_out {
-            return true;
-        }
-        if p == q {
-            return false;
-        }
-        let mut accepts: Vec&lt;_&gt; = self.accepts
-            .iter()
-            .map(|a| Some(*a))
-            .collect();
-        accepts.push(None);
-        for a in accepts {
-            let r = self.get_trans(p, a);
-            let s = self.get_trans(q, a);
-            match (r, s) {
-                (Accept, Accept) | (Unaccept, Unaccept) =&gt; {}
-                (Accept, _) | (_, Accept) | (Unaccept, _) | (_, Unaccept) =&gt; {
-                    return true;
-                }
-                (Next(rc), Next(sc)) =&gt; {
-                    if self.distinguishable(rc, sc) {
-                        return true;
-                    }
-                }
-            }
-        }
-        false
-    }
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">distinguishable</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">p</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">q</span>: <span class="kt">usize</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">bool</span> <span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">use</span><span class="w"> </span><span class="n">TransRes</span>::<span class="p">{</span><span class="n">Accept</span><span class="p">,</span><span class="w"> </span><span class="n">Next</span><span class="p">,</span><span class="w"> </span><span class="n">Unaccept</span><span class="p">};</span><span class="w"></span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">p_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">out</span><span class="p">.</span><span class="n">contains</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">q_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">out</span><span class="p">.</span><span class="n">contains</span><span class="p">(</span><span class="o">&amp;</span><span class="n">q</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">p_out</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">q_out</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">q</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">accepts</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">accepts</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">a</span><span class="o">|</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">))</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="n">accepts</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="nb">None</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">accepts</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">get_trans</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">get_trans</span><span class="p">(</span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">match</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="p">(</span><span class="n">Accept</span><span class="p">,</span><span class="w"> </span><span class="n">Accept</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">Unaccept</span><span class="p">,</span><span class="w"> </span><span class="n">Unaccept</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="w">                </span><span class="p">(</span><span class="n">Accept</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">Accept</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">Unaccept</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">Unaccept</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="p">(</span><span class="n">Next</span><span class="p">(</span><span class="n">rc</span><span class="p">),</span><span class="w"> </span><span class="n">Next</span><span class="p">(</span><span class="n">sc</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">distinguishable</span><span class="p">(</span><span class="n">rc</span><span class="p">,</span><span class="w"> </span><span class="n">sc</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">                    </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="kc">false</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 <p>得到了新的一组状态后，需要重建跳转表。因为多个原状态被合并为了一个新状态，所有只要求任意一个原状态的跳转就可得出新状态的跳转了。</p>
 
-<pre><code>pub fn minimize(&amp;self) -&gt; DFA {
-        let states = self.get_nondistinguishable_states();
-        let rename: HashMap&lt;usize, usize&gt; = states
-            .iter()
-            .enumerate()
-            .map(|(i, x)| x.iter().map(move |tx| (*tx, i)))
-            .flatten()
-            .collect();
-        let mut table = Vec::new();
-        for s in states {
-            let state_trans = self
-                .accepts
-                .iter()
-                .map(|a| match self.get_trans(*s.first().unwrap(), Some(*a)) {
-                    TransRes::Accept =&gt; unreachable!(),
-                    TransRes::Next(ns) =&gt; Some(*rename.get(&amp;ns).unwrap()),
-                    TransRes::Unaccept =&gt; None,
-                })
-                .collect::&lt;Vec&lt;_&gt;&gt;();
-            table.push(state_trans);
-        }
-        DFA {
-            accepts: self.accepts.clone(),
-            table,
-            start: *rename.get(&amp;self.start).unwrap(),
-            out: {
-                let mut o: Vec&lt;_&gt; = self.out
-                    .iter()
-                    .map(|x| *rename.get(x).unwrap())
-                    .collect();
-                o.sort_unstable();
-                o.dedup();
-                o
-            },
-        }
-    }
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">minimize</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">DFA</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">states</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">get_nondistinguishable_states</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">rename</span>: <span class="nc">HashMap</span><span class="o">&lt;</span><span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="kt">usize</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">states</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">enumerate</span><span class="p">()</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">map</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">tx</span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">)))</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">flatten</span><span class="p">()</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">table</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span>::<span class="n">new</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">states</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">state_trans</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="w"></span>
+<span class="w">                </span><span class="p">.</span><span class="n">accepts</span><span class="w"></span>
+<span class="w">                </span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">                </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">a</span><span class="o">|</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">get_trans</span><span class="p">(</span><span class="o">*</span><span class="n">s</span><span class="p">.</span><span class="n">first</span><span class="p">().</span><span class="n">unwrap</span><span class="p">(),</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="n">TransRes</span>::<span class="n">Accept</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">unreachable!</span><span class="p">(),</span><span class="w"></span>
+<span class="w">                    </span><span class="n">TransRes</span>::<span class="n">Next</span><span class="p">(</span><span class="n">ns</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="o">*</span><span class="n">rename</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ns</span><span class="p">).</span><span class="n">unwrap</span><span class="p">()),</span><span class="w"></span>
+<span class="w">                    </span><span class="n">TransRes</span>::<span class="n">Unaccept</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="p">})</span><span class="w"></span>
+<span class="w">                </span><span class="p">.</span><span class="n">collect</span>::<span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;&gt;</span><span class="p">();</span><span class="w"></span>
+<span class="w">            </span><span class="n">table</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">state_trans</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">DFA</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">accepts</span>: <span class="nc">self</span><span class="p">.</span><span class="n">accepts</span><span class="p">.</span><span class="n">clone</span><span class="p">(),</span><span class="w"></span>
+<span class="w">            </span><span class="n">table</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="n">start</span>: <span class="o">*</span><span class="n">rename</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">.</span><span class="n">start</span><span class="p">).</span><span class="n">unwrap</span><span class="p">(),</span><span class="w"></span>
+<span class="w">            </span><span class="n">out</span>: <span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">o</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">out</span><span class="w"></span>
+<span class="w">                    </span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w"></span>
+<span class="w">                    </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">x</span><span class="o">|</span><span class="w"> </span><span class="o">*</span><span class="n">rename</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">).</span><span class="n">unwrap</span><span class="p">())</span><span class="w"></span>
+<span class="w">                    </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span><span class="w"></span>
+<span class="w">                </span><span class="n">o</span><span class="p">.</span><span class="n">sort_unstable</span><span class="p">();</span><span class="w"></span>
+<span class="w">                </span><span class="n">o</span><span class="p">.</span><span class="n">dedup</span><span class="p">();</span><span class="w"></span>
+<span class="w">                </span><span class="n">o</span><span class="w"></span>
+<span class="w">            </span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
             </div>
         </div>

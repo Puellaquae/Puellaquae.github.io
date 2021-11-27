@@ -21,15 +21,18 @@ jobs:
       with:
         python-version: "3.10"
         
+    - name: Set up node
+      uses: actions/setup-node@v1
+
     - name: Install dependencies
       run: |
-        pip install jinja2
-        pip install markdown2
+        pip install -r requirements.txt
+        npm install katex
         
     - name: Build
       run: |
         python build.py article page
-        
+        pi
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@4.0.0
       with:
