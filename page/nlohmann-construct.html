@@ -37,9 +37,9 @@
 
 <p>看了源码以及经过几次试验后发现这个构造函数的关键在于这两个重载：</p>
 
-<div class="codehilite"><pre><span></span><code><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Json</span><span class="p">(</span><span class="n">T</span><span class="p">...);</span><span class="w"> </span><span class="c1">// 记为重载</span>
-<span class="n">Json</span><span class="p">(</span><span class="n">initializer_list</span><span class="o">&lt;</span><span class="n">Json</span><span class="o">&gt;</span><span class="p">);</span><span class="w"> </span><span class="c1">// 记为重载 2</span>
-</code></pre></div>
+<pre><code>template&lt;class... T&gt; Json(T...); // 记为重载
+Json(initializer_list&lt;Json&gt;); // 记为重载 2
+</code></pre>
 
 <p>以<code>Json{1,{2},{{nullptr,true},{}}}</code>为例，根据程序输出的结果来看：首先因为花括号里的元素类型不一致，参数传入重载 1，但是这里我发现传递进去的参数包只会有零个或一个，所以 1 被传入，源对象变为<code>{Json@1,{2},{{nullptr,true},{}}}</code>；</p>
 

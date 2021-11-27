@@ -49,13 +49,13 @@
 
 <p>可以用多线程下载的场景展示<code>join</code>函数的用法。</p>
 
-<div class="codehilite"><pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="nf">download1</span><span class="p">(...);</span><span class="w"></span>
-<span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="nf">download2</span><span class="p">(...);</span><span class="w"></span>
-<span class="c1">// 在下载时就可以进行的任务</span>
-<span class="n">download1</span><span class="p">.</span><span class="n">join</span><span class="p">();</span><span class="w"></span>
-<span class="n">download2</span><span class="p">.</span><span class="n">join</span><span class="p">();</span><span class="w"></span>
-<span class="c1">// 需要待所有内容都下载完再进行的任务</span>
-</code></pre></div>
+<pre><code>std::thread download1(...);
+std::thread download2(...);
+// 在下载时就可以进行的任务
+download1.join();
+download2.join();
+// 需要待所有内容都下载完再进行的任务
+</code></pre>
 
 <p>在大部分的场景下，使用<code>join</code>就可以实现了。而使用<code>detach</code>虽然可以获得更大的灵活度，但是需要自行解决同步的问题。</p>
 
