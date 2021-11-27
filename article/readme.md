@@ -1,5 +1,5 @@
 <!---
 hideIndex: both
 outdir: .
-template: readme.md
+template: README.md
 --->
