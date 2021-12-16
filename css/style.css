@@ -232,12 +232,6 @@ body {
     margin: 0;
 }
 
-.archive h2 {
-    font-size: 1.4em;
-    line-height: 1.4em;
-    margin: 0;
-}
-
 .archive p,
 .archive details {
     margin-block-end: 0.9em;
@@ -288,12 +282,8 @@ label[for="timeLine"]::before {
     content: var(--bigList);
 }
 
-#timeLine:checked~#filter-on:checked~#tag-cpp:checked~* .posts .post[tag~="cpp"],
-#timeLine:checked~#filter-on:checked~#tag-multithread:checked~* .posts .post[tag~="multithread"],
-#timeLine:checked~#filter-on:checked~#tag-crud:checked~* .posts .post[tag~="crud"],
-#timeLine:checked~#filter-on:checked~#tag-htmlcss:checked~* .posts .post[tag~="htmlcss"],
 #timeLine:checked~* .posts .post {
-    display: inline-flex;
+    display: flex;
     flex-direction: row;
     justify-content: left;
     align-items: center;

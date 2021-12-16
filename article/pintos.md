@@ -4,7 +4,9 @@
     tags: OS
 --->
 
-# Pintos 实验记录
+# Pintos 实验记录【未完成】
+
+Pintos 是我们学校操作系统课程的课程设计的一个内容，是拿的伯克利的 CS162 课程的大实验，另外 CS162 中的 shell 作业也包含在课程设计中。
 
 ## 环境配置
 
@@ -14,7 +16,7 @@
 
 ## Threads
 
-按照斯坦福的顺序，首先是 Threads 这个 Project。
+我并没有按照伯克利的顺序，而是按照斯坦福 CS140 的顺序，首先是 Threads 这个 Project。
 
 斯坦福课程自身提供了一份 [guide](https://web.stanford.edu/class/cs140/projects/pintos/pintos_6.html)，[这篇博客](https://www.cnblogs.com/laiy/p/pintos_project1_thread.html)写得也很详细，GitHub 上可参考的代码也很多。
 
