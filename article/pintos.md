@@ -1,15 +1,34 @@
-# Pintos
+<!---
+    tags: OS
+--->
 
-操作系统实验记录
+# Pintos 实验记录
 
 ## 环境配置
 
-首先克隆 [Pintos-os.org](pintos-os.org) 上的 pintos 代码，这个仓库是一直在维护的，斯坦福网站上的版本太老了。这里我吃了巨亏，这份代码一跑就成，而且 WSL1 也能用，非常好。
+[pintos-anon](https://pintos-os.org) 这个版本的配置最为简单，即使是 WSL1 也可以轻松运行。
 
-然后 `install build-essential bochs qemu qemu-system-i386` 这些需要的程序。
+将 pintos-anon 克隆下来，安装 build-essentials，make，qemu，bochs 等必要软件，将 pintos-anon/src/utils 设为 PATH 路径，然后直接在 threads 文件夹下 `make && make check` 即可编译与运行测试。
 
-最后直接去 `/src/threads` 下面 `make` 一下就完事了。
+## Threads
 
-### 吐槽
+按照斯坦福的顺序，首先是 Threads 这个 Project。
 
-之前我下的斯坦福课程网站的，它有个安装指南，但是我没有它指定的 bochs 2.2.6，我直接 apt install 的。然后它又要 make utils 里的几个程序，头文件找不到，一搜是 unix 下的头文件，直接注释掉。接着又是一段编不过的给 unix 写的代码。好不容易都给编译过了，check 了下，马上一个 27 of 27 failed，我一瞅，这终于成了么。结果 pintos 一 run，它 bo 不 chs 来，它说什么，我去网上一搜，stack overflow 上也有个这问题，那也是 WSL 的，但没人回答。于是，我想是不是 WSL1 或者 bochs 版本的问题。我先去换了几个 bochs，带显示的不带显示的，2.7 的 2.2.6 的，似乎能跑起来但不是报错就是崩溃。bochs 搞半天不行，我就去试 WSL2，Windows 可以跑 Linux 的 GUI 程序，很不错，bochs 能跑，qemu 能跑，但一碰上 pintos 它俩就歇了。这 pintos 太娇贵了，我特地装了 ubuntu 的虚拟机，结果 qemu 能跑，但是内核死活 load 不上。bochs 呢，搞半天自己都没跑起来。无可奈何，只能祭出 docker 大法，还是 docker 好，一拉直接就完事，alarm-multiple 能跑，check 也有 20 of 27 failed。看这两分钟就跑得飞起，我气的，不知怎么去下了个 pintos-anon，一试。好家伙，直接就是 alarm-multiple，20 of 27 failed。往之前的 WSL1 里一扔，bochs 啊 qemu 啊马上跑起来了。一个星期的白白折腾啊我，为什么网上都是些改文件的，不写 PATH 直接塞 `/usr/bin` 的，还有那斯坦福课程网站也是，太让人失望了。
+斯坦福课程自身提供了一份 [guide](https://web.stanford.edu/class/cs140/projects/pintos/pintos_6.html)，[这篇博客](https://www.cnblogs.com/laiy/p/pintos_project1_thread.html)写得也很详细，GitHub 上可参考的代码也很多。
+
+斯坦福的课程将这个 Project 分成了三个任务，按照顺序坐下去就可以了。
+
+### Alarm Clock
+
+第一个任务要求我们重构 `timer_sleep` 函数，因为它这个函数原来使用忙等实现的，我们要重写代码避免忙等。
+
+一般的实现就是使用一个队列保存所有 sleep 的进程，每次 tick 都检查一遍这个队列，判断是否需要唤醒。
+
+### Priority Scheduling
+
+第二个任务要求我们实现进程优先级，一共有两个部分：process preempt 和 priority donate。
+
+Process preempt 要求高优先级的进程就绪时，正在运行的低由优先级的进程需要立刻让出资源给高优先级进程。一般进程抢占会发生进程被创建，进程被唤醒时。pintos 已经实现了 `list_insert_ordered` 和 `list_sort` 函数，可以让进程根据优先级在队列中排队。
+
+## 其他
+
