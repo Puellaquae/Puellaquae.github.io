@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pintos 实验记录</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/codecolor.css" />
+</head>
+
+<body>
+    <header class="header">
+        <section sub="" class="navbar-left title">
+            Puelloc
+        </section>
+        <section class="navbar-right">
+            <a href="../index.html">首页</a>
+            <a href="about.html">关于</a>
+        </section>
+    </header>
+    <div class="container">
+        <div class="archive">
+            <h1>Pintos 实验记录</h1>
+
+            <div class="modified date">
+                2021/12/16
+            </div>
+            <div class="create date">
+                2021/12/16
+            </div>
+            
+            <span class="meta">OS</span>
+            
+            <div class="entry">
+                <h2>环境配置</h2>
+
+<p><a href="https://pintos-os.org">pintos-anon</a> 这个版本的配置最为简单，即使是 WSL1 也可以轻松运行。</p>
+
+<p>将 pintos-anon 克隆下来，安装 build-essentials，make，qemu，bochs 等必要软件，将 pintos-anon/src/utils 设为 PATH 路径，然后直接在 threads 文件夹下 <code>make &amp;&amp; make check</code> 即可编译与运行测试。</p>
+
+<h2>Threads</h2>
+
+<p>按照斯坦福的顺序，首先是 Threads 这个 Project。</p>
+
+<p>斯坦福课程自身提供了一份 <a href="https://web.stanford.edu/class/cs140/projects/pintos/pintos_6.html">guide</a>，<a href="https://www.cnblogs.com/laiy/p/pintos_project1_thread.html">这篇博客</a>写得也很详细，GitHub 上可参考的代码也很多。</p>
+
+<p>斯坦福的课程将这个 Project 分成了三个任务，按照顺序坐下去就可以了。</p>
+
+<h3>Alarm Clock</h3>
+
+<p>第一个任务要求我们重构 <code>timer_sleep</code> 函数，因为它这个函数原来使用忙等实现的，我们要重写代码避免忙等。</p>
+
+<p>一般的实现就是使用一个队列保存所有 sleep 的进程，每次 tick 都检查一遍这个队列，判断是否需要唤醒。</p>
+
+<h3>Priority Scheduling</h3>
+
+<p>第二个任务要求我们实现进程优先级，一共有两个部分：process preempt 和 priority donate。</p>
+
+<p>Process preempt 要求高优先级的进程就绪时，正在运行的低由优先级的进程需要立刻让出资源给高优先级进程。一般进程抢占会发生进程被创建，进程被唤醒时。pintos 已经实现了 <code>list_insert_ordered</code> 和 <code>list_sort</code> 函数，可以让进程根据优先级在队列中排队。</p>
+
+<h2>其他</h2>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+        <p rel="contact">
+            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="https://github.com/Puellaquae">Github</a>
+        </p>
+    </div>
+</body>
+
+</html>
