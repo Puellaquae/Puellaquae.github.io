@@ -34,5 +34,17 @@ Pintos 是我们学校操作系统课程的课程设计的一个内容，是拿�
 
 Process preempt 要求高优先级的进程就绪时，正在运行的低由优先级的进程需要立刻让出资源给高优先级进程。一般进程抢占会发生进程被创建，进程被唤醒时。pintos 已经实现了 `list_insert_ordered` 和 `list_sort` 函数，可以让进程根据优先级在队列中排队。
 
+## User Program
+
+根据斯坦福 guide 的[顺序](https://web.stanford.edu/class/cs140/projects/pintos/pintos_3.html#SEC40)，首先是 Argument Passing。
+
+另外，我遇到了一个奇怪的问题，我 Project 1 的代码似乎和 Projec 2 不兼容，内核在启动时因为 `thread_yield(): ASSERT(!intr_context())` 而崩溃，所以写 Project 2 时我又用了一份新的 pintos。
+
+后来经过分析发现是 `idle` 线程在 `sema_up (idle_started)` 那里由于之前优先级抢占的代码，会导致 `thread_yield` 在中断情况下触发，进而导致内核奔溃，但对于为什么那时会处于中断情况下仍然不清楚。
+
+### Argument Passing
+
+首先通过 `printf` 和 `debug_backtrace_all` 先理一遍系统启动的流程。pintos 真个系统的主程序在 `threads/init.c:main` 这个函数。
+
 ## 其他
 
