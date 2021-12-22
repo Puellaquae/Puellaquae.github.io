@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pintos 实验记录</title>
+    <title>Pintos 实验记录【未完成】</title>
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/codecolor.css" />
 </head>
@@ -21,10 +21,10 @@
     </header>
     <div class="container">
         <div class="archive">
-            <h1>Pintos 实验记录</h1>
+            <h1>Pintos 实验记录【未完成】</h1>
 
             <div class="modified date">
-                2021/12/16
+                2021/12/22
             </div>
             <div class="create date">
                 2021/12/16
@@ -33,7 +33,9 @@
             <span class="meta">OS</span>
             
             <div class="entry">
-                <h2>环境配置</h2>
+                <p>Pintos 是我们学校操作系统课程的课程设计的一个内容，是拿的伯克利的 CS162 课程的大实验，另外 CS162 中的 shell 作业也包含在课程设计中。</p>
+
+<h2>环境配置</h2>
 
 <p><a href="https://pintos-os.org">pintos-anon</a> 这个版本的配置最为简单，即使是 WSL1 也可以轻松运行。</p>
 
@@ -41,7 +43,7 @@
 
 <h2>Threads</h2>
 
-<p>按照斯坦福的顺序，首先是 Threads 这个 Project。</p>
+<p>我并没有按照伯克利的顺序，而是按照斯坦福 CS140 的顺序，首先是 Threads 这个 Project。</p>
 
 <p>斯坦福课程自身提供了一份 <a href="https://web.stanford.edu/class/cs140/projects/pintos/pintos_6.html">guide</a>，<a href="https://www.cnblogs.com/laiy/p/pintos_project1_thread.html">这篇博客</a>写得也很详细，GitHub 上可参考的代码也很多。</p>
 
@@ -58,6 +60,44 @@
 <p>第二个任务要求我们实现进程优先级，一共有两个部分：process preempt 和 priority donate。</p>
 
 <p>Process preempt 要求高优先级的进程就绪时，正在运行的低由优先级的进程需要立刻让出资源给高优先级进程。一般进程抢占会发生进程被创建，进程被唤醒时。pintos 已经实现了 <code>list_insert_ordered</code> 和 <code>list_sort</code> 函数，可以让进程根据优先级在队列中排队。</p>
+
+<h2>User Program</h2>
+
+<p>这里主要是参考了 <a href="https://github.com/liziwl/operating_system_project2">liziwl/operating<em>system</em>project2</a> 和 <a href="https://github.com/NicoleMayer/pintos_project2">NicoleMayer/pintos_project2</a> 的代码。</p>
+
+<p>根据斯坦福 guide 的<a href="https://web.stanford.edu/class/cs140/projects/pintos/pintos_3.html#SEC40">顺序</a>，首先是 Argument Passing。</p>
+
+<p>另外，我遇到了一个奇怪的问题，我 Project 1 的代码似乎和 Projec 2 不兼容，内核在启动时因为 <code>thread_yield(): ASSERT(!intr_context())</code> 而崩溃，所以写 Project 2 时我又用了一份新的 pintos。</p>
+
+<p>后来经过分析发现是 <code>idle</code> 线程在 <code>sema_up (idle_started)</code> 那里由于之前优先级抢占的代码，会导致 <code>thread_yield</code> 在中断情况下触发，进而导致内核奔溃，但对于为什么那时会处于中断情况下仍然不清楚，有可能是 <code>userprog</code> 多初始化的几个项目有关。</p>
+
+<h3>Argument Passing</h3>
+
+<p>首先通过 <code>printf</code> 和 <code>debug_backtrace_all</code> 先理一遍系统启动的流程。pintos 整个系统的主程序在 <code>threads/init.c:main</code> 这个函数。</p>
+
+<p>首先是复制一份 <code>file_name</code> 用于传递参数，注意生命周期，不能提早释放。压栈要注意逆序压入，对于栈的内容 guide 中有说明，也可以参考别人的文章和代码。</p>
+
+<p>由于 <code>process_wait</code> 还没有实现，主进程不会等到子进程的运行导致系统推出了子进程都还没加载进内存。在 <code>thread</code> 结构体中加入子进程的信息和用于等待的信号量，同样也要注意生命周期的问题，子进程的数据在进程退出后就会被回收，此时如果父进程去读取子进程中想要的数据（比如退出码）就会导致内存读取错误，所以需要用另外申请出来的空间。因为系统设定，进程只能等待自己的子进程，所以可以假定一个子进程只能阻塞一个父进程一次（第一次 <code>sema-down</code> 就会把自己阻塞，而等到子进程退出 <code>sema-up</code> 恢复后也没有办法 <code>sema-down</code> 第二次了）。因为我无法覆盖到所有的进程终止的情况，所以我将 <code>exit_code</code> 的测试点设为 -1 便于通过测试。</p>
+
+<p>用户进程 <code>return</code> 后具体会回到不是很清楚，但是会触发 <code>sys_exit</code> 系统调用引起进程退出。另外 <code>printf</code> 也需要实现 <code>sys_write</code> 系统调用（这里展示实现一下终端的输出就行了），所以还需要实现这两个系统调用才可以正式开始跑测试。系统调用时，栈顶为系统调用号，然后自顶向下是顺序第一个，第二个等参数。</p>
+
+<p>实现以上相关内容后就可以运行 <code>args-*</code> 相关的测试点了。</p>
+
+<h3>System Call</h3>
+
+<p>System call 这部分剩下要处理的主要是文件操作相关的了。不过另外还有处理一下用户进程内存访问的问题，需要检查调用访问的内存地址是否是合法的用户内存地址。这里 guide 中有提供思路和一些代码。但是有时候需要读取 4 个字节的内存，但是有 2 个字节是合法的内存而另外一半是不合法的，这里我的实现是连续检查一个指针长度内存地址。</p>
+
+<p>对于 <code>process_start</code>，还需要在子进程进行 <code>load</code> 的时候将父进程阻塞住，便于通知父进程子进程的状态，因为系统要求进程创建失败时返回 -1，而 <code>load</code> 是在子进程下进行的，所以只要进程创建成功就有有效的 tid，无法判断是否加载成功。这里我在 thread 结构体中加了一个信号量用于同步父子进程。</p>
+
+<p>然后开始处理文件操作相关的 system call，对于用户程序，文件是用数字标号来表示的。所以要在 thread 结构体中加入相关内容来记录打开的文件和标号。文件操作相关的函数 pintos 已经为我们提供了，所以只需要调用即可。另外对于文件操作，这里选择共用一个文件操作锁来避免读写冲突。系统要求可执行文件不能被写（好像只能通过 <code>load</code> 来判断文件是不是可执行文件，加载文件时 <code>file_deny_write</code>），而因为文件被 <code>close</code> 时会将文件 <code>file_allow_write</code> 设回 <code>true</code>，所以进程需要一直占有自身可执行文件，直到进程退出后再 <code>close</code>。</p>
+
+<h3>CS162 的额外内容</h3>
+
+<p>因为我的学校使用的是伯克利 CS162 的 pintos，而这个学期 Fall 2021，CS162 的 pintos 有 96 个测试点，较我使用的 pintos-anon 多了 16 个测试点。这 16 个测试点具体为 do-nothing，iloveos，practice，stack-align 系列和 fp 系列测试。其中 do-nothing 和 iloveos 基本不需要额外的代码，practice 需要新增 <code>sys_practice</code> 系统调用，stack-align 系列因为需要额外使用 clang 编译器（gcc 编译器下始终 pass）而暂时没有处理。最后是 fp 系列，也是这个学期 Fall 2021 新增的浮点计算相关的测试点。</p>
+
+<p>移植测试时需要注意 CS162 独有的函数和文件，另外浮点计算部分需要删除 gcc 的 -msoft-float FLAGS。对于 fp-kasm 和 fp-kinit，这两个测试点要求使用内核模式运行，需要修改 <code>threads/init.c</code> 中的主函数（学校 autograder 似乎会对 make 脚本做特殊处理，并不会使用 <code>rukt</code> 命令，需要代码写死判断）。</p>
+
+<p>浮点计算需要使用 FPU，CS162 的 guide 有相关提示，需要实现开启和初始化 FPU，保存恢复 FPU 状态的功能。开启 FPU 是修改 <code>entry.S</code> 中切换保护模式时写入 <code>cr0</code> 的参数（去掉 <code>CR0_EM</code>）。初始化、保存和恢复 FPU 状态的指令分别是 <code>fninit, fsave, frstor</code>，FPU 状态需要 108 字节保存。我对 GNU 扩展的 AT&amp;T 风格的汇编不是很清楚，我直接把 108 字节长的数组塞进了 thread 结构体，<code>asm volatile ("fsave %0"::"m"(thread-&gt;fpu_state[0]));</code> 保存状态，<code>asm volatile ("frstor %0"::"m"(thread-&gt;fpu_state[0]));</code> 恢复状态。在进程创建时（<code>thread_create</code>）保存自身进程 FPU 状态，初始化并保存一份 FPU 状态给新的进程，再恢复自身进程的 FPU 状态。另外再切换进程时（<code>schedule</code>），保存当前进程 FPU 状态，加载新进程的 FPU 状态。</p>
 
 <h2>其他</h2>
 
