@@ -1,6 +1,6 @@
 <!---
     cdate: 2021/12/16
-    mdate: 2021/12/16
+    mdate: 2021/12/22
     tags: OS
 --->
 
@@ -66,7 +66,7 @@ System call 这部分剩下要处理的主要是文件操作相关的了。不�
 
 ### CS162 的额外内容
 
-因为我的学校使用的是伯克利 CS162 的 pintos，而这个学期 Fall 2021，CS162 的 pintos 有 96 个测试点，较我使用的 pintos-anon 多了 16 个测试点。这 16 个测试点具体为 do-nothing，iloveos，practice，stack-align 系列和 fp 系列测试。其中 do-nothing 和 iloveos 基本不需要额外的代码，practice 需要新增 `SYSTEM_PRACTICE` 系统调用，stack-align 系列因为需要额外使用 clang 编译器（gcc 编译器下始终 pass）而暂时没有处理。最后是 fp 系列，也是这个学期 Fall 2021 新增的浮点计算相关的测试点。
+因为我的学校使用的是伯克利 CS162 的 pintos，而这个学期 Fall 2021，CS162 的 pintos 有 96 个测试点，较我使用的 pintos-anon 多了 16 个测试点。这 16 个测试点具体为 do-nothing，iloveos，practice，stack-align 系列和 fp 系列测试。其中 do-nothing 和 iloveos 基本不需要额外的代码，practice 需要新增 `sys_practice` 系统调用，stack-align 系列因为需要额外使用 clang 编译器（gcc 编译器下始终 pass）而暂时没有处理。最后是 fp 系列，也是这个学期 Fall 2021 新增的浮点计算相关的测试点。
 
 移植测试时需要注意 CS162 独有的函数和文件，另外浮点计算部分需要删除 gcc 的 -msoft-float FLAGS。对于 fp-kasm 和 fp-kinit，这两个测试点要求使用内核模式运行，需要修改 `threads/init.c` 中的主函数（学校 autograder 似乎会对 make 脚本做特殊处理，并不会使用 `rukt` 命令，需要代码写死判断）。
 
