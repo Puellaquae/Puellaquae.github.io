@@ -7,13 +7,16 @@ from jinja2 import Environment, FileSystemLoader
 
 jinjaEnv = Environment(loader=FileSystemLoader("template"))
 
+
 def pageGen(srcDir, desDir):
     articles = scanArticle(srcDir)
     print([str(a) for a in articles])
     htmldatas = [h.genHtml(desDir) for h in articles]
-    metadatas = sorted([h.metadata for h in htmldatas], key=lambda art: art["cdate"], reverse=True)
+    metadatas = sorted([h.metadata for h in htmldatas],
+                       key=lambda art: art["cdate"], reverse=True)
     for h in htmldatas:
         writeFile(h, metadatas)
+
 
 class Article:
     root: str
@@ -28,13 +31,17 @@ class Article:
     def genHtml(self, outDir: str):
         name, type = os.path.splitext(self.filename)
         if type == '.md':
-            fullpath = os.path.normpath(os.path.join(self.root, self.relpath, self.filename))
+            fullpath = os.path.normpath(os.path.join(
+                self.root, self.relpath, self.filename))
             html = mdfile2html(fullpath)
             if not 'outdir' in html.metadata:
-                html.metadata['outdir'] = os.path.normpath(os.path.join(outDir, self.relpath))
-            html.metadata['srcfile'] = os.path.normpath(os.path.join(self.root, self.relpath, name))
+                html.metadata['outdir'] = os.path.normpath(
+                    os.path.join(outDir, self.relpath))
+            html.metadata['srcfile'] = os.path.normpath(
+                os.path.join(self.root, self.relpath, name))
             _, type = os.path.splitext(html.metadata['template'])
-            html.metadata['path'] = os.path.normpath(os.path.join(html.metadata['outdir'], name)) + type
+            html.metadata['path'] = os.path.normpath(
+                os.path.join(html.metadata['outdir'], name)) + type
             return html
 
     def __str__(self) -> str:
@@ -58,7 +65,8 @@ def writeFile(html, metadatas):
     template = jinjaEnv.get_template(metadata["template"] + '.jinja')
     print(metadata['path'])
     fileout = open(metadata['path'], mode="w", encoding="utf-8")
-    fileout.write(template.render(content=html, metadata=metadata, articles=metadatas))
+    fileout.write(template.render(
+        content=html, metadata=metadata, articles=metadatas))
     fileout.close()
 
 
@@ -87,6 +95,8 @@ def mdfile2html(filepath: str, encoding: str = "utf-8"):
     inMath = False
     tex = ""
     hasTex = False
+    hasCodeBlock = False
+    extras = ["fenced-code-blocks", "metadata"]
     for line in mdfile.readlines():
         matches = re.match(r"\[extra\]\: #\((.*)\)", line, re.S)
         if matches:
@@ -94,6 +104,8 @@ def mdfile2html(filepath: str, encoding: str = "utf-8"):
                 inlineHtml = True
             elif matches.group(1) == "exclude":
                 exclude = True
+        elif line.strip() == "<!-- code-friendly -->":
+            extras.append("code-friendly")
         elif line.strip() == "```html" and inlineHtml:
             inHtml = True
         elif line.strip() == "```" and inHtml and inlineHtml:
@@ -108,6 +120,9 @@ def mdfile2html(filepath: str, encoding: str = "utf-8"):
             md += renderTex(tex)
             tex = ""
             hasTex = True
+        elif not inMath and line.strip() == "```":
+            hasCodeBlock = True
+            md += line
         elif titleMd == "" and line.startswith("# "):
             titleMd = line.strip("# ").strip()
         elif exclude:
@@ -121,7 +136,7 @@ def mdfile2html(filepath: str, encoding: str = "utf-8"):
                 sline[i] = "".join(ss)
             md += "".join(sline)
     mdfile.close()
-    html = markdown2.markdown(md, extras=["fenced-code-blocks", "metadata"])
+    html = markdown2.markdown(md, extras=extras)
     if "title" not in html.metadata:
         html.metadata["title"] = titleMd
     html.metadata["titleMd"] = titleMd
@@ -136,13 +151,15 @@ def mdfile2html(filepath: str, encoding: str = "utf-8"):
         html.metadata["template"] = "article.html"
     if not "hideIndex" in html.metadata:
         html.metadata["hideIndex"] = "none"
-    if not "hasTex" in html.metadata:
-        html.metadata["hasTex"] = hasTex
+    if (not "hasTex" in html.metadata) and hasTex:
+        html.metadata["hasTex"] = "true"
+    if (not "useIndent" in html.metadata) and not(hasTex or hasCodeBlock):
+        html.metadata["useIndent"] = "true"
     if "tags" in html.metadata:
         html.metadata["tags"] = [t.strip()
                                  for t in html.metadata["tags"].split(",")]
     return html
 
 
-if __name__ == '__main__' :
+if __name__ == '__main__':
     pageGen(sys.argv[1], sys.argv[2])

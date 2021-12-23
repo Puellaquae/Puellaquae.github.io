@@ -7,9 +7,17 @@
     <title>{{metadata["title"]|e}}</title>
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/codecolor.css" />
-    {%- if metadata["hasTex"] -%}
+{%- if metadata["hasTex"] == "true" -%}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.19/dist/katex.css" integrity="sha384-WIA8PXZs4di2BJiKfcuR39gE8uoWaMQy4koqQrMh4kxe62f/nlGFxHIVi3TGNuUF" crossorigin="anonymous"/>
-    {%- endif %}
+{%- endif %}
+{%- if metadata["useIndent"] == "true" %}
+    <style>
+        .archive p {
+            text-indent: 2em;
+            margin: 0.75em 0;
+        }
+    </style>
+{%- endif %}
 </head>
 
 <body>
