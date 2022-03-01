@@ -2,7 +2,7 @@
 cdate: 2021/10/15
 mdate: 2021/10/15
 tags: Rust, Regex
--->
+--->
 
 # 正则表达式转化为自动机
 
@@ -22,7 +22,7 @@ tags: Rust, Regex
 
 ### 预处理正则表达式
 
-根据 [_Regular Expression Matching Can Be Simple And Fast_](https://swtch.com/~rsc/regexp/regexp1.html) 这篇文章。预先将正则表达式预处理为后缀表达式再转化到 NFA 更方便。对于省略的连接运算符，相邻两个字符，字符与括号，星号和字符之间都需要额外补上。例如 `aa(((bc)|(de))*)f` 补上省略的连接符（用加号表示）`a+a+(((b+c)|(d+e))*)+f`，转为后缀 `aabc+de+|*f+++`。
+根据 *[Regular Expression Matching Can Be Simple And Fast](https://swtch.com/~rsc/regexp/regexp1.html)* 这篇文章。预先将正则表达式预处理为后缀表达式再转化到 NFA 更方便。对于省略的连接运算符，相邻两个字符，字符与括号，星号和字符之间都需要额外补上。例如 `aa(((bc)|(de))*)f` 补上省略的连接符（用加号表示）`a+a+(((b+c)|(d+e))*)+f`，转为后缀 `aabc+de+|*f+++`。
 
 ```rust
 pub fn regex2post(r: &str) -> Vec<RegexToken> {
