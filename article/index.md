@@ -1,5 +1,5 @@
 <!---
-hideIndex: both
-outdir: .
-template: index.html
+hideIndex = "both"
+outdir = "."
+template = "index.html"
 --->

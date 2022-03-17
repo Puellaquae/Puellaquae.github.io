@@ -1,5 +1,5 @@
 <!---
-hideIndex: both
-outdir: .
-template: README.md
+hideIndex = "both"
+outdir = "."
+template = "README.md"
 --->

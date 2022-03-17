@@ -1,8 +1,7 @@
-<!-- code-friendly -->
 <!---
-cdate: 2021/12/16
-mdate: 2021/12/23
-tags: OS
+cdate = "2021/12/16"
+mdate = "2021/12/23"
+tags = ["OS"]
 --->
 
 # Pintos 实验记录【未完成】

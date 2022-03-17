@@ -1,8 +1,8 @@
 <!---
-title: CSS 选择器与 <input> 标签的联用
-cdate: 2020/08/14
-mdate: 2021/12/16
-tags: CSS
+title = "CSS 选择器与 <input> 标签的联用"
+cdate = "2020/08/14"
+mdate = "2021/12/16"
+tags = ["CSS"]
 --->
 
 # CSS 选择器与 `<input>` 标签的联用
@@ -15,7 +15,6 @@ CSS 的选择器与`<input>`标签的联用可以代替 JS 实现一些简单功
 ## 主要想法
 
 利用`checkbox`、`radio`等控件的`:checked`伪类，配合 CSS 的选择器切换目标的`display`属性实现。
-
 
 ```html
 <style>

@@ -2,3 +2,4 @@ writing/
 .vscode/
 node_modules/
 __pycache__/
+index.js
