@@ -4,7 +4,7 @@
   "description": "Tools for build puellaquae.github.io's web page",
   "main": "index.js",
   "scripts": {
-    "build": "tsc index.ts && node index.js article page",
+    "build": "tsc index.ts && node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

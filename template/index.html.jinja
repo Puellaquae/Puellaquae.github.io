@@ -26,7 +26,7 @@
             {%- if article["hideIndex"] != "html" and article["hideIndex"] != "both" -%}
             <div class="post">
                 <a href="{{article['outdir']}}/{{article['outfilename']}}">{{article["title"]|e}}</a>
-                <div class="date">{{article["cdate"]}}</div>
+                <div class="date">{{article["createDate"].toLocaleDateString("zh-CN", {year:"numeric", month:"2-digit", day:"2-digit"})}}</div>
                 {%- for tag in article["tags"] %}
                 <label class="meta">{{tag}}</label>
                 {%- endfor %}

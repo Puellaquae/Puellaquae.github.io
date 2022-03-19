@@ -1,6 +1,7 @@
 import { lstatSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { Macro, Ptm, Node, easyMap } from "jsptm";
 import { configure } from "nunjucks";
+import { spawnSync } from "child_process";
 import highligt from "highlight.js";
 
 function getAllFiles(dir: string): { dir: string, name: string }[] {
@@ -48,34 +49,37 @@ class Articles {
     }
 
     prepareMetadata(ptm: Ptm) {
-        let m = ptm.metadata;
+        let em = easyMap(ptm.metadata);
         const defaultMetadata = {
             "hasTex": false,
-            "useIndent": false,
             "template": "article.html",
             "tags": [],
             "outdir": this.outputDir,
             "hideIndex": "none"
         }
         for (const [keys, values] of Object.entries(defaultMetadata)) {
-            if (!m.has(keys)) {
-                m.set(keys, values);
-            }
+            em.entry<typeof values>(keys).or(values);
         }
-        if (!m.has("outfilename")) {
-            const ofn = (m.get("rawfilename")! as string).split(".")[0] + "." + (m.get("template")! as string).split(".")[1];
-            m.set("outfilename", ofn);
-        }
-        let em = easyMap(m);
-        if (!em.entry<boolean>("hasCodeBlock").or(false).val && !em.entry<boolean>("hasTexBlock").or(false).val) {
+
+        const ofn = (em.get("rawfilename")! as string).split(".")[0] + "." + (em.get("template")! as string).split(".")[1];
+        em.entry<string>("outfilename").or(ofn);
+        if (!em.has("useIndent") && !em.entry<boolean>("hasCodeBlock").or(false).val && !em.entry<boolean>("hasTexBlock").or(false).val) {
             em.entry<boolean>("useIndent").val = true;
+        }
+        let rawfile = em.get("rawdir")! as string + "/" + em.get("rawfilename")! as string;
+        const changeLog = spawnSync("git", ["log", "--format=format:%cd", rawfile]).stdout.toString().split("\n");
+        const last = new Date(changeLog[0]);
+        const first = new Date(changeLog[changeLog.length - 1]);
+        em.entry<Date>("modifyDate").val = last;
+        const cdate = em.entry<Date>("createDate").or(first);
+        if (cdate.val.toLocaleDateString === undefined) {
+            cdate.val = new Date(cdate.val.toJSON() + "T00:00:00+08:00");
         }
     }
 
     done() {
         let ptms = [];
         for (const { dir, name } of this.articles) {
-            console.log(`Parse ${dir}/${name}`);
             let ptm = Ptm.parse(readFileSync(dir + "/" + name, { encoding: "utf-8" }));
             ptm.metadata.set("rawdir", dir);
             ptm.metadata.set("rawfilename", name);
@@ -83,11 +87,12 @@ class Articles {
             ptms.push(ptm);
         }
         ptms.forEach(this.prepareMetadata, this);
+        ptms.sort((a, b) => (a.metadata.get("createDate")! as Date) < (b.metadata.get("createDate")! as Date) ? 1 : -1);
         for (let ptm of ptms) {
             const file = applyTemplate(ptm, ptms)
             const outfilepath = ptm.metadata.get("outdir")! as string + "/" + ptm.metadata.get("outfilename")! as string;
             writeFileSync(outfilepath, file, { encoding: "utf-8" });
-            console.log(`Render ${ptm.metadata.get("rawfilename")} gened to ${outfilepath}`);
+            console.log(`${ptm.metadata.get("rawdir")}/${ptm.metadata.get("rawfilename")} gened to ${outfilepath}`);
             console.log(ptm.metadata);
         }
     }
@@ -152,9 +157,37 @@ const macro: { [name: string]: Macro; } = {
             }
             return node;
         }
+    },
+    "exclude": {
+        filter: [],
+        func(node: Node): Node {
+            return {
+                type: "void",
+                data: null,
+                rawData: node.rawData,
+                macros: node.macros,
+                children: node.children
+            }
+        }
+    },
+    "rawHtml": {
+        filter: ["fenceCode"],
+        func(node: Node, metadata: Map<string, unknown>): Node {
+            if (node.type === "fenceCode" && node.data.codetype === "html") {
+                easyMap(metadata).entry<boolean>("hasRawHTML").val = true;
+                return {
+                    type: "rawHtml",
+                    data: { html: node.data.code },
+                    rawData: node.rawData,
+                    macros: node.macros,
+                    children: node.children
+                }
+            }
+            return node;
+        }
     }
 };
 
 const forceMacro: string[] = ["title", "highlighFenceCode"];
 
-new Articles("article").process(macro, forceMacro).output("writing").done();
+new Articles("article").process(macro, forceMacro).output("page").done();

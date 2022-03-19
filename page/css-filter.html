@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSS 选择器与 &lt;input&gt; 标签的联用</title>
+    <title>CSS 选择器与 input 标签的联用</title>
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/codecolor.css" />
 </head>
@@ -21,44 +21,32 @@
     </header>
     <div class="container">
         <div class="archive">
-            <h1>CSS 选择器与 <code>&lt;input&gt;</code> 标签的联用</h1>
-
+            <h1>CSS 选择器与 input 标签的联用</h1>
             <div class="modified date">
-                2021/12/16
+                2022年3月17日
             </div>
             <div class="create date">
-                2020/08/14
+                2020年8月14日
             </div>
             
             <span class="meta">CSS</span>
             
             <div class="entry">
-                <p>CSS 的选择器与<code>&lt;input&gt;</code>标签的联用可以代替 JS 实现一些简单功能，如标签筛选、可折叠菜单栏等。</p>
-
-<h2>主要想法</h2>
-
-<p>利用<code>checkbox</code>、<code>radio</code>等控件的<code>:checked</code>伪类，配合 CSS 的选择器切换目标的<code>display</code>属性实现。</p>
-
-<div class="codehilite"><pre><span></span><code><span class="p">&lt;</span><span class="nt">style</span><span class="p">&gt;</span>
-    <span class="p">.</span><span class="nc">item</span> <span class="p">{</span><span class="k">display</span><span class="p">:</span> <span class="kc">none</span><span class="p">;}</span>
-    <span class="p">#</span><span class="nn">tagall</span><span class="p">:</span><span class="nd">checked</span><span class="o">~</span><span class="p">.</span><span class="nc">item</span><span class="o">,</span> <span class="p">#</span><span class="nn">tag1</span><span class="p">:</span><span class="nd">checked</span><span class="o">~</span><span class="p">.</span><span class="nc">tag1</span><span class="o">,</span>
-    <span class="p">#</span><span class="nn">tag2</span><span class="p">:</span><span class="nd">checked</span><span class="o">~</span><span class="p">.</span><span class="nc">tag2</span><span class="o">,</span> <span class="p">#</span><span class="nn">tag3</span><span class="p">:</span><span class="nd">checked</span><span class="o">~</span><span class="p">.</span><span class="nc">tag3</span>
-    <span class="p">{</span><span class="k">display</span><span class="p">:</span> <span class="kc">unset</span><span class="p">;}</span>
-<span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;radio&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;filter&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;tagall&quot;</span> <span class="na">checked</span> <span class="na">hidden</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;radio&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;filter&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;tag1&quot;</span> <span class="na">hidden</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;radio&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;filter&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;tag2&quot;</span> <span class="na">hidden</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;tagall&quot;</span><span class="p">&gt;</span>all<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;tag1&quot;</span><span class="p">&gt;</span>tag1<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;tag2&quot;</span><span class="p">&gt;</span>tag2<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;item tag1&quot;</span><span class="p">&gt;</span>item with tag1<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;item tag2&quot;</span><span class="p">&gt;</span>item with tag2<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;item tag1 tag2&quot;</span><span class="p">&gt;</span>item with tag1 tag2<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-</code></pre></div>
-
-
-
-<div class="interact" id="interact1">
+                <p>CSS 的选择器与<code>&lt;input&gt;</code>标签的联用可以代替 JS 实现一些简单功能，如标签筛选、可折叠菜单栏等。</p><h2>主要想法</h2><p>利用<code>checkbox</code>、<code>radio</code>等控件的<code>:checked</code>伪类，配合 CSS 的选择器切换目标的<code>display</code>属性实现。</p><div class='codeblock'><pre><code><span class="hljs-tag">&lt;<span class="hljs-name">style</span>&gt;</span><span class="language-css">
+    <span class="hljs-selector-class">.item</span> {<span class="hljs-attribute">display</span>: none;}
+    <span class="hljs-selector-id">#tagall</span><span class="hljs-selector-pseudo">:checked</span>~<span class="hljs-selector-class">.item</span>, <span class="hljs-selector-id">#tag1</span><span class="hljs-selector-pseudo">:checked</span>~<span class="hljs-selector-class">.tag1</span>,
+    <span class="hljs-selector-id">#tag2</span><span class="hljs-selector-pseudo">:checked</span>~<span class="hljs-selector-class">.tag2</span>, <span class="hljs-selector-id">#tag3</span><span class="hljs-selector-pseudo">:checked</span>~<span class="hljs-selector-class">.tag3</span>
+    {<span class="hljs-attribute">display</span>: unset;}
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;radio&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;filter&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;tagall&quot;</span> <span class="hljs-attr">checked</span> <span class="hljs-attr">hidden</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;radio&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;filter&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;tag1&quot;</span> <span class="hljs-attr">hidden</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;radio&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;filter&quot;</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;tag2&quot;</span> <span class="hljs-attr">hidden</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;tagall&quot;</span>&gt;</span>all<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;tag1&quot;</span>&gt;</span>tag1<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">for</span>=<span class="hljs-string">&quot;tag2&quot;</span>&gt;</span>tag2<span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;item tag1&quot;</span>&gt;</span>item with tag1<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;item tag2&quot;</span>&gt;</span>item with tag2<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;item tag1 tag2&quot;</span>&gt;</span>item with tag1 tag2<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre></div><div class="interact" id="interact1">
     <style>
         #interact1 .item {
             display: none;
@@ -100,13 +88,7 @@
     <div class="item tag1 tag3">item with tag1, tag3</div>
     <div class="item tag2 tag3">item with tag2, tag3</div>
     <div class="item tag1 tag2 tag3">item with tag1, tag2, tag3</div>
-</div>
-
-<h2>拓展</h2>
-
-<p><code>&lt;label&gt;</code>元素也可以根据<code>:checked</code>显示或隐藏，从而实现类似<code>radio</code>与<code>checkbox</code>相结合的效果。</p>
-
-<div class="interact" id="interact2">
+</div><h2>拓展</h2><p><code>&lt;label&gt;</code>元素也可以根据<code>:checked</code>显示或隐藏，从而实现类似<code>radio</code>与<code>checkbox</code>相结合的效果。</p><div class="interact" id="interact2">
     <style>
         #interact2 .item {
             display: none;
@@ -209,13 +191,7 @@
     <div class="item atag1 atag2">item with tag1, tag2</div>
     <div class="item atag2 atag3">item with tag2, tag3</div>
     <div class="item atag1 atag2 atag3">item with tag1, tag2, tag3</div>
-</div>
-
-<p>当然，这种作法是不推荐用于实际情况的，<code>n</code>个标签就需要<code>2^n</code>个<code>radio</code>记录状态和<code>n2^n</code>个label控制状态的转移。这会导致代码十分冗长，而且标签的切换需要频繁地重排页面，以及伪类选择器的大量使用（属性选择器可以预先展开为 id 选择器），都会降低页面的性能。</p>
-
-<p>根据这个原理，只要是可以抽象为有限状态机模型的理论上都是可以利用用 CSS 实现的，此外利用 animation 产生时间差切换显示不同的label还可以模拟出伪随机的状态游走（效果会受限于浏览器的时间精度和刷新策略）。</p>
-
-<div class="interact" id="interact3">
+</div><p>当然，这种作法是不推荐用于实际情况的，<code>n</code>个标签就需要<code>2^n</code>个<code>radio</code>记录状态和<code>n2^n</code>个label控制状态的转移。这会导致代码十分冗长，而且标签的切换需要频繁地重排页面，以及伪类选择器的大量使用（属性选择器可以预先展开为 id 选择器），都会降低页面的性能。</p><p>根据这个原理，只要是可以抽象为有限状态机模型的理论上都是可以利用用 CSS 实现的，此外利用 animation 产生时间差切换显示不同的label还可以模拟出伪随机的状态游走（效果会受限于浏览器的时间精度和刷新策略）。</p><div class="interact" id="interact3">
     <style>
         #interact3 {
             display: flex;
@@ -300,12 +276,7 @@
         <label id="lblue" for="blue"></label>
         <label id="lgreen" for="green"></label>
     </div>
-</div>
-
-<p>HTML + CSS3 是被认为图灵完备的，因为它可以实现元胞自动机 <a href="https://en.wikipedia.org/wiki/Rule_110">Rule 110</a>，这里有一个<a href="http://eli.fox-epste.in/rule110-full.html">实现的例子</a>。因为无论是 HTML 还是 CSS 都无法自行改变元素的属性，所以每一步计算都需要人为介入，十分繁琐。</p>
-
-<p>而且这已经超出了 CSS 设计初衷的应用范围，前面的只是一些小技巧，后面的几个就是奇技淫巧了。</p>
-
+</div><p>HTML + CSS3 是被认为图灵完备的，因为它可以实现元胞自动机 <a href="https://en.wikipedia.org/wiki/Rule_110">Rule 110</a>，这里有一个<a href="http://eli.fox-epste.in/rule110-full.html">实现的例子</a>。因为无论是 HTML 还是 CSS 都无法自行改变元素的属性，所以每一步计算都需要人为介入，十分繁琐。</p><p>而且这已经超出了 CSS 设计初衷的应用范围，前面的只是一些小技巧，后面的几个就是奇技淫巧了。</p><p></p>
             </div>
         </div>
     </div>

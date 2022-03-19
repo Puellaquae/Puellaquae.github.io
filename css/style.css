@@ -304,7 +304,6 @@ label[for="timeLine"]::before {
 #timeLine:checked~* .posts .post a {
     font-size: 1em;
     font-weight: normal;
-    color: var(--fontColor);
 }
 
 #timeLine:checked~* .posts .post:hover {

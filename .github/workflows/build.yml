@@ -11,24 +11,18 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v2
-      with:
-        python-version: "3.10"
-        
+    steps:  
     - name: Set up node
       uses: actions/setup-node@v1
 
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt
-        npm install katex
+        npm install
         
     - name: Build
       run: |
-        python build.py article page
+        npm run build
+
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@4.0.0
       with:

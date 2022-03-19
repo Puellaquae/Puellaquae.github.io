@@ -7,10 +7,10 @@
     <title>{{metadata["title"]|e}}</title>
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/codecolor.css" />
-{%- if metadata["hasTex"] == "true" -%}
+{%- if metadata["hasTex"] -%}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.19/dist/katex.css" integrity="sha384-WIA8PXZs4di2BJiKfcuR39gE8uoWaMQy4koqQrMh4kxe62f/nlGFxHIVi3TGNuUF" crossorigin="anonymous"/>
 {%- endif %}
-{%- if metadata["useIndent"] == "true" %}
+{%- if metadata["useIndent"] %}
     <style>
         .archive p {
             text-indent: 2em;
@@ -32,12 +32,12 @@
     </header>
     <div class="container">
         <div class="archive">
-            <h1>{{metadata["title"]}}</h1>
+            <h1>{{metadata["title"]|e}}</h1>
             <div class="modified date">
-                {{metadata["mdate"]}}
+                {{metadata["modifyDate"].toLocaleDateString("zh-CN", {year:"numeric", month:"long", day:"numeric"})}}
             </div>
             <div class="create date">
-                {{metadata["cdate"]}}
+                {{metadata["createDate"].toLocaleDateString("zh-CN", {year:"numeric", month:"long", day:"numeric"})}}
             </div>
             {% for tag in metadata["tags"] %}
             <span class="meta">{{tag}}</span>
