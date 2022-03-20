@@ -83,6 +83,8 @@ const Exclude: Macro = {
     }
 };
 
+type ExcludeMetadata = {};
+
 const RawHtml: Macro = {
     filter: ["fenceCode"],
     func(node: Node, metadata: Map<string, unknown>): Node {
@@ -106,6 +108,6 @@ export {
     Title, TitleMetadata,
     HighlightInlineCode, HighlightInlineCodeMetadata,
     HighlightFenceCode, HighlightFenceCodeMetadata,
-    Exclude,
+    Exclude, ExcludeMetadata,
     RawHtml, RawHtmlMetadata
 };

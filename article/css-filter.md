@@ -5,7 +5,7 @@ tags = ["CSS"]
 
 # CSS 选择器与 input 标签的联用
 
-<!M exclude>
+<!M Exclude>
 **本文有交互式内容，建议前往[网面版本](https://puellaquae.github.io/page/css-filter.html)查看**
 
 CSS 的选择器与`<input>`标签的联用可以代替 JS 实现一些简单功能，如标签筛选、可折叠菜单栏等。
@@ -32,7 +32,7 @@ CSS 的选择器与`<input>`标签的联用可以代替 JS 实现一些简单功
 <div class="item tag1 tag2">item with tag1 tag2</div>
 ```
 
-<!M rawHtml>
+<!M RawHtml>
 ```html
 <div class="interact" id="interact1">
     <style>
@@ -83,7 +83,7 @@ CSS 的选择器与`<input>`标签的联用可以代替 JS 实现一些简单功
 
 `<label>`元素也可以根据`:checked`显示或隐藏，从而实现类似`radio`与`checkbox`相结合的效果。
 
-<!M rawHtml>
+<!M RawHtml>
 ```html
 <div class="interact" id="interact2">
     <style>
@@ -195,7 +195,7 @@ CSS 的选择器与`<input>`标签的联用可以代替 JS 实现一些简单功
 
 根据这个原理，只要是可以抽象为有限状态机模型的理论上都是可以利用用 CSS 实现的，此外利用 animation 产生时间差切换显示不同的label还可以模拟出伪随机的状态游走（效果会受限于浏览器的时间精度和刷新策略）。
 
-<!M rawHtml>
+<!M RawHtml>
 ```html
 <div class="interact" id="interact3">
     <style>

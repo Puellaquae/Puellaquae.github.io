@@ -3,7 +3,7 @@ import { Macro, Ptm, easyMap } from "jsptm";
 import { configure } from "nunjucks";
 import { spawnSync } from "child_process";
 import { Metadata } from "./metadata";
-import { Exclude, HighlightFenceCode, HighlightInlineCode, RawHtml, Title } from "./macro";
+import { Exclude, ExcludeMetadata, HighlightFenceCode, HighlightFenceCodeMetadata, HighlightInlineCode, HighlightInlineCodeMetadata, RawHtml, RawHtmlMetadata, Title, TitleMetadata } from "./macro";
 
 function getAllFiles(dir: string): { dir: string, name: string }[] {
     let res = [];
@@ -110,15 +110,23 @@ class Articles {
 }
 
 const macro: { [name: string]: Macro; } = {
-    "title": Title,
-    "highlighFenceCode": HighlightFenceCode,
-    "highlighInlineCode": HighlightInlineCode,
-    "exclude": Exclude,
-    "rawHtml": RawHtml
+    Title,
+    HighlightFenceCode,
+    HighlightInlineCode,
+    Exclude,
+    RawHtml
 };
 
-const forceMacro: string[] = ["title", "highlightFenceCode"];
+type MacrosMetadatas = [
+    TitleMetadata, 
+    HighlightFenceCodeMetadata, 
+    HighlightInlineCodeMetadata, 
+    ExcludeMetadata,
+    RawHtmlMetadata
+];
+
+const forceMacro: string[] = ["Title", "HighlightFenceCode"];
 
 new Articles("article").process(macro, forceMacro).output("page").done();
 
-export { BasicMetadata };
+export { BasicMetadata, MacrosMetadatas };
