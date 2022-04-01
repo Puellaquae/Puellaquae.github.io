@@ -4,6 +4,6 @@
 
 {% for md in articles %}
 {%- if md["hideIndex"] != "md" and md["hideIndex"] != "both" -%}
-- [{{md["title"]}}]({{md["rawdir"]}}/{{md["rawfilename"]}}.md)
+- [{{md["title"]}}]({{md["rawdir"]}}/{{md["rawfilename"]}})
 {% endif -%}
 {% endfor %}

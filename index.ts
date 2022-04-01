@@ -42,6 +42,8 @@ type BasicMetadata = {
     hasTexBlock: boolean,
     modifyDate: Date,
     createDate: Date,
+    type: "article" | "about" | "indexHTML" | "indexMD",
+    language: "zh" | "en"
 }
 
 class Articles {
@@ -49,8 +51,11 @@ class Articles {
     macro: { [name: string]: Macro; } = {};
     forceMacro: string[] = [];
     outputDir: string = "";
+    rootDir: string = ".";
+    newChangedFile: string[]
     constructor(dir: string) {
         this.articles = getAllFiles(dir);
+        this.newChangedFile = spawnSync("git", ["status", "-s"]).stdout.toString().split("\n");
     }
 
     process(macro: { [name: string]: Macro; }, forceMacro: string[]) {
@@ -59,8 +64,9 @@ class Articles {
         return this;
     }
 
-    output(dir: string) {
+    output(dir: string, root: string = ".") {
         this.outputDir = dir;
+        this.rootDir = root;
         return this;
     }
 
@@ -70,15 +76,16 @@ class Articles {
         em.entry("tags").or([]);
         em.entry("outdir").or(this.outputDir);
         em.entry("hideIndex").or("none");
-        const ofn = (em.get("rawfilename")! as string).split(".")[0] + "." + (em.get("template")! as string).split(".")[1];
+        const ofn = em.get("rawfilename")!.split(".").slice(0, -1).join(".") + "." + em.get("template")!.split(".")[1];
         em.entry("outfilename").or(ofn);
         if (!em.has("useIndent") && !em.entry("hasCodeBlock").or(false).val && !em.entry("hasTexBlock").or(false).val) {
             em.entry("useIndent").val = true;
         }
-        let rawfile = em.get("rawdir")! as string + "/" + em.get("rawfilename")! as string;
-        const changeLog = spawnSync("git", ["log", "--format=format:%cd", rawfile]).stdout.toString().split("\n");
-        const last = new Date(changeLog[0]);
-        const first = new Date(changeLog[changeLog.length - 1]);
+        let rawfile = em.get("rawdir")! + "/" + em.get("rawfilename")!;
+        const changeLog = spawnSync("git", ["log", "--format=format:%cd", rawfile]).stdout.toString().split("\n").filter(s => s !== "");
+        const newChanged = this.newChangedFile.some(s => s.includes(rawfile));
+        const last = (changeLog.length > 0 && !newChanged) ? (new Date(changeLog[0])) : (new Date());
+        const first = changeLog.length > 0 ? (new Date(changeLog[changeLog.length - 1])) : (new Date());
         em.entry("modifyDate").val = last;
         const cdate = em.entry("createDate").or(first);
         if (cdate.val.toLocaleDateString === undefined) {
@@ -101,7 +108,7 @@ class Articles {
         for (let ptm of ptms) {
             let meta = easyMap<Metadata>(ptm.metadata);
             const file = applyTemplate(ptm, ptms)
-            const outfilepath = meta.get("outdir") + "/" + meta.get("outfilename");
+            const outfilepath = this.rootDir + "/" + meta.get("outdir") + "/" + meta.get("outfilename");
             writeFileSync(outfilepath, file, { encoding: "utf-8" });
             console.log(`${meta.get("rawdir")}/${meta.get("rawfilename")} gened to ${outfilepath}`);
             console.log(ptm.metadata);
@@ -118,15 +125,15 @@ const macro: { [name: string]: Macro; } = {
 };
 
 type MacrosMetadatas = [
-    TitleMetadata, 
-    HighlightFenceCodeMetadata, 
-    HighlightInlineCodeMetadata, 
+    TitleMetadata,
+    HighlightFenceCodeMetadata,
+    HighlightInlineCodeMetadata,
     ExcludeMetadata,
     RawHtmlMetadata
 ];
 
 const forceMacro: string[] = ["Title", "HighlightFenceCode"];
 
-new Articles("article").process(macro, forceMacro).output("page").done();
+new Articles("article").process(macro, forceMacro).output("page", ".").done();
 
 export { BasicMetadata, MacrosMetadatas };
