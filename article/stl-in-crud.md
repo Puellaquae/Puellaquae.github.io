@@ -7,19 +7,19 @@ tags = ["C++"]
 
 大一 C++ 的课设内容不外乎文件读写与经典的增删改查，而利用 C++ 的标准库可以较为便利而优雅的实现。
 
-先前在 cppreference 中看到了`copy`函数和输入迭代器的巧妙利用。
+先前在 cppreference 中看到了 `copy` 函数和输入迭代器的巧妙利用。
 
 ```c++
 copy(vector.begin(), vector.end(), ostream_iterator<int>(cout, " "));
 ```
 
-将输入流视为一个特殊的容器，把`vector`容器中的内容复制到输出流中，可以实现数据的快速输出。同样地，输入流也可以被视作一个容器，用这种方法实现快速的输入。
+将输入流视为一个特殊的容器，把 `vector` 容器中的内容复制到输出流中，可以实现数据的快速输出。同样地，输入流也可以被视作一个容器，用这种方法实现快速的输入。
 
 ```c++
 copy(istream_iterator<int>(cin), istream_iterator<int>(), back_inserter(vector));
 ```
 
-再结合算法库中的`remove_if`，`sort`等函数，就可用较短的代码实现一个完整课设内容。
+再结合算法库中的 `remove_if`，`sort` 等函数，就可用较短的代码实现一个完整课设内容。
 
 **课设要求**：
 

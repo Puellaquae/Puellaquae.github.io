@@ -10,14 +10,6 @@
 {%- if metadata["hasTex"] -%}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.19/dist/katex.css" integrity="sha384-WIA8PXZs4di2BJiKfcuR39gE8uoWaMQy4koqQrMh4kxe62f/nlGFxHIVi3TGNuUF" crossorigin="anonymous"/>
 {%- endif %}
-{%- if metadata["useIndent"] %}
-    <style>
-        .archive p {
-            text-indent: 2em;
-            margin: 0.75em 0;
-        }
-    </style>
-{%- endif %}
 </head>
 
 <body>
@@ -31,7 +23,7 @@
         </section>
     </header>
     <div class="container">
-        <div class="archive">
+        <div class="archive {%- if metadata['useIndent'] %} indent {%- endif %}">
             <h1>{{metadata["title"]|e}}</h1>
             <div class="modified date">
                 {{metadata["modifyDate"].toLocaleDateString("zh-CN", {year:"numeric", month:"long", day:"numeric"})}}

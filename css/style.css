@@ -16,10 +16,10 @@
     --font: "Source Han Serif", "思源宋体", "Noto Serif CJK SC",  serif;
 }
 
-@media(min-width: 1020px) {
+@media(min-width: 1220px) {
     :root {
-        --ContainWidth: 1000px;
-        font-size: 20px;
+        --ContainWidth: 1200px;
+        font-size: 24px;
     }
 
     .header section[sub]::after {
@@ -27,11 +27,10 @@
     }
 }
 
-@media(min-width: 832px) and (max-width: 1020px) {
+@media(min-width: 832px) and (max-width: 1220px) {
     :root {
         --ContainWidth: 800px;
-        --font: "Source Han Sans", "思源黑体", "Noto Sans CJK SC", sans-serif;
-        font-size: 16px;
+        font-size: 20px;
     }
 
     .header section[sub]::after {
@@ -41,7 +40,7 @@
 
 @media(max-width: 832px) {
     :root {
-        --ContainWidth: 96%;
+        --ContainWidth: 94%;
         --font: "Source Han Sans", "思源黑体", "Noto Sans CJK SC", sans-serif;
     }
 }
@@ -108,7 +107,7 @@ a[rel="license"] {
 body {
     text-align: center;
     font-family: var(--font);
-    line-height: 1.6;
+    line-height: 1.666;
     color: var(--fontColor);
     margin: 0px;
     padding: 0px;
@@ -175,7 +174,6 @@ body {
 .archive {
     vertical-align: baseline;
     width: 100%;
-    max-width: var(--ContainWidth);
 }
 
 .posts .post {
@@ -224,6 +222,11 @@ body {
     background-color: var(--tagBgColor);
     border-radius: 8px;
     padding: 0px 3px;
+}
+
+.indent p {
+    text-indent: 2em;
+    margin: 0.75em 0;
 }
 
 .archive h1 {
