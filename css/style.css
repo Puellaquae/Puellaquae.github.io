@@ -12,8 +12,8 @@
     --nako: #ff6e90;
     --lettleList: "小列表";
     --bigList: "大列表";
-    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans", "思源黑体", "Noto Sans CJK SC", monospace;
-    --font: "Source Han Serif", "思源宋体", "Noto Serif CJK SC",  serif;
+    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans", "思源黑体", "Noto Sans CJK SC", "Noto Sans", monospace;
+    --font: "Source Han Serif", "思源宋体", "Noto Serif CJK SC", "Noto Serif", serif;
 }
 
 @media(min-width: 1220px) {
@@ -21,20 +21,12 @@
         --ContainWidth: 1200px;
         font-size: 24px;
     }
-
-    .header section[sub]::after {
-        content: attr(sub);
-    }
 }
 
 @media(min-width: 832px) and (max-width: 1220px) {
     :root {
         --ContainWidth: 800px;
         font-size: 20px;
-    }
-
-    .header section[sub]::after {
-        content: attr(sub);
     }
 }
 
@@ -88,6 +80,10 @@ a {
 
 .header a {
     color: inherit;
+}
+
+.header section[sub]::after {
+    content: attr(sub);
 }
 
 a:hover {

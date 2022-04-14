@@ -1,6 +1,11 @@
 import { easyMap, Macro, Node } from "jsptm";
 import { Metadata } from "./metadata";
 import highligt from "highlight.js";
+import { spawnSync } from "child_process";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "fs";
+import path from "path/posix";
+import os from "os";
+import { customAlphabet  } from "nanoid";
 
 const HighlightInlineCode: Macro = {
     filter: ["inlineCode"],
@@ -104,10 +109,69 @@ const RawHtml: Macro = {
 
 type RawHtmlMetadata = { hasRawHTML: boolean };
 
+const TexBlock: Macro = {
+    filter: ["fenceCode"],
+    func(node: Node, metadata: Map<string, unknown>): Node {
+        if (node.type === "fenceCode") {
+            if (node.data.codetype === "tex") {
+                easyMap<Metadata>(metadata).entry("hasTexBlock").or(true);
+                const tex = '\\documentclass{standalone}\n\\usepackage[UTF8]{ctex}\n\\usepackage{amsmath}\n\\begin{document}\n$\\displaystyle\n'
+                    + node.data.code +
+                    '\n$\n\\end{document}';
+                const tmpdir = mkdtempSync(path.join(os.tmpdir(), "tex-"));
+                const texfile = path.join(tmpdir, "doc.tex");
+                writeFileSync(texfile, tex, { encoding: "utf-8" });
+                const cwd = process.cwd();
+                process.chdir(tmpdir);
+                const xelatexOutput = spawnSync("latex", ["--halt-on-error", texfile]).stdout.toString("utf-8");
+                const dvifile = path.join(tmpdir, "doc.dvi");
+                if (!existsSync(dvifile)) {
+                    process.chdir(cwd);
+                    rmSync(tmpdir, { recursive: true });
+                    throw xelatexOutput;
+                }
+                const dvisvgmOutput = spawnSync("dvisvgm", ["-f", "woff2", "--exact-bbox", "--zoom=-1", "--no-styles", dvifile]);
+                const svgfile = path.join(tmpdir, "doc.svg");
+                if (!existsSync(svgfile)) {
+                    process.chdir(cwd);
+                    rmSync(tmpdir, { recursive: true });
+                    throw dvisvgmOutput;
+                }
+                let svg = readFileSync(svgfile, { encoding: "utf-8" });
+                const fontRename = new Map<string, string>();
+                const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 8);
+                svg = svg.replaceAll(/font-family:(.+?);/g, (_match, p1) => {
+                    const id = nanoid();
+                    const rename = `${id}${p1}`;
+                    fontRename.set(p1, rename);
+                    return `font-family:${rename};`;
+                });
+                svg = svg.replaceAll(/font-family='(.+?)'/g, (_match, p1) => {
+                    const rename = fontRename.get(p1)!;
+                    return `font-family='${rename}'`;
+                })
+                process.chdir(cwd);
+                rmSync(tmpdir, { recursive: true });
+                return {
+                    type: "rawHtml",
+                    data: { html: svg },
+                    rawData: node.rawData,
+                    macros: node.macros,
+                    children: node.children
+                }
+            }
+        }
+        return node;
+    }
+}
+
+type TexBlockMetadata = { hasTexBlock: boolean };
+
 export {
     Title, TitleMetadata,
     HighlightInlineCode, HighlightInlineCodeMetadata,
     HighlightFenceCode, HighlightFenceCodeMetadata,
     Exclude, ExcludeMetadata,
-    RawHtml, RawHtmlMetadata
+    RawHtml, RawHtmlMetadata,
+    TexBlock, TexBlockMetadata
 };

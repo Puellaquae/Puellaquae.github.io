@@ -4,12 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{metadata['title']|e}}">
     <title>{{metadata["title"]|e}}</title>
-    <link rel="stylesheet" href="../css/style.css" />
-    <link rel="stylesheet" href="../css/codecolor.css" />
-{%- if metadata["hasTex"] -%}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.19/dist/katex.css" integrity="sha384-WIA8PXZs4di2BJiKfcuR39gE8uoWaMQy4koqQrMh4kxe62f/nlGFxHIVi3TGNuUF" crossorigin="anonymous"/>
-{%- endif %}
+    <link rel="stylesheet" href="{{metadata['relativeRoot']}}/css/style.css" />
+    <link rel="stylesheet" href="{{metadata['relativeRoot']}}/css/codecolor.css" />
 </head>
 
 <body>
@@ -18,8 +16,8 @@
             Puelloc
         </section>
         <section class="navbar-right">
-            <a href="../index.html">首页</a>
-            <a href="about.html">关于</a>
+            <a href="{{metadata['relativeRoot']}}/index.html">首页</a>
+            <a href="{{metadata['relativeRoot']}}/page/about.html">关于</a>
         </section>
     </header>
     <div class="container">

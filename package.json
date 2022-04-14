@@ -4,7 +4,7 @@
   "description": "Tools for build puellaquae.github.io's web page",
   "main": "index.js",
   "scripts": {
-    "build": "tsc index.ts && node index.js",
+    "build": "tsc && node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -16,7 +16,7 @@
   "dependencies": {
     "highlight.js": "^11.4.0",
     "jsptm": "^0.0.8",
-    "katex": "^0.15.2",
+    "nanoid": "^3.3.2",
     "nunjucks": "^3.2.3"
   },
   "devDependencies": {

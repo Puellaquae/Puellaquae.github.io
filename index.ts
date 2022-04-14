@@ -1,9 +1,10 @@
-import { lstatSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { Macro, Ptm, easyMap } from "jsptm";
 import { configure } from "nunjucks";
 import { spawnSync } from "child_process";
 import { Metadata } from "./metadata";
-import { Exclude, ExcludeMetadata, HighlightFenceCode, HighlightFenceCodeMetadata, HighlightInlineCode, HighlightInlineCodeMetadata, RawHtml, RawHtmlMetadata, Title, TitleMetadata } from "./macro";
+import { Exclude, ExcludeMetadata, HighlightFenceCode, HighlightFenceCodeMetadata, HighlightInlineCode, HighlightInlineCodeMetadata, RawHtml, RawHtmlMetadata, TexBlock, TexBlockMetadata, Title, TitleMetadata } from "./macro";
+import { basename, extname, format, join, relative } from "path/posix";
 
 function getAllFiles(dir: string): { dir: string, name: string }[] {
     let res = [];
@@ -39,21 +40,24 @@ type BasicMetadata = {
     rawfilename: string,
     useIndent: boolean,
     hasCodeBlock: boolean,
-    hasTexBlock: boolean,
+    hasTex: boolean,
     modifyDate: Date,
     createDate: Date,
     type: "article" | "about" | "indexHTML" | "indexMD",
-    language: "zh" | "en"
+    language: "zh" | "en",
+    relativeRoot: string
 }
 
 class Articles {
     articles: { dir: string; name: string; }[];
     macro: { [name: string]: Macro; } = {};
     forceMacro: string[] = [];
+    inputDir: string;
     outputDir: string = "";
     rootDir: string = ".";
     newChangedFile: string[]
     constructor(dir: string) {
+        this.inputDir = dir;
         this.articles = getAllFiles(dir);
         this.newChangedFile = spawnSync("git", ["status", "-s"]).stdout.toString().split("\n");
     }
@@ -74,14 +78,22 @@ class Articles {
         let em = easyMap<Metadata>(ptm.metadata);
         em.entry("template").or("article.html");
         em.entry("tags").or([]);
-        em.entry("outdir").or(this.outputDir);
+        const outdir = join(this.outputDir, relative(this.inputDir, em.get("rawdir")));
+        em.entry("outdir").or(outdir);
+        em.entry("relativeRoot").or(relative(outdir, this.rootDir));
         em.entry("hideIndex").or("none");
-        const ofn = em.get("rawfilename")!.split(".").slice(0, -1).join(".") + "." + em.get("template")!.split(".")[1];
+        const rawfilename = em.get("rawfilename");
+        const basefilename = basename(rawfilename, extname(rawfilename));
+        const ofn = format({
+            name: basefilename,
+            ext: extname(em.get("template"))
+        });
         em.entry("outfilename").or(ofn);
         if (!em.has("useIndent") && !em.entry("hasCodeBlock").or(false).val && !em.entry("hasTexBlock").or(false).val) {
             em.entry("useIndent").val = true;
         }
-        let rawfile = em.get("rawdir")! + "/" + em.get("rawfilename")!;
+        em.entry("hasTex").val = em.entry("hasTexBlock").or(false).val
+        let rawfile = join(em.get("rawdir"), rawfilename);
         const changeLog = spawnSync("git", ["log", "--format=format:%cd", rawfile]).stdout.toString().split("\n").filter(s => s !== "");
         const newChanged = this.newChangedFile.some(s => s.includes(rawfile));
         const last = (changeLog.length > 0 && !newChanged) ? (new Date(changeLog[0])) : (new Date());
@@ -96,8 +108,9 @@ class Articles {
     done() {
         let ptms = [];
         for (const { dir, name } of this.articles) {
-            let ptm = Ptm.parse(readFileSync(dir + "/" + name, { encoding: "utf-8" }));
+            let ptm = Ptm.parse(readFileSync(join(dir, name), { encoding: "utf-8" }));
             let meta = easyMap<Metadata>(ptm.metadata);
+            console.log(`process ${dir}/${name}`);
             meta.set("rawdir", dir);
             meta.set("rawfilename", name);
             ptm.applyMacro(this.macro, this.forceMacro);
@@ -108,10 +121,13 @@ class Articles {
         for (let ptm of ptms) {
             let meta = easyMap<Metadata>(ptm.metadata);
             const file = applyTemplate(ptm, ptms)
-            const outfilepath = this.rootDir + "/" + meta.get("outdir") + "/" + meta.get("outfilename");
+            const outdir = meta.get("outdir");
+            if (!existsSync(outdir)) {
+                mkdirSync(outdir, { recursive: true });
+            }
+            const outfilepath = join(this.rootDir, outdir, meta.get("outfilename"));
             writeFileSync(outfilepath, file, { encoding: "utf-8" });
             console.log(`${meta.get("rawdir")}/${meta.get("rawfilename")} gened to ${outfilepath}`);
-            console.log(ptm.metadata);
         }
     }
 }
@@ -121,7 +137,8 @@ const macro: { [name: string]: Macro; } = {
     HighlightFenceCode,
     HighlightInlineCode,
     Exclude,
-    RawHtml
+    RawHtml,
+    TexBlock
 };
 
 type MacrosMetadatas = [
@@ -129,7 +146,8 @@ type MacrosMetadatas = [
     HighlightFenceCodeMetadata,
     HighlightInlineCodeMetadata,
     ExcludeMetadata,
-    RawHtmlMetadata
+    RawHtmlMetadata,
+    TexBlockMetadata
 ];
 
 const forceMacro: string[] = ["Title", "HighlightFenceCode"];
