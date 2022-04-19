@@ -1,26 +1,23 @@
-import { easyMap, Macro, Node } from "jsptm";
+import { easyMap, Macro, Node, NodeData, Ptm } from "jsptm";
 import { Metadata } from "./metadata";
 import highligt from "highlight.js";
 import { spawnSync } from "child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "fs";
 import path from "path/posix";
 import os from "os";
-import { customAlphabet  } from "nanoid";
+import { customAlphabet } from "nanoid";
 
 const HighlightInlineCode: Macro = {
     filter: ["inlineCode"],
-    func(node: Node, metadata: Map<string, unknown>): Node {
+    func(node: Node, metadata: Map<string, unknown>): NodeData | null {
         if (node.type === "inlineCode") {
             easyMap<Metadata>(metadata).entry("hasInlineCode").or(true);
             return {
                 type: "rawHtml",
                 data: { html: "<code>" + highligt.highlightAuto(node.data.code).value + "</code>" },
-                rawData: node.rawData,
-                macros: node.macros,
-                children: node.children,
             }
         }
-        return node;
+        return null;
     }
 }
 
@@ -28,20 +25,17 @@ type HighlightInlineCodeMetadata = { hasInlineCode: boolean };
 
 const HighlightFenceCode: Macro = {
     filter: ["fenceCode"],
-    func(node: Node, metadata: Map<string, unknown>): Node {
+    func(node: Node, metadata: Map<string, unknown>): NodeData | null {
         if (node.type === "fenceCode") {
             easyMap<Metadata>(metadata).entry("hasCodeBlock").or(true);
             let code = highligt.highlight(node.data.code, { language: node.data.codetype }).value;
             return {
                 type: "rawHtml",
                 data: { html: `<div class='codeblock'><pre><code>${code}</code></pre></div>` },
-                rawData: node.rawData,
-                macros: node.macros,
-                children: node.children,
             }
 
         }
-        return node;
+        return null;
     }
 }
 
@@ -49,7 +43,7 @@ type HighlightFenceCodeMetadata = { hasCodeBlock: boolean };
 
 const Title: Macro = {
     filter: ["title"],
-    func(node: Node, metadata: Map<string, unknown>): Node {
+    func(node: Node, metadata: Map<string, unknown>): NodeData | null {
         let m = easyMap<Metadata>(metadata);
         let titleCount = m.entry("titleCount").or(0);
         if (node.type === "title" && node.data.level === 1) {
@@ -63,13 +57,10 @@ const Title: Macro = {
             m.entry("title").or(node.rawData.substring(2));
             return {
                 type: "void",
-                data: null,
-                rawData: node.rawData,
-                macros: node.macros,
-                children: node.children
+                data: null
             }
         }
-        return node;
+        return null;
     }
 }
 
@@ -77,13 +68,10 @@ type TitleMetadata = { title: string, titleCount: number };
 
 const Exclude: Macro = {
     filter: [],
-    func(node: Node): Node {
+    func(node: Node): NodeData {
         return {
             type: "void",
-            data: null,
-            rawData: node.rawData,
-            macros: node.macros,
-            children: node.children
+            data: null
         }
     }
 };
@@ -92,18 +80,15 @@ type ExcludeMetadata = {};
 
 const RawHtml: Macro = {
     filter: ["fenceCode"],
-    func(node: Node, metadata: Map<string, unknown>): Node {
+    func(node: Node, metadata: Map<string, unknown>): NodeData | null {
         if (node.type === "fenceCode" && node.data.codetype === "html") {
             easyMap<Metadata>(metadata).entry("hasRawHTML").val = true;
             return {
                 type: "rawHtml",
-                data: { html: node.data.code },
-                rawData: node.rawData,
-                macros: node.macros,
-                children: node.children
+                data: { html: node.data.code }
             }
         }
-        return node;
+        return null;
     }
 }
 
@@ -111,9 +96,10 @@ type RawHtmlMetadata = { hasRawHTML: boolean };
 
 const TexBlock: Macro = {
     filter: ["fenceCode"],
-    func(node: Node, metadata: Map<string, unknown>): Node {
+    func(node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
         if (node.type === "fenceCode") {
             if (node.data.codetype === "tex") {
+                const args = arg.split(",").map(a => a.trim());
                 easyMap<Metadata>(metadata).entry("hasTexBlock").or(true);
                 const tex = '\\documentclass{standalone}\n\\usepackage[UTF8]{ctex}\n\\usepackage{amsmath}\n\\begin{document}\n$\\displaystyle\n'
                     + node.data.code +
@@ -130,7 +116,7 @@ const TexBlock: Macro = {
                     rmSync(tmpdir, { recursive: true });
                     throw xelatexOutput;
                 }
-                const dvisvgmOutput = spawnSync("dvisvgm", ["-f", "woff2", "--exact-bbox", "--zoom=-1", "--no-styles", dvifile]);
+                const dvisvgmOutput = spawnSync("dvisvgm", ["-f", "woff2", "--exact-bbox", "--zoom=-1", "--no-style", dvifile]);
                 const svgfile = path.join(tmpdir, "doc.svg");
                 if (!existsSync(svgfile)) {
                     process.chdir(cwd);
@@ -152,16 +138,23 @@ const TexBlock: Macro = {
                 })
                 process.chdir(cwd);
                 rmSync(tmpdir, { recursive: true });
-                return {
+                const texnode: NodeData = {
                     type: "rawHtml",
                     data: { html: svg },
-                    rawData: node.rawData,
-                    macros: node.macros,
-                    children: node.children
+                }
+                if (args.includes("copycode")) {
+                    return {
+                        type: "forknodes",
+                        data: {
+                            nodes: [node, texnode]
+                        }
+                    };
+                } else {
+                    return texnode;
                 }
             }
         }
-        return node;
+        return null;
     }
 }
 

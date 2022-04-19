@@ -64,6 +64,7 @@ html::-webkit-scrollbar {
 }
 
 ::selection {
+    fill: var(--selectedFontColor);
     color: var(--selectedFontColor);
     background: var(--selectedBgColor);
 }
