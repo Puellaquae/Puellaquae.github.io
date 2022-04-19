@@ -124,18 +124,20 @@ const TexBlock: Macro = {
                     throw dvisvgmOutput;
                 }
                 let svg = readFileSync(svgfile, { encoding: "utf-8" });
-                const fontRename = new Map<string, string>();
-                const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 8);
-                svg = svg.replaceAll(/font-family:(.+?);/g, (_match, p1) => {
-                    const id = nanoid();
-                    const rename = `${id}${p1}`;
-                    fontRename.set(p1, rename);
-                    return `font-family:${rename};`;
-                });
-                svg = svg.replaceAll(/font-family='(.+?)'/g, (_match, p1) => {
-                    const rename = fontRename.get(p1)!;
-                    return `font-family='${rename}'`;
-                })
+                if (args.includes("randomFontName")) {
+                    const fontRename = new Map<string, string>();
+                    const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 8);
+                    svg = svg.replaceAll(/font-family:(.+?);/g, (_match, p1) => {
+                        const id = nanoid();
+                        const rename = `${id}${p1}`;
+                        fontRename.set(p1, rename);
+                        return `font-family:${rename};`;
+                    });
+                    svg = svg.replaceAll(/font-family='(.+?)'/g, (_match, p1) => {
+                        const rename = fontRename.get(p1)!;
+                        return `font-family='${rename}'`;
+                    })
+                }
                 process.chdir(cwd);
                 rmSync(tmpdir, { recursive: true });
                 const texnode: NodeData = {
