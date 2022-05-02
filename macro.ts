@@ -116,7 +116,12 @@ const TexBlock: Macro = {
                     rmSync(tmpdir, { recursive: true });
                     throw xelatexOutput;
                 }
-                const dvisvgmOutput = spawnSync("dvisvgm", ["-f", "woff2", "--exact-bbox", "--zoom=-1", "--no-style", dvifile]);
+                const fixedSize = !args.includes("noFixedSize")
+                let dvisvgmExtarArgs: string[] = [];
+                if (!fixedSize) {
+                    dvisvgmExtarArgs = ["--exact-bbox", "--zoom=-1"];
+                }
+                const dvisvgmOutput = spawnSync("dvisvgm", ["-f", "woff2", ...dvisvgmExtarArgs, "--no-style", dvifile]);
                 const svgfile = path.join(tmpdir, "doc.svg");
                 if (!existsSync(svgfile)) {
                     process.chdir(cwd);
@@ -124,6 +129,11 @@ const TexBlock: Macro = {
                     throw dvisvgmOutput;
                 }
                 let svg = readFileSync(svgfile, { encoding: "utf-8" });
+                if (fixedSize) {
+                    svg = svg.replace(/width='(.*?)pt' height='(.*?)pt'/, (_match, _p1, p2) => {
+                        return `height='calc(2em * (${p2} / 10.49993))'`;
+                    })
+                }
                 if (args.includes("randomFontName")) {
                     const fontRename = new Map<string, string>();
                     const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 8);
@@ -142,7 +152,7 @@ const TexBlock: Macro = {
                 rmSync(tmpdir, { recursive: true });
                 const texnode: NodeData = {
                     type: "rawHtml",
-                    data: { html: svg },
+                    data: { html: `<div class="latex-block">${svg}</div>` },
                 }
                 if (args.includes("copycode")) {
                     return {

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="安卓开发记录">
+    <title>安卓开发记录</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/codecolor.css" />
+</head>
+
+<body>
+    <header class="header">
+        <section sub="" class="navbar-left title">
+            Puelloc
+        </section>
+        <section class="navbar-right">
+            <a href="../index.html">首页</a>
+            <a href="../page/about.html">关于</a>
+        </section>
+    </header>
+    <div class="container">
+        <div class="archive indent">
+            <h1>安卓开发记录</h1>
+            <div class="modified date">
+                2022年5月2日
+            </div>
+            <div class="create date">
+                2022年5月2日
+            </div>
+            
+            <div class="entry">
+                <h2>Edge To Edge 关于 System Bar 和输入法遮挡的处理</h2><p>对于 System Bar 的处理 Google 关于 Edge To Edge 的介绍中就已经提及，需要通过 <code>OnApplyWindowInsetsListener</code> 来处理。但是关于输入法遮挡的解决方案，网上大部分还是较早的 <code>android:windowSoftInputMode="adjustResize"</code> 方法。但是可能是因为 Google 已经将其弃用了（只在 <code>WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE</code> 那里写着），导致无法与 <code>CoordinatorLayout</code> 正常配合使用。Google 给出的替代方案也是使用 <code>OnApplyWindowInsetsListener</code> 来处理。但是有几点，我遇到的，需要注意的地方。标注有 <code>android:fitsSystemWindows="true"</code> 的视图也需要处理 <code>Inset</code>，所以如果不能直接在 <code>Activity</code> 那里就 <code>CONSUMED</code> 掉，否则有些子视图的显示就会出现异常。另外就是 <code>FloatingActionButton</code>，如果父层视图没有把 System Bar 的高度空出来，按键就会显示在 System Bar 的后面了。所以在这种情况下需要对按钮额外处理。另外如果视图原来自身就有间距值，需要把它也计算上。另外在输入框弹出的时候就不需要再空出 System Bar 的空间了。</p><p></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+        <p rel="contact">
+            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="https://github.com/Puellaquae">Github</a>
+        </p>
+    </div>
+</body>
+
+</html>

@@ -348,3 +348,8 @@ label[for="timeLine"]::before {
 .footer a:first-child {
     margin-left: 0px;
 }
+
+.latex-block {
+    display: flex;
+    justify-content: center;
+}
