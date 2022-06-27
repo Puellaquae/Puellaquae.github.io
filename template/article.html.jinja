@@ -16,8 +16,11 @@
             Puelloc
         </section>
         <section class="navbar-right">
-            <a href="{{metadata['relativeRoot']}}/index.html">首页</a>
-            <a href="{{metadata['relativeRoot']}}/page/about.html">关于</a>
+            {% for article in articles %}
+            {%- if article["specialPosition"].includes("navbar-article") -%}
+            <a href="{{metadata['relativeRoot']}}/{{article['outdir']}}/{{article['outfilename']}}">{{article["title"]|e}}</a>
+            {% endif %}
+            {%- endfor -%}
         </section>
     </header>
     <div class="container">

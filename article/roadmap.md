@@ -3,4 +3,4 @@ hideIndex = "both"
 specialPosition = ["navbar-article", "navbar-index"]
 --->
 
-# 关于
+# 规划

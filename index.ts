@@ -45,7 +45,8 @@ type BasicMetadata = {
     createDate: Date,
     type: "article" | "about" | "indexHTML" | "indexMD",
     language: "zh" | "en",
-    relativeRoot: string
+    relativeRoot: string,
+    specialPosition: ("navbar-article" | "navbar-index")[]
 }
 
 class Articles {
@@ -82,6 +83,7 @@ class Articles {
         em.entry("outdir").or(outdir);
         em.entry("relativeRoot").or(relative(outdir, this.rootDir));
         em.entry("hideIndex").or("none");
+        em.entry("specialPosition").or([]);
         const rawfilename = em.get("rawfilename")!;
         const basefilename = basename(rawfilename, extname(rawfilename));
         const ofn = format({
