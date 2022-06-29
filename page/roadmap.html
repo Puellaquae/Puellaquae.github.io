@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="规划">
-    <title>规划</title>
+    <meta name="description" content="TODO">
+    <title>TODO</title>
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/codecolor.css" />
 </head>
@@ -16,23 +16,23 @@
             Puelloc
         </section>
         <section class="navbar-right">
-            <a href="../page/roadmap.html">规划</a>
+            <a href="../page/roadmap.html">TODO</a>
             <a href=".././index.html">首页</a>
             <a href="../page/about.html">关于</a>
             </section>
     </header>
     <div class="container">
         <div class="archive indent">
-            <h1>规划</h1>
+            <h1>TODO</h1>
             <div class="modified date">
-                2022年6月27日
+                2022年6月29日
             </div>
             <div class="create date">
                 2022年6月27日
             </div>
             
             <div class="entry">
-                <p></p>
+                <h2>使用 LSP 实现泛用的代码语义着色</h2><p>见 <a href="https://github.com/Puellaquae/colorfulize">Puellaquae/colorfulize</a> 项目。</p><p>目前大部分的代码高亮工具都是语法高亮，而支持语义高亮的基本都是代码编辑器或 IDE。所以我希望尝试开发一个基于 LSP 的语义高亮工具，为我的这个网站服务。同时我也希望加入提示功能，像代码编辑器或 IDE 一样，移上去可以显示类型等信息。</p><h2>增量生成功能</h2><p>因为我使用了 pdfLaTex 配合 dvisvgm 来渲染公式，导致一旦文章涉及到公式，就会出现一下两个问题：1、pdfLaTex 编译时间太长，导致一篇文章的编译的耗时达到了分钟级别；2、生成的 svg 图不稳定，每一次渲染出来的字体数据的顺序都是不一致的。所以需要增量编译来解决这两个问题。这就需要实现判断是否需要重新生成的功能了。</p><p></p>
             </div>
         </div>
     </div>

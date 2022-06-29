@@ -46,7 +46,7 @@ type BasicMetadata = {
     type: "article" | "about" | "indexHTML" | "indexMD",
     language: "zh" | "en",
     relativeRoot: string,
-    specialPosition: ("navbar-article" | "navbar-index")[]
+    specialPosition: ("navbar-article" | "navbar-index" | "readme")[]
 }
 
 class Articles {

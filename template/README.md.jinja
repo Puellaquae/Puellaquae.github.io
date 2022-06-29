@@ -1,6 +1,9 @@
 # Puelloc Blog
 
-[__网页版本__](https://puellaquae.github.io/)
+[__网页版本__](https://puellaquae.github.io/) 
+{%- for md in articles -%}
+{%- if md["specialPosition"].includes("readme") %} | [{{md["title"]}}]({{md["rawdir"]}}/{{md["rawfilename"]}}){% endif -%}
+{%- endfor %}
 
 {% for md in articles %}
 {%- if md["hideIndex"] != "md" and md["hideIndex"] != "both" -%}
