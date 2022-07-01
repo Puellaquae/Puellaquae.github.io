@@ -3,3 +3,4 @@ writing/
 node_modules/
 __pycache__/
 *.js
+cache/

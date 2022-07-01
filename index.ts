@@ -1,10 +1,10 @@
 import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
-import { Macro, Ptm, easyMap, MacroCall } from "jsptm";
+import { Macro, Ptm, easyMap, MacroCall, CacheData, jsonToCacheData, cacheDataToJson } from "jsptm";
 import { configure } from "nunjucks";
 import { spawnSync } from "child_process";
 import { Metadata } from "./metadata";
 import { Exclude, ExcludeMetadata, HighlightFenceCode, HighlightFenceCodeMetadata, HighlightInlineCode, HighlightInlineCodeMetadata, RawHtml, RawHtmlMetadata, TexBlock, TexBlockMetadata, Title, TitleMetadata } from "./macro";
-import { basename, extname, format, join, relative } from "path/posix";
+import { basename, extname, dirname, format, join, relative } from "path/posix";
 
 function getAllFiles(dir: string): { dir: string, name: string }[] {
     let res = [];
@@ -28,6 +28,27 @@ function applyTemplate(ptm: Ptm, ptms: Ptm[]) {
             content: ptm.render("html"),
             articles: ptms.map(p => Object.fromEntries(p.metadata))
         });
+}
+
+function loadCache(filepath: string): CacheData {
+    const cacheFile = join("cache", filepath) + ".json";
+    if (existsSync(cacheFile)) {
+        return jsonToCacheData(readFileSync(cacheFile).toString());
+    } else {
+        return {
+            lastMacroApply: new Map(),
+            lastMacroHash: new Map()
+        }
+    }
+}
+
+function saveCache(filepath: string, cache: CacheData) {
+    const cacheFile = join("cache", filepath) + ".json";
+    const cacheDir = dirname(cacheFile);
+    if (!existsSync(cacheDir)) {
+        mkdirSync(cacheDir, { recursive: true });
+    }
+    writeFileSync(cacheFile, cacheDataToJson(cache));
 }
 
 type BasicMetadata = {
@@ -116,7 +137,9 @@ class Articles {
             const t0 = performance.now();
             meta.set("rawdir", dir);
             meta.set("rawfilename", name);
-            ptm.applyMacro(this.macro, this.forceMacro);
+            const cacheData = loadCache(join(dir, name));
+            const newCache = ptm.applyMacroWithCache(this.macro, this.forceMacro, cacheData);
+            saveCache(join(dir, name), newCache);
             const t1 = performance.now();
             process.stdout.write(`${(t1 - t0).toFixed(3)}ms\n`);
             ptms.push(ptm);

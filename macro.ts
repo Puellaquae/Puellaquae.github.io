@@ -68,7 +68,7 @@ type TitleMetadata = { title: string, titleCount: number };
 
 const Exclude: Macro = {
     filter: [],
-    func(node: Node): NodeData {
+    func(): NodeData {
         return {
             type: "void",
             data: null
