@@ -13,7 +13,7 @@
     --lettleList: "小列表";
     --bigList: "大列表";
     --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans", "思源黑体", "Noto Sans CJK SC", "Noto Sans", monospace;
-    --font: "Source Han Serif", "思源宋体", "Noto Serif CJK SC", "Noto Serif", serif;
+    --font: "Georgia Pro", "Source Han Serif", "思源宋体", "Noto Serif CJK SC", "Noto Serif", serif;
 }
 
 @media(min-width: 1220px) {
@@ -33,7 +33,7 @@
 @media(max-width: 832px) {
     :root {
         --ContainWidth: 94%;
-        --font: "Source Han Sans", "思源黑体", "Noto Sans CJK SC", sans-serif;
+        --font: "Verdana Pro", "Source Han Sans", "思源黑体", "Noto Sans CJK SC", sans-serif;
     }
 }
 

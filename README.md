@@ -2,6 +2,7 @@
 
 [__网页版本__](https://puellaquae.github.io/) | [TODO](article/roadmap.md) | [关于](article/about.md)
 
+- [C++ 的 const 限定](article/cpp-const.md)
 - [安卓开发记录](article/android-dev.md)
 - [博客系统的演化](article/new-blog.zh.md)
 - [New Generation of Blog](article/new-blog.en.md)
