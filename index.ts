@@ -141,10 +141,11 @@ class Articles {
             const newCache = ptm.applyMacroWithCache(this.macro, this.forceMacro, cacheData);
             saveCache(join(dir, name), newCache);
             const t1 = performance.now();
+            this.prepareMetadata(ptm);
             process.stdout.write(`${(t1 - t0).toFixed(3)}ms\n`);
             ptms.push(ptm);
         }
-        ptms.forEach(this.prepareMetadata, this);
+        // ptms.forEach(this.prepareMetadata, this);
         ptms.sort((a, b) => (a.metadata.get("createDate")! as Date) < (b.metadata.get("createDate")! as Date) ? 1 : -1);
         for (let ptm of ptms) {
             let meta = easyMap<Metadata>(ptm.metadata);

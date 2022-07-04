@@ -1,6 +1,6 @@
 <!---
 hideIndex = "both"
-specialPosition = ["navbar-article", "navbar-index", "readme"]
+specialPosition = ["navbar-index", "readme"]
 --->
 
 # TODO
