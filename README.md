@@ -2,6 +2,7 @@
 
 [__网页版本__](https://puellaquae.github.io/) | [TODO](article/roadmap.md) | [关于](article/about.md)
 
+- [西数 WD40PURX 体验](article/wd40purx.md)
 - [HTTP 缓存策略](article/interview/http-cache.md)
 - [C++ 的 const 限定](article/cpp-const.md)
 - [安卓开发记录](article/android-dev.md)
