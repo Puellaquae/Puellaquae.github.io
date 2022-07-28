@@ -43,3 +43,7 @@ D(x) = \begin{cases}
 \int_a^{3b}x_{ij}+e^2 \mathrm{d}x,& x>3 \\
 \end{cases}
 ```
+
+## 行内公式
+
+`` `$ z=/sqrt(x^2+y^2) $` `` `$ z=/sqrt(x^2+y^2) $` 首尾有且仅有一个 $ 的会被视为行内公式。

@@ -7,7 +7,7 @@ tags = ["C++"]
 
 大一 C++ 的课设内容不外乎文件读写与经典的增删改查，而利用 C++ 的标准库可以较为便利而优雅的实现。
 
-先前在 cppreference 中看到了 `copy` 函数和输入迭代器的巧妙利用。
+先前在 [cppreference](https://zh.cppreference.com/w/cpp/algorithm/copy) 中看到了 `copy` 函数和输入迭代器的巧妙利用。
 
 ```c++
 copy(vector.begin(), vector.end(), ostream_iterator<int>(cout, " "));
