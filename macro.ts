@@ -94,6 +94,56 @@ const RawHtml: Macro = {
 
 type RawHtmlMetadata = { hasRawHTML: boolean };
 
+function RenderTexCodeToSvg(tex: string, args: string[]): string {
+    const tmpdir = mkdtempSync(path.join(os.tmpdir(), "tex-"));
+    const texfile = path.join(tmpdir, "doc.tex");
+    writeFileSync(texfile, tex, { encoding: "utf-8" });
+    const cwd = process.cwd();
+    process.chdir(tmpdir);
+    const xelatexOutput = spawnSync("latex", ["--halt-on-error", texfile]).stdout.toString("utf-8");
+    const dvifile = path.join(tmpdir, "doc.dvi");
+    if (!existsSync(dvifile)) {
+        process.chdir(cwd);
+        rmSync(tmpdir, { recursive: true });
+        throw xelatexOutput;
+    }
+    const fixedSize = !args.includes("noFixedSize")
+    let dvisvgmExtarArgs: string[] = [];
+    if (!fixedSize) {
+        dvisvgmExtarArgs = ["--exact-bbox", "--zoom=-1"];
+    }
+    const dvisvgmOutput = spawnSync("dvisvgm", ["-f", "woff2", ...dvisvgmExtarArgs, "--no-style", dvifile]);
+    const svgfile = path.join(tmpdir, "doc.svg");
+    if (!existsSync(svgfile)) {
+        process.chdir(cwd);
+        rmSync(tmpdir, { recursive: true });
+        throw dvisvgmOutput;
+    }
+    let svg = readFileSync(svgfile, { encoding: "utf-8" });
+    if (fixedSize) {
+        svg = svg.replace(/width='(.*?)pt' height='(.*?)pt'/, (_match, _p1, p2) => {
+            return `height='calc(2em * (${p2} / 10.49993))'`;
+        })
+    }
+    if (args.includes("randomFontName")) {
+        const fontRename = new Map<string, string>();
+        const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 8);
+        svg = svg.replaceAll(/font-family:(.+?);/g, (_match, p1) => {
+            const id = nanoid();
+            const rename = `${id}${p1}`;
+            fontRename.set(p1, rename);
+            return `font-family:${rename};`;
+        });
+        svg = svg.replaceAll(/font-family='(.+?)'/g, (_match, p1) => {
+            const rename = fontRename.get(p1)!;
+            return `font-family='${rename}'`;
+        })
+    }
+    process.chdir(cwd);
+    rmSync(tmpdir, { recursive: true });
+    return svg;
+}
+
 const TexBlock: Macro = {
     filter: ["fenceCode"],
     func(node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
@@ -104,52 +154,7 @@ const TexBlock: Macro = {
                 const tex = '\\documentclass{standalone}\n\\usepackage[UTF8]{ctex}\n\\usepackage{amsmath}\n\\begin{document}\n$\\displaystyle\n'
                     + node.data.code +
                     '\n$\n\\end{document}';
-                const tmpdir = mkdtempSync(path.join(os.tmpdir(), "tex-"));
-                const texfile = path.join(tmpdir, "doc.tex");
-                writeFileSync(texfile, tex, { encoding: "utf-8" });
-                const cwd = process.cwd();
-                process.chdir(tmpdir);
-                const xelatexOutput = spawnSync("latex", ["--halt-on-error", texfile]).stdout.toString("utf-8");
-                const dvifile = path.join(tmpdir, "doc.dvi");
-                if (!existsSync(dvifile)) {
-                    process.chdir(cwd);
-                    rmSync(tmpdir, { recursive: true });
-                    throw xelatexOutput;
-                }
-                const fixedSize = !args.includes("noFixedSize")
-                let dvisvgmExtarArgs: string[] = [];
-                if (!fixedSize) {
-                    dvisvgmExtarArgs = ["--exact-bbox", "--zoom=-1"];
-                }
-                const dvisvgmOutput = spawnSync("dvisvgm", ["-f", "woff2", ...dvisvgmExtarArgs, "--no-style", dvifile]);
-                const svgfile = path.join(tmpdir, "doc.svg");
-                if (!existsSync(svgfile)) {
-                    process.chdir(cwd);
-                    rmSync(tmpdir, { recursive: true });
-                    throw dvisvgmOutput;
-                }
-                let svg = readFileSync(svgfile, { encoding: "utf-8" });
-                if (fixedSize) {
-                    svg = svg.replace(/width='(.*?)pt' height='(.*?)pt'/, (_match, _p1, p2) => {
-                        return `height='calc(2em * (${p2} / 10.49993))'`;
-                    })
-                }
-                if (args.includes("randomFontName")) {
-                    const fontRename = new Map<string, string>();
-                    const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 8);
-                    svg = svg.replaceAll(/font-family:(.+?);/g, (_match, p1) => {
-                        const id = nanoid();
-                        const rename = `${id}${p1}`;
-                        fontRename.set(p1, rename);
-                        return `font-family:${rename};`;
-                    });
-                    svg = svg.replaceAll(/font-family='(.+?)'/g, (_match, p1) => {
-                        const rename = fontRename.get(p1)!;
-                        return `font-family='${rename}'`;
-                    })
-                }
-                process.chdir(cwd);
-                rmSync(tmpdir, { recursive: true });
+                const svg = RenderTexCodeToSvg(tex, args);
                 const texnode: NodeData = {
                     type: "rawHtml",
                     data: { html: `<div class="latex-block">${svg}</div>` },
@@ -172,11 +177,79 @@ const TexBlock: Macro = {
 
 type TexBlockMetadata = { hasTexBlock: boolean };
 
+const GFMTexBlock: Macro = {
+    filter: ["para"],
+    func(node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
+        if (node.type === "para") {
+            if (node.rawData.startsWith("$$\n") && node.rawData.endsWith("\n$$")) {
+                const args = arg.split(",").map(a => a.trim());
+                easyMap<Metadata>(metadata).entry("hasTexBlock").or(true);
+                const tex = '\\documentclass{standalone}\n\\usepackage[UTF8]{ctex}\n\\usepackage{amsmath}\n\\begin{document}\n$\\displaystyle\n'
+                    + node.rawData.slice(3, node.rawData.length - 3) +
+                    '\n$\n\\end{document}';
+                const svg = RenderTexCodeToSvg(tex, args);
+                const texnode: NodeData = {
+                    type: "rawHtml",
+                    data: { html: `<div class="latex-block">${svg}</div>` },
+                }
+                if (args.includes("copycode")) {
+                    return {
+                        type: "forknodes",
+                        data: {
+                            nodes: [node, texnode]
+                        }
+                    };
+                } else {
+                    return texnode;
+                }
+            }
+        }
+        return null;
+    }
+}
+
+type GFMTexBlockMetadata = { hasTexBlock: boolean };
+
+const TexInline: Macro = {
+    filter: ["inlineCode"],
+    func(node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
+        if (node.type === "inlineCode") {
+            if (node.data.code.startsWith("$ ") && node.data.code.endsWith(" $")) {
+                const args = arg.split(",").map(a => a.trim());
+                easyMap<Metadata>(metadata).entry("hasTexBlock").or(true);
+                const tex = '\\documentclass{standalone}\n\\usepackage[UTF8]{ctex}\n\\usepackage{amsmath}\n\\begin{document}\n$\n'
+                    + node.data.code.slice(2, node.data.code.length - 2) +
+                    '\n$\n\\end{document}';
+                const svg = RenderTexCodeToSvg(tex, args);
+                const texnode: NodeData = {
+                    type: "rawHtml",
+                    data: { html: `<span class="latex-inline">${svg}</span>` },
+                }
+                if (args.includes("copycode")) {
+                    return {
+                        type: "forknodes",
+                        data: {
+                            nodes: [node, texnode]
+                        }
+                    };
+                } else {
+                    return texnode;
+                }
+            }
+        }
+        return null;
+    }
+}
+
+type TexInlineMetadata = { hasTexInline: boolean };
+
 export {
     Title, TitleMetadata,
     HighlightInlineCode, HighlightInlineCodeMetadata,
     HighlightFenceCode, HighlightFenceCodeMetadata,
     Exclude, ExcludeMetadata,
     RawHtml, RawHtmlMetadata,
-    TexBlock, TexBlockMetadata
+    TexBlock, TexBlockMetadata,
+    GFMTexBlock, GFMTexBlockMetadata,
+    TexInline, TexInlineMetadata
 };

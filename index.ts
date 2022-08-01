@@ -3,7 +3,24 @@ import { Macro, Ptm, easyMap, MacroCall, CacheData, jsonToCacheData, cacheDataTo
 import { configure } from "nunjucks";
 import { spawnSync } from "child_process";
 import { Metadata } from "./metadata";
-import { Exclude, ExcludeMetadata, HighlightFenceCode, HighlightFenceCodeMetadata, HighlightInlineCode, HighlightInlineCodeMetadata, RawHtml, RawHtmlMetadata, TexBlock, TexBlockMetadata, Title, TitleMetadata } from "./macro";
+import { 
+    Exclude, 
+    ExcludeMetadata, 
+    HighlightFenceCode, 
+    HighlightFenceCodeMetadata, 
+    HighlightInlineCode, 
+    HighlightInlineCodeMetadata, 
+    RawHtml, 
+    RawHtmlMetadata, 
+    TexBlock, 
+    TexBlockMetadata, 
+    Title, 
+    TitleMetadata,
+    GFMTexBlock,
+    GFMTexBlockMetadata,
+    TexInline,
+    TexInlineMetadata
+} from "./macro";
 import { basename, extname, dirname, format, join, relative } from "path/posix";
 
 function getAllFiles(dir: string): { dir: string, name: string }[] {
@@ -167,7 +184,9 @@ const macro = {
     HighlightInlineCode,
     Exclude,
     RawHtml,
-    TexBlock
+    TexBlock,
+    GFMTexBlock,
+    TexInline
 };
 
 type MacroName = keyof typeof macro;
@@ -178,7 +197,9 @@ type MacrosMetadatas = [
     HighlightInlineCodeMetadata,
     ExcludeMetadata,
     RawHtmlMetadata,
-    TexBlockMetadata
+    TexBlockMetadata,
+    GFMTexBlockMetadata,
+    TexInlineMetadata
 ];
 
 const forceMacro: { name: MacroName, arg?: string }[] = [{ name: "Title" }, { name: "HighlightFenceCode" }];

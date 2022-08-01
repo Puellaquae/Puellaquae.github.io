@@ -353,3 +353,9 @@ label[for="timeLine"]::before {
     display: flex;
     justify-content: center;
 }
+
+.latex-inline {
+    font-size: 0.5em;
+    position: relative;
+    top: 0.5em;
+}
