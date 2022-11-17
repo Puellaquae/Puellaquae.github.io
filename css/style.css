@@ -83,7 +83,19 @@ a {
     color: inherit;
 }
 
-.header section[sub]::after {
+.header section.title {
+    display: inline-flex;
+}
+
+.header section[sub].title::before {
+    content: 'p.';
+}
+
+.header section[sub=""].title::before {
+    content: 'Puelloc';
+}
+
+.header section::after {
     content: attr(sub);
 }
 

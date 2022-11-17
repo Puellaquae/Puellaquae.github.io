@@ -3,18 +3,18 @@ import { Macro, Ptm, easyMap, MacroCall, CacheData, jsonToCacheData, cacheDataTo
 import { configure } from "nunjucks";
 import { spawnSync } from "child_process";
 import { Metadata } from "./metadata";
-import { 
-    Exclude, 
-    ExcludeMetadata, 
-    HighlightFenceCode, 
-    HighlightFenceCodeMetadata, 
-    HighlightInlineCode, 
-    HighlightInlineCodeMetadata, 
-    RawHtml, 
-    RawHtmlMetadata, 
-    TexBlock, 
-    TexBlockMetadata, 
-    Title, 
+import {
+    Exclude,
+    ExcludeMetadata,
+    HighlightFenceCode,
+    HighlightFenceCodeMetadata,
+    HighlightInlineCode,
+    HighlightInlineCodeMetadata,
+    RawHtml,
+    RawHtmlMetadata,
+    TexBlock,
+    TexBlockMetadata,
+    Title,
     TitleMetadata,
     GFMTexBlock,
     GFMTexBlockMetadata,
@@ -82,6 +82,7 @@ type BasicMetadata = {
     modifyDate: Date,
     createDate: Date,
     type: "article" | "about" | "indexHTML" | "indexMD",
+    subtype: string,
     language: "zh" | "en",
     relativeRoot: string,
     specialPosition: ("navbar-article" | "navbar-index" | "readme")[]
@@ -120,6 +121,7 @@ class Articles {
         const outdir = join(this.outputDir, relative(this.inputDir, em.get("rawdir")!));
         em.entry("outdir").or(outdir);
         em.entry("relativeRoot").or(relative(outdir, this.rootDir));
+
         em.entry("hideIndex").or("none");
         em.entry("specialPosition").or([]);
         const rawfilename = em.get("rawfilename")!;
@@ -131,6 +133,12 @@ class Articles {
         em.entry("outfilename").or(ofn);
         if (!em.has("useIndent") && !em.entry("hasCodeBlock").or(false).val && !em.entry("hasTexBlock").or(false).val) {
             em.entry("useIndent").val = true;
+        }
+        const rawdir = em.get("rawdir")!;
+        if (dirname(rawdir) !== ".") {
+            let sub = basename(rawdir);
+            sub = sub[0].toUpperCase() + sub.substring(1).toLowerCase();
+            em.entry("subtype").or(sub);
         }
         em.entry("hasTex").val = em.entry("hasTexBlock").or(false).val
         let rawfile = join(em.get("rawdir")!, rawfilename);

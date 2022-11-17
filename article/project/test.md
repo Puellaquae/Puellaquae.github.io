@@ -74,4 +74,4 @@ D(x) = \begin{cases}
 
 TexInline 依赖于行内代码，`` `$ z = \sqrt{x^2+y^2} $` `` `$ z = \sqrt{x^2+y^2} $` 首末字符为 `$` 的会被视为行内公式，`$` 和公式之间需要有一个空格。
 
-GFMTexInline 会把被 `$` 紧密包裹的文本识别为行内公式，` $z = \sqrt{x^2+y^2}$ `。
+GFMTexInline 会把被 `$` 紧密包裹的文本识别为行内公式，` $z = \sqrt{x^2+y^2}$ `$z = \sqrt{x^2+y^2}$。
