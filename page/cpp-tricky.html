@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="C++ 小知识">
+    <title>C++ 小知识</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/codecolor.css" />
+</head>
+
+<body>
+    <header class="header">
+        <section sub="" class="navbar-left title">
+        </section>
+        <section class="navbar-right">
+            <a href=".././index.html">首页</a>
+            <a href="../page/about.html">关于</a>
+            </section>
+    </header>
+    <div class="container">
+        <div class="archive">
+            <h1>C++ 小知识</h1>
+            <div class="modified date">
+                2022年12月5日
+            </div>
+            <div class="create date">
+                2022年12月5日
+            </div>
+            
+            <span class="meta">C++</span>
+            
+            <div class="entry">
+                <h2>访问私有成员</h2><p>在一个博客看到了 <a href="http://bloglitb.blogspot.com/2010/07/access-to-private-members-thats-easy.html">C++ 获取私有成员的一个方法</a>，感觉非常神奇，就花了两三个晚上分析了其背后的原理。</p><div class='codeblock'><pre><code><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">A</span> {
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">print_b</span><span class="hljs-params">()</span> </span>{ std::cout &lt;&lt; b &lt;&lt; std::endl; }
+
+    <span class="hljs-type">int</span> a{};
+<span class="hljs-keyword">private</span>:
+    <span class="hljs-type">int</span> b{};
+};
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> Tag, <span class="hljs-keyword">typename</span> Tag::type M&gt;
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Rob</span> {
+    <span class="hljs-function"><span class="hljs-keyword">friend</span> <span class="hljs-keyword">typename</span> Tag::type <span class="hljs-title">get</span><span class="hljs-params">(Tag)</span> </span>{ <span class="hljs-keyword">return</span> M; }
+};
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">A_b</span> {
+    <span class="hljs-keyword">using</span> type = <span class="hljs-type">int</span> A::*;
+    <span class="hljs-function"><span class="hljs-keyword">friend</span> type <span class="hljs-title">get</span><span class="hljs-params">(A_b)</span></span>;
+};
+
+<span class="hljs-keyword">template</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">Rob</span>&lt;A_b, &amp;A::b&gt;;
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    A a{};
+    a.*<span class="hljs-built_in">get</span>(A_b{}) = <span class="hljs-number">12</span>; <span class="hljs-comment">// access private member &#x27;b&#x27;</span>
+    a.<span class="hljs-built_in">print_b</span>(); <span class="hljs-comment">// print 12</span>
+}</code></pre></div><h3>成员指针访问运算符</h3><p>最初看到 <code>a.*get(A_b{})</code> 这一语句感到非常奇妙，仿佛我们向类型 <code>A</code> 扩展了方法 <code>get</code> 一样。但其实 <code>.*</code> 是一个二元运算符，<a href="https://zh.cppreference.com/w/cpp/language/operator_member_access#.E5.86.85.E5.BB.BA.E7.9A.84.E6.88.90.E5.91.98.E6.8C.87.E9.92.88.E8.AE.BF.E9.97.AE.E8.BF.90.E7.AE.97.E7.AC.A6">成员指针访问运算符</a>。另外我最初被 <code>get</code> 函数迷惑了，以为它是在类型的域内的，但它是友元函数，它是全局上的一个函数。</p><p>了解成员指针访问运算符后我们可以这样获取成员变量：</p><div class='codeblock'><pre><code><span class="hljs-type">int</span> A:: *ptr_a = &amp;A::a;
+A a{};
+a.*ptr_a = <span class="hljs-number">13</span>;</code></pre></div><p>当然直接用这种方式是获取不了私有变量的，它是通不过编译检查的：</p><div class='codeblock'><pre><code><span class="hljs-type">int</span> A:: *ptr_b = &amp;A::b; <span class="hljs-comment">// error</span>
+A a{};
+a.*ptr_b = <span class="hljs-number">13</span>;</code></pre></div><p>当然，你可让 <code>A</code> 直接返回一个指针给你，但在这讨论就没有什么意义了。</p><h3>逃过编译器检查</h3><p>但是作者发现了一处编译器不会检查的地方，而且这个这是写在 C++ 标准里的（C++ 20 前在 <a href="https://timsong-cpp.github.io/cppwp/n4659/temp.explicit#12">temp.explicit.12</a>，20 起移到了 <a href="https://timsong-cpp.github.io/cppwp/temp.spec.general#6">temp.spec.general.6</a>）。对于特化申明的模板参数，编译器不会进行检查。</p><div class='codeblock'><pre><code><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt; <span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span> {};
+<span class="hljs-keyword">template</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span>&lt;&amp;A::b&gt;; <span class="hljs-comment">// no error</span></code></pre></div><p>但是仅仅这样是不行的，因为 <code>&A::b</code> 不能出现在特化申明以外的地方，所以我们现在也获取不到那个特化的 <code>S</code>。这里博客展示了两个手法：</p><div class='codeblock'><pre><code><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> Tag&gt;
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Get</span> {
+    <span class="hljs-type">static</span> <span class="hljs-keyword">typename</span> Tag::type ptr;
+};
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> Tag&gt;
+<span class="hljs-keyword">typename</span> Tag::type Get&lt;Tag&gt;::ptr;
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> Tag, <span class="hljs-keyword">typename</span> Tag::type M&gt;
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Rob</span> {
+    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">D</span> {
+        <span class="hljs-built_in">D</span>() { Rob&lt;Tag&gt;::ptr = M; }
+    };
+    <span class="hljs-type">static</span> D d;
+};
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> Tag, <span class="hljs-keyword">typename</span> Tag::type p&gt;
+<span class="hljs-keyword">typename</span> Rob&lt;Tag, p&gt;::D Rob&lt;Tag, p&gt;::d;
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">A_b</span> {
+    <span class="hljs-keyword">using</span> type = <span class="hljs-type">int</span> A::*;
+};
+
+<span class="hljs-keyword">template</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">Rob</span>&lt;A_b, &amp;A::b&gt;;
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    A a{};
+    a.*Get&lt;A_b&gt;::ptr = <span class="hljs-number">12</span>;
+    a.<span class="hljs-built_in">print_b</span>();
+}</code></pre></div><p>这个手法首先将指针值的模板参数与 <code>Get</code> 剥离，使得我们只需要一个 <code>Tag</code> 类型就可以取得特定的特化。然后利用辅助类型 <code>Rob</code>，<code>Rob</code> 的静态成员 <code>d</code> 初始化时将指针的值赋到对于的 <code>Get</code> 类型上。</p><p>另一个手法就是文章最开始展示的，利用了 <code>get</code> 函数重载。但是仅仅在模板中的友元申明是不能被 ADL 找到的</p><div class='codeblock'><pre><code><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">T</span>&gt;
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span> {
+    <span class="hljs-function"><span class="hljs-keyword">friend</span> <span class="hljs-type">void</span> <span class="hljs-title">f</span><span class="hljs-params">(T)</span></span>{}
+};
+
+<span class="hljs-keyword">template</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">S</span>&lt;<span class="hljs-type">int</span>&gt;;
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-built_in">f</span>(<span class="hljs-number">1</span>); <span class="hljs-comment">// cannot resolve symbol</span>
+}</code></pre></div><p>所以需要在 <code>A_b</code> 中申明具体的 <code>get</code> 函数。其中函数申明也可以写到类型外面：</p><div class='codeblock'><pre><code><span class="hljs-keyword">struct</span> <span class="hljs-title class_">A_b</span> {
+    <span class="hljs-keyword">using</span> type = <span class="hljs-type">int</span> A::*;
+};
+<span class="hljs-function">A_b::type <span class="hljs-title">get</span><span class="hljs-params">(A_b)</span></span>;</code></pre></div><h3>扩展阅读</h3><p>在<a href="https://quuxplusone.github.io/blog/2020/12/02/unused-private-member/">这篇博文</a>中作者探讨测试了未使用的类的私有成员是否会被编译器优化掉（我们的代码需要建立在不会被优化掉的基础上才能正常工作）。</p><p></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+        <p rel="contact">
+            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="https://github.com/Puellaquae">Github</a>
+        </p>
+    </div>
+</body>
+
+</html>
