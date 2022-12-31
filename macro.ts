@@ -243,6 +243,23 @@ const TexInline: Macro = {
 
 type TexInlineMetadata = { hasTexInline: boolean };
 
+const PunctuationCompression: Macro = {
+    filter: ["text"],
+    func: function (node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
+        if (node.type === "text") {
+            let text = node.data.text.replace(/([\p{Pe}。]+)([。，])/gu, "<span class='halt'>$1</span>$2");
+            text = text.replace(/([。，])([\p{Ps}。]+)/gu, "$1<span class='halt'>$2</span>");
+            return {
+                type: "text",
+                data: {
+                    text
+                }
+            };
+        }
+        return null;
+    }
+}
+
 export {
     Title, TitleMetadata,
     HighlightInlineCode, HighlightInlineCodeMetadata,
@@ -251,5 +268,6 @@ export {
     RawHtml, RawHtmlMetadata,
     TexBlock, TexBlockMetadata,
     GFMTexBlock, GFMTexBlockMetadata,
-    TexInline, TexInlineMetadata
+    TexInline, TexInlineMetadata,
+    PunctuationCompression
 };

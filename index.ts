@@ -19,7 +19,8 @@ import {
     GFMTexBlock,
     GFMTexBlockMetadata,
     TexInline,
-    TexInlineMetadata
+    TexInlineMetadata,
+    PunctuationCompression
 } from "./macro";
 import { basename, extname, dirname, format, join, relative } from "path/posix";
 
@@ -194,7 +195,8 @@ const macro = {
     RawHtml,
     TexBlock,
     GFMTexBlock,
-    TexInline
+    TexInline,
+    PunctuationCompression
 };
 
 type MacroName = keyof typeof macro;
@@ -210,7 +212,10 @@ type MacrosMetadatas = [
     TexInlineMetadata
 ];
 
-const forceMacro: { name: MacroName, arg?: string }[] = [{ name: "Title" }, { name: "HighlightFenceCode" }];
+const forceMacro: { name: MacroName, arg?: string }[] = [
+    { name: "Title" },
+    { name: "HighlightFenceCode" }
+];
 
 new Articles("article").process(macro, forceMacro).output("page", ".").done();
 

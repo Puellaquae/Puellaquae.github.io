@@ -37,6 +37,37 @@
     }
 }
 
+@media(min-width: 1300px) or ((max-width: 1220px) and (min-width: 910px)) {
+    :root {
+        counter-reset: h2-id h3-id;
+    }
+
+    h2::before {
+        visibility: hidden;
+        counter-increment: h2-id;
+        counter-reset: h3-id;
+        content: counter(h2-id) ".";
+        position: absolute;
+        right: calc((100% + var(--ContainWidth))/2);
+    }
+
+    h2:hover::before {
+        visibility: visible;
+    }
+
+    h3::before {
+        visibility: hidden;
+        counter-increment: h3-id;
+        content: counter(h2-id) "." counter(h3-id) ".";
+        position: absolute;
+        right: calc((100% + var(--ContainWidth))/2);
+    }
+
+    h3:hover::before {
+        visibility: visible;
+    }
+}
+
 /*
 @media(prefers-color-scheme: dark) {
     :root {
@@ -370,4 +401,8 @@ label[for="timeLine"]::before {
     font-size: 0.5em;
     position: relative;
     top: 0.5em;
+}
+
+.halt {
+    font-feature-settings: "halt";
 }

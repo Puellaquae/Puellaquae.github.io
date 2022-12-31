@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="2022 回顾">
+    <title>2022 回顾</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/codecolor.css" />
+</head>
+
+<body>
+    <header class="header">
+        <section sub="" class="navbar-left title">
+        </section>
+        <section class="navbar-right">
+            <a href=".././index.html">首页</a>
+            <a href="../page/about.html">关于</a>
+            </section>
+    </header>
+    <div class="container">
+        <div class="archive indent">
+            <h1>2022 回顾</h1>
+            <div class="modified date">
+                2022年12月31日
+            </div>
+            <div class="create date">
+                2022年12月31日
+            </div>
+            
+            <div class="entry">
+                <h2>冬</h2><p>作为大学生，寒假有很长的一段空闲时光。可以从小年前半个多月一直休息到元宵后一个星期，大概一个多月的时间（春节做为国人最传统最重要的节日，我认为应该至少从腊月廿五放到正月初八，然后允许个人自由前后调节几天<span class='halt'>）</span>。我个人比较无趣比较懒比较宅，没的什么特别的别的事做，所以一般这是开新坑最积极的时间。<span class='halt'>（</span>按照时间顺序）一共启动了 <a href="https://github.com/Puellaquae/tooibasho">TooiBasho</a>、<a href="https://github.com/Puellaquae/RondOS">RondOS</a>、<a href="https://github.com/Puellaquae/PuellocMark">PuellocMark</a> 这三个项目。</p><h3>TooiBasho</h3><p>这个项目的起因，是我关注的一个做少女歌剧相关的 up 主，由于版权等原因，决定删除上传的所有内容。评论区人们准备着存档备份，我就想写个工具来做这件事。主要备份 b 站专栏的一些内容。因为对于视频什么的，已经有很成熟的方案了。考虑到除了 b 站有删库跑路，知乎等其他平台也有删库跑路的情况，所以准备写一个通用些的图文内容存档工具（虽然直到 2022 年结束我也没有去实现知乎内容的存档<span class='halt'>）</span>。为了方便使用，我把它做成了浏览器插件（也有库的 export<span class='halt'>）</span>。陆续大概做了两周，之后又零碎加了些功能。</p><h3>RondOS</h3><p>TooiBasho 写得七七八八了之后，我又开始了这个项目。一个简陋 x86 操作系统（与其说是操作系统，不如说是多了些内容的 bootloader<span class='halt'>）</span>。之前我也做过类似的，但是在汇编和 C 语言衔接的部分，因为工具链的一些原因，就搁置了。但是这次用了 Rust，以及完全可以在纯 Windows 下开发的工具链。主要是学着 <em><a href="https://os.phil-opp.com/">Writing an OS in Rust</a></em> 来写的，bootloader 用的是我以前写时的经验写的（那个教程里直接用个了库，但是我编译有些问题<span class='halt'>）</span>，然后自己摸索搞了一套还算能用的工具链方案。至于为什么又开了这个坑，我也记得不大清了，大概是刚结束了操作系统的课吧。</p><h3>PuellocMark</h3><p>这是个先前的一个计划的产物了，主要的目的就是为这个博客提供 markdown 转 html 功能。当然还有其他定制的功能，否则随便找个普通的 markdown 工具就行了。对于移动端，直接在 GitHub App 上看 markdown 文件我觉得比看网页版本方便，但是网页版本可以有更多的定制和交互能力。所以这个项目一大特点就是要保证 markdown 源文件即使加上了扩展，也要保证在 GitHub 上看没有什么奇奇怪怪的问题（像是在开头添加 toml 配置参数的那种，就会在页面开头出现一个表格<span class='halt'>）</span>。当然在 GitHub 上看，扩展的效果肯定是没了的，但是也首要保证不被渲染成其他东西。</p><h2>春</h2><p>回到学校就是大三下了，这个学期并没有多少课，主要有代码量的就是一门安卓的课程。写了<a href="https://github.com/Puellaquae/android-drawboard">画板</a>、<a href="https://github.com/Puellaquae/android-contacts">通讯录</a>、<a href="https://github.com/Puellaquae/MusicForYou">音乐播放器</a>之类的项目。这两年我基本都是把音乐存到设备上听的，本地音乐播放器就够用了。于是，现在基本在手机上我都是只用我写的那个来听歌了。</p><p>由于我打算直接就业，于是我还得准备实习的事。我投了些字节、网易、阿里之类大厂的前端岗，可惜我太垃圾，八股背不出（一直以来，背诵一直是我最劣势的<span class='halt'>）</span>，算法也写不出（在集训队里摸了太多鱼，何况，菜是原罪<span class='halt'>）</span>，没有一个过了一面的。而且对于春招而言，我那个时候已经比较晚了。虽然我是科班的，但我的水平也就像是：说了这么多年中文，学了这么多年语文，高考语文拼音、标点、语病还是都做不对。理论知识还是太薄弱了。毕竟中文环境下这么多年，谁还不能说两句中文呢。</p><p>到了期末也没找到个什么，那就开始准备秋招吧。</p><p>此外还看到了腾讯组织的一个开源活动，我之前就了解到的 <a href="https://github.com/WasmEdge/WasmEdge">WasmEdge</a> 也在那里面，就为它下面的 <a href="https://github.com/second-state/wasmedge-quickjs">wasmedge-quickjs</a> 提交了个 nodejs os 模块的 api 实现（做为新人贡献，还送了我三个腾讯的玩偶<span class='halt'>）</span>。</p><h2>夏</h2><p>暑假了，我一边投简历，一边背八股刷 LeetCode。前端的、C++的一些厂子都有去投（比较我可能也就这两方面稍微熟悉一些了吧<span class='halt'>）</span>。过了差不多一个月吧，收到了第一个 offer，也就是目前还在实习的地方，是一家 AI 计算加速芯片方向的初创。主要的工作就是为它家的平台适配深度网络模型。这个公司的友商产品大致是 Google 的 TPU（毕竟创始人就是那出来的<span class='halt'>）</span>。开发手段基本就是人肉编译，手写指令，基本没有一丝的上层抽象。实习工资的话就是一般般的，不过朝九晚五还算是不错的（虽然也会有加班的情况<span class='halt'>）</span>。</p><p>因为晚上有些自由时间，而且正好 LFX Mentorship 项目中有我之前提交的贡献的 wasmedge-quickjs 项目，我就去申请了。项目要求是实现余下其他 nodejs 模块的 api。不过当时我错估了我的开发效率和所需的工程量。最开始的 fs 模块我是照着 nodejs 文档去实现，然后把 nodejs 的测试弄过来之后发现我之前些的函数都有些问题。于是我基本每天就是测试，修改，测试，修改，直到全部通过测试为止，而且有时还会遇到 WasmEdge 的 wasi 实现有 Bug 的情况。这一段耗费了我大量的时间，直到 11 月份才正式完成。之后我就采用 js 直接拿 nodejs 的，然后接口部分自己实现（毕竟也还没有现成的针对 wasi 的能拿来用的<span class='halt'>）</span>。</p><h2>秋</h2><p>国庆回来，之前我和一起进来的实习生 9 月末便回去处理毕业的事情了。尔后也陆续来来去去了一些实习生。</p><p>大四上，学校里基本没有什么事，大都是忙着实习或升学的。我这半年也基本就是上班度过的。</p><h2>2023</h2><p>虽然就我而言，元旦和普通双休天并没有什么特别，不过是多休息几天罢了（唯有春节我认为有特殊意义，农历新年才是我认可的新年，而不只是历法的一次循环<span class='halt'>）</span>。但还是</p><p><strong>明けましておめでとう！</strong></p><p><strong>Happy New Year!</strong></p><p></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+        <p rel="contact">
+            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="https://github.com/Puellaquae">Github</a>
+        </p>
+    </div>
+</body>
+
+</html>
