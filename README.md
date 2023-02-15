@@ -2,6 +2,7 @@
 
 [__网页版本__](https://puellaquae.github.io/) | [TODO](article/roadmap.md) | [关于](article/about.md)
 
+- [低代码开发的特点和挑战：来自从业者的视角](article/paper/low-code-practitioners-view.cn.md)
 - [2022 回顾](article/2022-review.md)
 - [C++ 小知识](article/cpp-tricky.md)
 - [西数 WD40PURX 体验](article/wd40purx.md)
