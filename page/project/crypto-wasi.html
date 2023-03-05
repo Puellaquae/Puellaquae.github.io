@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Crypto-wasi 开发记录（WIP）">
+    <title>Crypto-wasi 开发记录（WIP）</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/codecolor.css" />
+</head>
+
+<body>
+    <header class="header">
+        <section sub="Project" class="navbar-left title">
+        </section>
+        <section class="navbar-right">
+            <a href="../.././index.html">首页</a>
+            <a href="../../page/about.html">关于</a>
+            </section>
+    </header>
+    <div class="container">
+        <div class="archive">
+            <h1>Crypto-wasi 开发记录（WIP）</h1>
+            <div class="modified date">
+                2023年3月5日
+            </div>
+            <div class="create date">
+                2023年3月5日
+            </div>
+            
+            <div class="entry">
+                <p>因为春节假期以及准备毕设的缘故，这个项目已经搁置了有两个多月没有继续开发，考虑到之后毕设等事宜还需要花费一段时间，为了防止我忘记项目的内容，特此记录一下。</p><p>这个项目以 wasi-crypto proposal 的文档和 WasmEdge 对 wasi-crypto 的实现为参考依据。</p><h2>hash</h2><p>hash 函数 WasmEdge 实现了 SHA-256、SHA-512 和 SHA-256/512 三种。wasi-crypto 的 api 调用（下文简称 wasi 调用）顺序为：</p><div class='codeblock'><pre><code><span class="hljs-keyword">let</span> <span class="hljs-variable">handle</span> = <span class="hljs-title function_ invoke__">symmetric_state_open</span>(alg, NONE_KEY, NONE_OPTS);
+<span class="hljs-title function_ invoke__">symmetric_state_absorb</span>(handle, data.<span class="hljs-title function_ invoke__">as_ptr</span>(), data.<span class="hljs-title function_ invoke__">len</span>());
+<span class="hljs-title function_ invoke__">symmetric_state_squeeze</span>(handle, buf.<span class="hljs-title function_ invoke__">as_mut_ptr</span>(), buf.<span class="hljs-title function_ invoke__">len</span>());
+<span class="hljs-title function_ invoke__">symmetric_state_close</span>(handle);</code></pre></div><h2>hmac</h2><p>hmac 与 hash 类似，但 hmac 的结果从 <code>squeeze_tag</code> 函数中取得。wasi 调用顺序为：</p><div class='codeblock'><pre><code><span class="hljs-keyword">let</span> <span class="hljs-variable">key</span> = <span class="hljs-title function_ invoke__">symmetric_key_import</span>(alg, key.<span class="hljs-title function_ invoke__">as_ptr</span>(), key.<span class="hljs-title function_ invoke__">len</span>());
+<span class="hljs-keyword">let</span> <span class="hljs-variable">opt</span> = OptSymmetricKey {
+    tag: OPT_SYMMETRIC_KEY_U_SOME,
+    u: OptSymmetricKeyUnion { some: key },
+};
+<span class="hljs-keyword">let</span> <span class="hljs-variable">handle</span> = <span class="hljs-title function_ invoke__">symmetric_state_open</span>(alg, opt, NONE_OPTS);
+<span class="hljs-title function_ invoke__">symmetric_key_close</span>(key);
+<span class="hljs-title function_ invoke__">symmetric_state_absorb</span>(handle, data.<span class="hljs-title function_ invoke__">as_ptr</span>(), data.<span class="hljs-title function_ invoke__">len</span>());
+<span class="hljs-title function_ invoke__">symmetric_state_squeeze_tag</span>(handle);
+<span class="hljs-keyword">let</span> <span class="hljs-variable">len</span> = <span class="hljs-title function_ invoke__">symmetric_tag_len</span>(tag);
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">out</span> = <span class="hljs-built_in">vec!</span>[<span class="hljs-number">0</span>; len];
+<span class="hljs-title function_ invoke__">symmetric_tag_pull</span>(tag, out.<span class="hljs-title function_ invoke__">as_mut_ptr</span>(), out.<span class="hljs-title function_ invoke__">len</span>());
+<span class="hljs-title function_ invoke__">symmetric_tag_close</span>(tag)
+<span class="hljs-title function_ invoke__">symmetric_state_close</span>(handle);</code></pre></div><h2>hkdf</h2><p>hkdf 的调用方法和 hash 基本一致，但是分为 extract 和 expand 两个步骤。extract 阶段计算出一个新 key，expand 阶段通过进行多计算生成任意长度的结果。wasi 调用顺序为：</p><div class='codeblock'><pre><code><span class="hljs-comment">// extract 阶段</span>
+<span class="hljs-keyword">let</span> <span class="hljs-variable">extract_key</span> = <span class="hljs-title function_ invoke__">symmetric_key_import</span>(extract_alg, key.<span class="hljs-title function_ invoke__">as_ptr</span>(), key.<span class="hljs-title function_ invoke__">len</span>());
+<span class="hljs-keyword">let</span> <span class="hljs-variable">extract_handle</span> = <span class="hljs-title function_ invoke__">symmetric_state_open</span>(
+    extract_alg,
+    OptSymmetricKey {
+        tag: OPT_SYMMETRIC_KEY_U_SOME.<span class="hljs-title function_ invoke__">raw</span>(),
+        u: OptSymmetricKeyUnion { some: extract_key },
+    },
+    NONE_OPTS,
+);
+<span class="hljs-title function_ invoke__">symmetric_state_absorb</span>(extract_handle, salt.<span class="hljs-title function_ invoke__">as_ptr</span>(), salt.<span class="hljs-title function_ invoke__">len</span>());
+<span class="hljs-keyword">let</span> <span class="hljs-variable">expand_key</span> = <span class="hljs-title function_ invoke__">symmetric_state_squeeze_key</span>(extract_handle, expand_alg);
+<span class="hljs-title function_ invoke__">symmetric_state_close</span>(extract_handle);
+<span class="hljs-title function_ invoke__">symmetric_key_close</span>(extract_key);
+<span class="hljs-comment">// expand 阶段</span>
+<span class="hljs-keyword">let</span> <span class="hljs-variable">expand_handle</span> = <span class="hljs-title function_ invoke__">symmetric_state_open</span>(
+    expand_alg,
+    OptSymmetricKey {
+        tag: OPT_SYMMETRIC_KEY_U_SOME.<span class="hljs-title function_ invoke__">raw</span>(),
+        u: OptSymmetricKeyUnion { some: expand_key },
+    },
+    NONE_OPTS,
+);
+<span class="hljs-title function_ invoke__">symmetric_state_absorb</span>(expand_handle, info.<span class="hljs-title function_ invoke__">as_ptr</span>(), info.<span class="hljs-title function_ invoke__">len</span>());
+<span class="hljs-title function_ invoke__">symmetric_state_squeeze</span>(expand_handle, out.<span class="hljs-title function_ invoke__">as_mut_ptr</span>(), out.<span class="hljs-title function_ invoke__">len</span>());
+<span class="hljs-title function_ invoke__">symmetric_state_close</span>(expand_handle);
+<span class="hljs-title function_ invoke__">symmetric_key_close</span>(expand_key);</code></pre></div><p>其中 extract 阶段等价于使用 hmac 将 salt 做为 key 对进行 ikm 计算的新 key。由于 nodejs 要求 ikm 可以为空，而 WasmEdge 对 extrace 部分 openssl 的调用为：</p><div class='codeblock'><pre><code><span class="hljs-keyword">auto</span> ctx = <span class="hljs-built_in">EVP_PKEY_CTX_new_id</span>(EVP_PKEY_HKDF, <span class="hljs-literal">nullptr</span>);
+<span class="hljs-built_in">EVP_PKEY_derive_init</span>(ctx);
+<span class="hljs-built_in">EVP_PKEY_CTX_set_hkdf_md</span>(ctx, <span class="hljs-built_in">EVP_get_digestbynid</span>(NID_sha256));
+<span class="hljs-built_in">EVP_PKEY_CTX_hkdf_mode</span>(ctx, EVP_PKEY_HKDEF_MODE_EXTRACT_ONLY);
+<span class="hljs-comment">// fail if ikm is zero-length </span>
+<span class="hljs-built_in">EVP_PKEY_CTX_set1_hkdf_key</span>(ctx, ikm.<span class="hljs-built_in">data</span>(), ikm.<span class="hljs-built_in">size</span>()); 
+<span class="hljs-built_in">EVP_PKEY_CTX_set1_hkdf_salt</span>(ctx, salt.<span class="hljs-built_in">data</span>(), salt.<span class="hljs-built_in">size</span>());
+<span class="hljs-function">std::vector&lt;<span class="hljs-type">uint8_t</span>&gt; <span class="hljs-title">out</span><span class="hljs-params">(<span class="hljs-number">32</span>)</span></span>;
+<span class="hljs-type">size_t</span> out_size;
+<span class="hljs-built_in">EVP_PKEY_derive</span>(ctx, out.<span class="hljs-built_in">data</span>(), &amp;out_ize);</code></pre></div><p>所以对于 ikm 为零长度的情况调用 hmac 代替 extract。</p><p></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+        <p rel="contact">
+            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="https://github.com/Puellaquae">Github</a>
+        </p>
+    </div>
+</body>
+
+</html>
