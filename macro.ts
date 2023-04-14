@@ -3,8 +3,7 @@ import { Metadata } from "./metadata";
 import highligt from "highlight.js";
 import { spawnSync } from "child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "fs";
-import path from "path/posix";
-import os from "os";
+import path from "path";
 import { customAlphabet } from "nanoid";
 
 const HighlightInlineCode: Macro = {
@@ -95,7 +94,7 @@ const RawHtml: Macro = {
 type RawHtmlMetadata = { hasRawHTML: boolean };
 
 function RenderTexCodeToSvg(tex: string, args: string[]): string {
-    const tmpdir = mkdtempSync(path.join(os.tmpdir(), "tex-"));
+    const tmpdir = mkdtempSync(path.join(path.resolve("tmp"), "tex-"));
     const texfile = path.join(tmpdir, "doc.tex");
     writeFileSync(texfile, tex, { encoding: "utf-8" });
     const cwd = process.cwd();
