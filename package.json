@@ -17,7 +17,7 @@
     "highlight.js": "^11.4.0",
     "jsptm": "^0.0.15",
     "nanoid": "^3.3.2",
-    "nunjucks": "^3.2.3"
+    "nunjucks": "^3.2.4"
   },
   "devDependencies": {
     "@types/node": "^17.0.21",
