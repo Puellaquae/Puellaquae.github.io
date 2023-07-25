@@ -14,8 +14,8 @@
     --nako: #ff6e90;
     --lettleList: "小列表";
     --bigList: "大列表";
-    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans", "思源黑体", "Noto Sans CJK SC", "Noto Sans", monospace;
-    --font: "Georgia Pro", "Source Han Serif", "思源宋体", "Noto Serif CJK SC", "Noto Serif", serif;
+    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans", "思源黑体", "Source Han Sans VF", "Noto Sans CJK SC", "Noto Sans", monospace;
+    --font: "Georgia Pro", "Source Han Serif", "思源宋体", "Source Han Serif VF", "Noto Serif CJK SC", "Noto Serif", serif;
 }
 
 @media(min-width: 1220px) {
