@@ -1,6 +1,6 @@
 # Crypto-wasi 开发记录（WIP）
 
-因为春节假期以及准备毕设的缘故，这个项目已经搁置了有两个多月没有继续开发，考虑到之后毕设等事宜还需要花费一段时间，为了防止我忘记项目的内容，特此记录一下。
+项目开发记录。
 
 这个项目以 wasi-crypto proposal 的文档和 WasmEdge 对 wasi-crypto 的实现为参考依据。
 
@@ -86,3 +86,7 @@ EVP_PKEY_derive(ctx, out.data(), &out_ize);
 ```
 
 所以对于 ikm 为零长度的情况调用 hmac 代替 extract。
+
+## scrypt
+
+
