@@ -2,6 +2,7 @@
 
 [__网页版本__](https://puellaquae.github.io/) | [TODO](article/roadmap.md) | [关于](article/about.md)
 
+- [fork：像线程一样使用进程](article/fork-usage.md)
 - [四川之行（WIP）](article/thought/suchuan.md)
 - [Crypto-wasi 开发记录（WIP）](article/project/crypto-wasi.md)
 - [低代码开发的特点和挑战：来自从业者的视角](article/paper/low-code-practitioners-view.cn.md)

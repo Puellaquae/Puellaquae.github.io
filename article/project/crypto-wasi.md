@@ -87,6 +87,14 @@ EVP_PKEY_derive(ctx, out.data(), &out_ize);
 
 所以对于 ikm 为零长度的情况调用 hmac 代替 extract。
 
+## pbkdf2
+
+pbkdf2 是一个多次调用伪随机函数为基础的函数，这里主要是基于 HMAC。
+
 ## scrypt
 
+scrypt 在 wasi-crypto 中并没有提供相应的接口，这里采用了纯代码的实现。
 
+## cipher 和 decipher
+
+这一块 wasi-crypto 提供了 `AES-128-GCM`，`AES-256-GCM` 和 `CHACHA20-POLY1305` 这两种对称加密算法。

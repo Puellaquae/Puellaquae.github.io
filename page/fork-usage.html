@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="fork：像线程一样使用进程">
+    <title>fork：像线程一样使用进程</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/codecolor.css" />
+</head>
+
+<body>
+    <header class="header">
+        <section sub="" class="navbar-left title">
+        </section>
+        <section class="navbar-right">
+            <a href=".././index.html">首页</a>
+            <a href="../page/about.html">关于</a>
+            </section>
+    </header>
+    <div class="container">
+        <div class="archive">
+            <h1>fork：像线程一样使用进程</h1>
+            <div class="modified date">
+                2023年10月10日
+            </div>
+            <div class="create date">
+                2023年10月10日
+            </div>
+            
+            <div class="entry">
+                <p>曾经的我不理解 linux 上 fork 的设计，但是现在我发现了 fork 的一个独到的用处，就是可以像线程一样去使用进程。</p><h2>做什么</h2><p>我需要设计一个函数 <code>([T;n], T -&gt; R) -&gt; [Result&lt;R&gt;;n]</code>，提供一个函数和一组输入，并行的将这个函数应用到每一个输入上得到一组输出，其中输入的数量是编译时可计算得到的值。但是函数在运行时可能会出错崩溃，而且函数设计时没有考虑过并行的情况。</p><h2>为什么</h2><p>大部分语言和平台都提供了简单 api 可以让函数运行在一个新的线程里，可以简单地实现一个线程池来做一些并行的任务。但是，由于线程是共享内存的，有些库内部维护了一个全局状态，不能很好地处理并行的情况，或者就没有考虑过；而且如果其中一个线程崩掉，会直接把自身进程一并带崩溃掉，需要非常繁琐的信号处理，可能也无法完美清理崩溃的现场。但是使用进程就不一样了，即使子进程崩溃掉了，对自身毫无影响，直接再唤起一个便是了；而且由于各自有各自的内存，所以也不用担心什么全局状态的问题。</p><h2>什么做</h2><p>当然，使用进程并没有使用线程一样简单，因为内存是各自。所以需要使用共享内存等方法将函数的结果传递给父进程。下面是一个简易的实现：</p><div class='codeblock'><pre><code><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">Task</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">Ret</span>, <span class="hljs-type">size_t</span> TaskCnt&gt; <span class="hljs-keyword">struct</span> <span class="hljs-title class_">ProcessPool</span> {
+<span class="hljs-meta">#<span class="hljs-keyword">if</span> defined(ATOMIC_INT_LOCK_FREE)</span>
+    <span class="hljs-keyword">using</span> AtomicLockFreeType = std::atomic&lt;<span class="hljs-type">int</span>&gt;;
+<span class="hljs-meta">#<span class="hljs-keyword">elif</span> defined(ATOMIC_LONG_LOCK_FREE)</span>
+    <span class="hljs-keyword">using</span> AtomicLockFreeType = std::atomic&lt;<span class="hljs-type">long</span>&gt;;
+<span class="hljs-meta">#<span class="hljs-keyword">elif</span> defined(ATOMIC_LLONG_LOCK_FREE)</span>
+    <span class="hljs-keyword">using</span> AtomicLockFreeType = std::atomic&lt;<span class="hljs-type">long</span> <span class="hljs-type">long</span>&gt;;
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span></span>
+
+    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">SharedMemory</span> {
+        AtomicLockFreeType tasksTopIdx;
+        Ret rets[TaskCnt];
+        <span class="hljs-type">pid_t</span> whom[TaskCnt];
+        <span class="hljs-type">int</span> taskStatus[TaskCnt];
+    };
+
+    <span class="hljs-built_in">static_assert</span>(std::is_trivial_v&lt;Ret&gt; &amp;&amp; std::is_standard_layout_v&lt;Ret&gt;,
+                  <span class="hljs-string">&quot;Ret require trivial and standard_layout&quot;</span>);
+
+    std::vector&lt;Task&gt; tasks;
+    <span class="hljs-type">int</span> shmid;
+    SharedMemory *shmp = <span class="hljs-literal">nullptr</span>;
+    std::vector&lt;<span class="hljs-type">pid_t</span>&gt; child_process;
+    std::function&lt;Ret(Task)&gt; func;
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CreateProc</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-type">pid_t</span> pid = fork();
+        <span class="hljs-keyword">if</span> (pid == <span class="hljs-number">-1</span>) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;fork fail: %s\n&quot;</span>, <span class="hljs-built_in">strerror</span>(errno));
+            <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
+        }
+        <span class="hljs-keyword">if</span> (pid == <span class="hljs-number">0</span>) {
+            shmp = (SharedMemory *)<span class="hljs-built_in">shmat</span>(shmid, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>);
+            <span class="hljs-keyword">if</span> ((<span class="hljs-type">void</span> *)shmp == (<span class="hljs-type">void</span> *)<span class="hljs-number">-1</span>) {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;shmat fail: %s\n&quot;</span>, <span class="hljs-built_in">strerror</span>(errno));
+                <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
+            }
+            <span class="hljs-type">pid_t</span> mine = <span class="hljs-built_in">getpid</span>();
+            <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+                <span class="hljs-type">int</span> curTask = shmp-&gt;tasksTopIdx.<span class="hljs-built_in">fetch_add</span>(<span class="hljs-number">1</span>);
+                <span class="hljs-keyword">if</span> (curTask &gt;= TaskCnt) {
+                    <span class="hljs-keyword">break</span>;
+                }
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;child[%d] get task %d\n&quot;</span>, mine, curTask);
+                shmp-&gt;whom[curTask] = mine;
+                Ret ret = <span class="hljs-built_in">func</span>(tasks[curTask]);
+                <span class="hljs-built_in">memcpy</span>(shmp-&gt;rets + curTask, &amp;ret, <span class="hljs-built_in">sizeof</span>(ret));
+                shmp-&gt;taskStatus[curTask] = <span class="hljs-number">0</span>;
+            }
+            <span class="hljs-type">int</span> ret = <span class="hljs-built_in">shmdt</span>(shmp);
+            <span class="hljs-keyword">if</span> (ret == <span class="hljs-number">-1</span>) {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;shmdt fail: %s\n&quot;</span>, <span class="hljs-built_in">strerror</span>(errno));
+                <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
+            }
+            <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);
+        } <span class="hljs-keyword">else</span> {
+            child_process.<span class="hljs-built_in">push_back</span>(pid);
+        }
+    }
+
+    <span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">Fn</span>&gt;
+    <span class="hljs-built_in">ProcessPool</span>(Fn fn, <span class="hljs-type">const</span> std::vector&lt;Task&gt; tasks, <span class="hljs-type">int</span> poolSize) 
+        : <span class="hljs-built_in">tasks</span>(tasks), <span class="hljs-built_in">func</span>(fn) {
+        shmid = <span class="hljs-built_in">shmget</span>(IPC_PRIVATE, <span class="hljs-built_in">sizeof</span>(SharedMemory), IPC_CREAT | <span class="hljs-number">0600</span>);
+        <span class="hljs-keyword">if</span> (shmid == <span class="hljs-number">-1</span>) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;shmget fail: %s\n&quot;</span>, <span class="hljs-built_in">strerror</span>(errno));
+            <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
+        }
+
+        shmp = (SharedMemory *)<span class="hljs-built_in">shmat</span>(shmid, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>);
+        <span class="hljs-keyword">if</span> ((<span class="hljs-type">void</span> *)shmp == (<span class="hljs-type">void</span> *)<span class="hljs-number">-1</span>) {
+            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;shmat fail: %s\n&quot;</span>, <span class="hljs-built_in">strerror</span>(errno));
+            <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
+        }
+        <span class="hljs-keyword">new</span> (&amp;shmp-&gt;tasksTopIdx) <span class="hljs-keyword">decltype</span>(shmp-&gt;tasksTopIdx);
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; TaskCnt; i++) {
+            shmp-&gt;taskStatus[i] = <span class="hljs-number">-1</span>;
+        }
+        shmp-&gt;tasksTopIdx.<span class="hljs-built_in">store</span>(<span class="hljs-number">0</span>);
+        poolSize = std::<span class="hljs-built_in">min</span>(poolSize, (<span class="hljs-type">int</span>)TaskCnt);
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; poolSize; i++) {
+            <span class="hljs-built_in">CreateProc</span>();
+        }
+    }
+
+    std::vector&lt;std::tuple&lt;Ret, <span class="hljs-type">int</span>&gt;&gt; <span class="hljs-built_in">await</span>() {
+        <span class="hljs-type">int</span> exited_children = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword">while</span> (exited_children &lt; child_process.<span class="hljs-built_in">size</span>()) {
+            <span class="hljs-type">int</span> status = <span class="hljs-number">0</span>;
+            <span class="hljs-type">pid_t</span> who = <span class="hljs-built_in">waitpid</span>(<span class="hljs-number">-1</span>, &amp;status, <span class="hljs-number">0</span>);
+            <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">WIFEXITED</span>(status)) {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;child[%d] killed, create new proc\n&quot;</span>, who);
+                <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; TaskCnt; i++) {
+                    <span class="hljs-keyword">if</span> (shmp-&gt;whom[i] == who &amp;&amp; shmp-&gt;taskStatus[i] != <span class="hljs-number">0</span>) {
+                        shmp-&gt;taskStatus[i] = status;
+                    }
+                }
+                <span class="hljs-built_in">CreateProc</span>();
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;child[%d] finish\n&quot;</span>, who);
+            }
+            exited_children++;
+        }
+        std::vector&lt;std::tuple&lt;Ret, <span class="hljs-type">int</span>&gt;&gt; rets;
+        rets.<span class="hljs-built_in">reserve</span>(TaskCnt);
+        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; TaskCnt; i++) {
+            rets.<span class="hljs-built_in">emplace_back</span>(shmp-&gt;rets[i], shmp-&gt;taskStatus[i]);
+        }
+        <span class="hljs-keyword">return</span> rets;
+    }
+
+    ~<span class="hljs-built_in">ProcessPool</span>() {
+        <span class="hljs-built_in">shmdt</span>(shmp);
+        shmid_ds ds;
+        <span class="hljs-built_in">shmctl</span>(shmid, IPC_RMID, &amp;ds);
+    }
+};</code></pre></div><p>核心的思想就是利用 fork 创建一个进程来执行传入的函数，利用一个下标来分配任务，函数的结果直接写入共享内容（这里对返回值的类型有要求，因为数据通信使用的是直接内存拷贝）。这里我开发的时候 <code>shmget</code> 的 <code>key</code> 得是 <code>IPC_PRIVATE</code>，否则会会报 <code>Permission denied</code>，暂时不清楚是什么原因。父进程等到所有的子进程都推出后返回所有的输入，如果发现有子进程意外结束，就记录进程退出的状态码，然后重新拉起一个进程。</p><p></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+        <p rel="contact">
+            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="https://github.com/Puellaquae">Github</a>
+        </p>
+    </div>
+</body>
+
+</html>
