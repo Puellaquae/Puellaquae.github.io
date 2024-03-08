@@ -199,6 +199,10 @@ body {
     justify-self: right;
 }
 
+.header>.navbar-right>* {
+    padding-left: 0.25em;
+}
+
 .title {
     font-size: 2rem;
     font-weight: bold;

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+
+<channel>
+  <title>Puelloc</title>
+  <link>http://www.runoob.com</link>
+  <description>Puelloc</description>
+  {% for article in articles %}
+  {%- if article["hideIndex"] != "html" and article["hideIndex"] != "both" -%}
+  <item>
+    <title>{{article["title"]|e}}</title>
+    <link>https://puellaquae.github.io/{{article['outdir']}}/{{article['outfilename']}}</link>
+    <description>{{article["title"]|e}}</description>
+  </item>
+  {% endif %}
+  {%- endfor -%}
+</channel>
+
+</rss>
