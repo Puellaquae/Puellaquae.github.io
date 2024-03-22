@@ -3,11 +3,11 @@
 
 <channel>
   <title>Puelloc</title>
-  <link>http://www.runoob.com</link>
+  <link>https://puellaquae.github.io</link>
   <description>Puelloc</description>
   <item>
     <title>fork：像线程一样使用进程</title>
-    <link>https://puellaquae.github.io/page/fork-usage.html</link>
+    <link>https://puellaquae.github.io/page/linux/fork-usage.html</link>
     <description>fork：像线程一样使用进程</description>
   </item>
   <item>
@@ -27,12 +27,12 @@
   </item>
   <item>
     <title>2022 回顾</title>
-    <link>https://puellaquae.github.io/page/2022-review.html</link>
+    <link>https://puellaquae.github.io/page/thought/2022-review.html</link>
     <description>2022 回顾</description>
   </item>
   <item>
     <title>C++ 小知识</title>
-    <link>https://puellaquae.github.io/page/cpp-tricky.html</link>
+    <link>https://puellaquae.github.io/page/cpp/cpp-tricky.html</link>
     <description>C++ 小知识</description>
   </item>
   <item>
@@ -42,12 +42,12 @@
   </item>
   <item>
     <title>HTTP 缓存策略</title>
-    <link>https://puellaquae.github.io/page/interview/http-cache.html</link>
+    <link>https://puellaquae.github.io/page/web/http-cache.html</link>
     <description>HTTP 缓存策略</description>
   </item>
   <item>
     <title>C++ 的 const 限定</title>
-    <link>https://puellaquae.github.io/page/cpp-const.html</link>
+    <link>https://puellaquae.github.io/page/cpp/cpp-const.html</link>
     <description>C++ 的 const 限定</description>
   </item>
   <item>
@@ -56,33 +56,23 @@
     <description>安卓开发记录</description>
   </item>
   <item>
-    <title>Tex 公式测试</title>
-    <link>https://puellaquae.github.io/page/project/test.html</link>
-    <description>Tex 公式测试</description>
-  </item>
-  <item>
-    <title>博客系统的演化</title>
-    <link>https://puellaquae.github.io/page/new-blog.zh.html</link>
-    <description>博客系统的演化</description>
-  </item>
-  <item>
-    <title>New Generation of Blog</title>
-    <link>https://puellaquae.github.io/page/new-blog.en.html</link>
-    <description>New Generation of Blog</description>
+    <title>博客系统编年史</title>
+    <link>https://puellaquae.github.io/page/changelog.html</link>
+    <description>博客系统编年史</description>
   </item>
   <item>
     <title>Pintos 实验记录</title>
-    <link>https://puellaquae.github.io/page/pintos.html</link>
+    <link>https://puellaquae.github.io/page/os/pintos.html</link>
     <description>Pintos 实验记录</description>
   </item>
   <item>
     <title>正则表达式转化为自动机</title>
-    <link>https://puellaquae.github.io/page/regex.html</link>
+    <link>https://puellaquae.github.io/page/compile/regex.html</link>
     <description>正则表达式转化为自动机</description>
   </item>
   <item>
     <title>对 nlohmann-json 构造函数的分析</title>
-    <link>https://puellaquae.github.io/page/nlohmann-construct.html</link>
+    <link>https://puellaquae.github.io/page/cpp/nlohmann-construct.html</link>
     <description>对 nlohmann-json 构造函数的分析</description>
   </item>
   <item>
@@ -92,22 +82,22 @@
   </item>
   <item>
     <title>CSS 选择器与 input 标签的联用</title>
-    <link>https://puellaquae.github.io/page/css-filter.html</link>
+    <link>https://puellaquae.github.io/page/web/css-filter.html</link>
     <description>CSS 选择器与 input 标签的联用</description>
   </item>
   <item>
     <title>C++ 多线程 std::thread join 与 detach</title>
-    <link>https://puellaquae.github.io/page/std-thread.html</link>
+    <link>https://puellaquae.github.io/page/cpp/std-thread.html</link>
     <description>C++ 多线程 std::thread join 与 detach</description>
   </item>
   <item>
     <title>C++ 多线程 volatile 限定符</title>
-    <link>https://puellaquae.github.io/page/multithread-1.html</link>
+    <link>https://puellaquae.github.io/page/cpp/multithread-1.html</link>
     <description>C++ 多线程 volatile 限定符</description>
   </item>
   <item>
     <title>80 行的课设，C++ 标准库在简单增删改查中的使用</title>
-    <link>https://puellaquae.github.io/page/stl-in-crud.html</link>
+    <link>https://puellaquae.github.io/page/cpp/stl-in-crud.html</link>
     <description>80 行的课设，C++ 标准库在简单增删改查中的使用</description>
   </item>
   </channel>

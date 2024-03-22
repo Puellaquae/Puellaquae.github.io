@@ -138,13 +138,30 @@ class Articles {
         const rawdir = em.get("rawdir")!;
         if (dirname(rawdir) !== ".") {
             let sub = basename(rawdir);
-            sub = sub[0].toUpperCase() + sub.substring(1).toLowerCase();
+            const specSubName: { [key: string]: string } = {
+                "os": "OS"
+            }
+            if (Object.keys(specSubName).includes(sub)) {
+                sub = specSubName[sub]
+            } else {
+                sub = sub[0].toUpperCase() + sub.substring(1).toLowerCase();
+            }
             em.entry("subtype").or(sub);
         }
         em.entry("hasTex").val = em.entry("hasTexBlock").or(false).val
         let rawfile = join(em.get("rawdir")!, rawfilename);
-        const changeLog = spawnSync("git", ["log", "--format=format:%cd", rawfile]).stdout.toString().split("\n").filter(s => s !== "");
-        const newChanged = this.newChangedFile.some(s => s.includes(rawfile));
+        let changeLog = spawnSync("git", ["log", "--follow", "--format=format:%cd", "--", rawfile]).stdout.toString().split("\n").filter(s => s !== "");
+        const renamed = this.newChangedFile.find(s => s.includes(rawfile) && s.startsWith('R'));
+        let newChanged = this.newChangedFile.find(s => s.includes(rawfile) && !s.startsWith('R')) ?? true;
+        if (renamed) {
+            const oldfilename = renamed.substring(2).split("->")[0].trim();
+            changeLog = spawnSync("git", ["log", "--follow", "--format=format:%cd", "--", oldfilename]).stdout.toString().split("\n").filter(s => s !== "");
+            const diff = spawnSync("git", ["diff", "--staged", "-M", "--", oldfilename, rawfile]).stdout.toString();
+            const onlyRename = diff.includes("similarity index 100%");
+            if (!onlyRename) {
+                newChanged = true;
+            }
+        }
         const last = (changeLog.length > 0 && !newChanged) ? (new Date(changeLog[0])) : (new Date());
         const first = changeLog.length > 0 ? (new Date(changeLog[changeLog.length - 1])) : (new Date());
         em.entry("modifyDate").val = last;
