@@ -20,7 +20,9 @@ import {
     GFMTexBlockMetadata,
     TexInline,
     TexInlineMetadata,
-    PunctuationCompression
+    PunctuationCompression,
+    Descript,
+    DescriptMetadata
 } from "./macro";
 import { basename, extname, dirname, format, join, relative } from "path/posix";
 
@@ -152,7 +154,7 @@ class Articles {
         let rawfile = join(em.get("rawdir")!, rawfilename);
         let changeLog = spawnSync("git", ["log", "--follow", "--format=format:%cd", "--", rawfile]).stdout.toString().split("\n").filter(s => s !== "");
         const renamed = this.newChangedFile.find(s => s.includes(rawfile) && s.startsWith('R'));
-        let newChanged = this.newChangedFile.find(s => s.includes(rawfile) && !s.startsWith('R')) ?? true;
+        let newChanged = this.newChangedFile.find(s => s.includes(rawfile) && !s.startsWith('R')) ?? false;
         if (renamed) {
             const oldfilename = renamed.substring(2).split("->")[0].trim();
             changeLog = spawnSync("git", ["log", "--follow", "--format=format:%cd", "--", oldfilename]).stdout.toString().split("\n").filter(s => s !== "");
@@ -174,17 +176,17 @@ class Articles {
     done() {
         let ptms = [];
         for (const { dir, name } of this.articles) {
-            let ptm = Ptm.parse(readFileSync(join(dir, name), { encoding: "utf-8" }));
-            let meta = easyMap<Metadata>(ptm.metadata);
             process.stdout.write(`process ${dir}/${name} `);
             const t0 = performance.now();
+            let ptm = Ptm.parse(readFileSync(join(dir, name), { encoding: "utf-8" }));
+            let meta = easyMap<Metadata>(ptm.metadata);
             meta.set("rawdir", dir);
             meta.set("rawfilename", name);
             const cacheData = loadCache(join(dir, name));
             const newCache = ptm.applyMacroWithCache(this.macro, this.forceMacro, cacheData);
             saveCache(join(dir, name), newCache);
-            const t1 = performance.now();
             this.prepareMetadata(ptm);
+            const t1 = performance.now();
             process.stdout.write(`${(t1 - t0).toFixed(3)}ms\n`);
             ptms.push(ptm);
         }
@@ -213,7 +215,8 @@ const macro = {
     TexBlock,
     GFMTexBlock,
     TexInline,
-    PunctuationCompression
+    PunctuationCompression,
+    Descript
 };
 
 type MacroName = keyof typeof macro;
@@ -226,12 +229,13 @@ type MacrosMetadatas = [
     RawHtmlMetadata,
     TexBlockMetadata,
     GFMTexBlockMetadata,
-    TexInlineMetadata
+    TexInlineMetadata,
+    DescriptMetadata
 ];
 
 const forceMacro: { name: MacroName, arg?: string }[] = [
     { name: "Title" },
-    { name: "HighlightFenceCode" }
+    { name: "HighlightFenceCode" },
 ];
 
 new Articles("article").process(macro, forceMacro).output("page", ".").done();

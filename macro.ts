@@ -259,6 +259,22 @@ const PunctuationCompression: Macro = {
     }
 }
 
+const Descript: Macro = {
+    filter: ["para"],
+    func: function (node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
+        if (node.type == "para" && !easyMap<Metadata>(metadata).has("descript")) {
+            easyMap<Metadata>(metadata).set("descript", node.rawData);
+            return {
+                type: "void",
+                data: null
+            }
+        }
+        return null;
+    }
+}
+
+type DescriptMetadata = { descript: string };
+
 export {
     Title, TitleMetadata,
     HighlightInlineCode, HighlightInlineCodeMetadata,
@@ -268,5 +284,6 @@ export {
     TexBlock, TexBlockMetadata,
     GFMTexBlock, GFMTexBlockMetadata,
     TexInline, TexInlineMetadata,
-    PunctuationCompression
+    PunctuationCompression,
+    Descript, DescriptMetadata
 };

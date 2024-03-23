@@ -8,97 +8,154 @@
   <item>
     <title>fork：像线程一样使用进程</title>
     <link>https://puellaquae.github.io/page/linux/fork-usage.html</link>
-    <description>fork：像线程一样使用进程</description>
+    <description></description>
+    <pubData>2023/10/10</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Linux</category>
   </item>
   <item>
     <title>四川之行（WIP）</title>
     <link>https://puellaquae.github.io/page/thought/suchuan.html</link>
-    <description>四川之行（WIP）</description>
+    <description></description>
+    <pubData>2023/08/10</pubData>
+    <lastBuildDate>2023/08/10</lastBuildDate>
+    <category>Thought</category>
   </item>
   <item>
     <title>Crypto-wasi 开发记录（WIP）</title>
     <link>https://puellaquae.github.io/page/project/crypto-wasi.html</link>
-    <description>Crypto-wasi 开发记录（WIP）</description>
+    <description></description>
+    <pubData>2023/03/05</pubData>
+    <lastBuildDate>2023/10/10</lastBuildDate>
+    <category>Project</category>
   </item>
   <item>
     <title>低代码开发的特点和挑战：来自从业者的视角</title>
     <link>https://puellaquae.github.io/page/paper/low-code-practitioners-view.cn.html</link>
-    <description>低代码开发的特点和挑战：来自从业者的视角</description>
+    <description></description>
+    <pubData>2023/02/15</pubData>
+    <lastBuildDate>2023/03/05</lastBuildDate>
+    <category>Paper</category>
   </item>
   <item>
     <title>2022 回顾</title>
     <link>https://puellaquae.github.io/page/thought/2022-review.html</link>
-    <description>2022 回顾</description>
+    <description></description>
+    <pubData>2022/12/31</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Thought</category>
   </item>
   <item>
     <title>C++ 小知识</title>
     <link>https://puellaquae.github.io/page/cpp/cpp-tricky.html</link>
-    <description>C++ 小知识</description>
+    <description></description>
+    <pubData>2022/12/05</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Cpp</category>
   </item>
   <item>
     <title>西数 WD40PURX 体验</title>
     <link>https://puellaquae.github.io/page/wd40purx.html</link>
-    <description>西数 WD40PURX 体验</description>
+    <description></description>
+    <pubData>2022/07/24</pubData>
+    <lastBuildDate>2022/07/24</lastBuildDate>
+    <category></category>
   </item>
   <item>
     <title>HTTP 缓存策略</title>
     <link>https://puellaquae.github.io/page/web/http-cache.html</link>
-    <description>HTTP 缓存策略</description>
+    <description></description>
+    <pubData>2022/07/04</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Web</category>
   </item>
   <item>
     <title>C++ 的 const 限定</title>
     <link>https://puellaquae.github.io/page/cpp/cpp-const.html</link>
-    <description>C++ 的 const 限定</description>
+    <description></description>
+    <pubData>2022/07/02</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Cpp</category>
   </item>
   <item>
     <title>安卓开发记录</title>
     <link>https://puellaquae.github.io/page/android-dev.html</link>
-    <description>安卓开发记录</description>
+    <description></description>
+    <pubData>2022/05/02</pubData>
+    <lastBuildDate>2022/06/08</lastBuildDate>
+    <category></category>
   </item>
   <item>
     <title>博客系统编年史</title>
     <link>https://puellaquae.github.io/page/changelog.html</link>
-    <description>博客系统编年史</description>
+    <description></description>
+    <pubData>2022/04/01</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category></category>
   </item>
   <item>
     <title>Pintos 实验记录</title>
     <link>https://puellaquae.github.io/page/os/pintos.html</link>
-    <description>Pintos 实验记录</description>
+    <description></description>
+    <pubData>2021/11/29</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>OS</category>
   </item>
   <item>
     <title>正则表达式转化为自动机</title>
     <link>https://puellaquae.github.io/page/compile/regex.html</link>
-    <description>正则表达式转化为自动机</description>
+    <description></description>
+    <pubData>2021/10/15</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Compile</category>
   </item>
   <item>
     <title>对 nlohmann-json 构造函数的分析</title>
     <link>https://puellaquae.github.io/page/cpp/nlohmann-construct.html</link>
-    <description>对 nlohmann-json 构造函数的分析</description>
+    <description></description>
+    <pubData>2021/01/30</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Cpp</category>
   </item>
   <item>
     <title>错误与弯路集</title>
     <link>https://puellaquae.github.io/page/bugs-and-fail.html</link>
-    <description>错误与弯路集</description>
+    <description></description>
+    <pubData>2020/08/21</pubData>
+    <lastBuildDate>2022/04/08</lastBuildDate>
+    <category></category>
   </item>
   <item>
     <title>CSS 选择器与 input 标签的联用</title>
     <link>https://puellaquae.github.io/page/web/css-filter.html</link>
-    <description>CSS 选择器与 input 标签的联用</description>
+    <description></description>
+    <pubData>2020/08/14</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Web</category>
   </item>
   <item>
     <title>C++ 多线程 std::thread join 与 detach</title>
     <link>https://puellaquae.github.io/page/cpp/std-thread.html</link>
-    <description>C++ 多线程 std::thread join 与 detach</description>
+    <description></description>
+    <pubData>2020/08/07</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Cpp</category>
   </item>
   <item>
     <title>C++ 多线程 volatile 限定符</title>
     <link>https://puellaquae.github.io/page/cpp/multithread-1.html</link>
-    <description>C++ 多线程 volatile 限定符</description>
+    <description></description>
+    <pubData>2020/07/27</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Cpp</category>
   </item>
   <item>
     <title>80 行的课设，C++ 标准库在简单增删改查中的使用</title>
     <link>https://puellaquae.github.io/page/cpp/stl-in-crud.html</link>
-    <description>80 行的课设，C++ 标准库在简单增删改查中的使用</description>
+    <description></description>
+    <pubData>2020/07/15</pubData>
+    <lastBuildDate>2024/03/22</lastBuildDate>
+    <category>Cpp</category>
   </item>
   </channel>
 
