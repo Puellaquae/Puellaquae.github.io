@@ -6,11 +6,27 @@
   <link>https://puellaquae.github.io</link>
   <description>Puelloc</description>
   <item>
+    <title>监听子进程输出</title>
+    <link>https://puellaquae.github.io/page/linux/stdio-monitor.html</link>
+    <description></description>
+    <pubData>2024/03/24</pubData>
+    <lastBuildDate>2024/03/24</lastBuildDate>
+    <category>Linux</category>
+  </item>
+  <item>
+    <title>阻止 Ctrl C 杀死父进程</title>
+    <link>https://puellaquae.github.io/page/linux/sigint-handler.html</link>
+    <description></description>
+    <pubData>2024/03/24</pubData>
+    <lastBuildDate>2024/03/24</lastBuildDate>
+    <category>Linux</category>
+  </item>
+  <item>
     <title>fork：像线程一样使用进程</title>
     <link>https://puellaquae.github.io/page/linux/fork-usage.html</link>
     <description></description>
     <pubData>2023/10/10</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <lastBuildDate>2024/03/24</lastBuildDate>
     <category>Linux</category>
   </item>
   <item>
@@ -26,7 +42,7 @@
     <link>https://puellaquae.github.io/page/project/crypto-wasi.html</link>
     <description></description>
     <pubData>2023/03/05</pubData>
-    <lastBuildDate>2023/10/10</lastBuildDate>
+    <lastBuildDate>2024/03/24</lastBuildDate>
     <category>Project</category>
   </item>
   <item>
@@ -74,7 +90,7 @@
     <link>https://puellaquae.github.io/page/cpp/cpp-const.html</link>
     <description></description>
     <pubData>2022/07/02</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <lastBuildDate>2024/03/24</lastBuildDate>
     <category>Cpp</category>
   </item>
   <item>
@@ -106,7 +122,7 @@
     <link>https://puellaquae.github.io/page/compile/regex.html</link>
     <description></description>
     <pubData>2021/10/15</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <lastBuildDate>2024/03/24</lastBuildDate>
     <category>Compile</category>
   </item>
   <item>
@@ -130,7 +146,7 @@
     <link>https://puellaquae.github.io/page/web/css-filter.html</link>
     <description></description>
     <pubData>2020/08/14</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <lastBuildDate>2024/03/24</lastBuildDate>
     <category>Web</category>
   </item>
   <item>

@@ -172,7 +172,7 @@ RegexToken::Closure => {
 
 ## NFA 转 DFA
 
-NFA 转 DFA 使用子集构造法，这需要为 NFA 增加一个 `get_reach` 函数计算一个状态消耗一个字符可到达的状态的集合。另外 DFA 没有采用 NFA 一样的数据结构，而是直接使用了一个二维数组表示。
+NFA 转 DFA 使用子集构造法，这需要为 NFA 增加一个 get_reach 函数计算一个状态消耗一个字符可到达的状态的集合。另外 DFA 没有采用 NFA 一样的数据结构，而是直接使用了一个二维数组表示。
 
 ```rust
 pub struct DFA {

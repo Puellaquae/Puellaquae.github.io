@@ -22,7 +22,8 @@ import {
     TexInlineMetadata,
     PunctuationCompression,
     Descript,
-    DescriptMetadata
+    DescriptMetadata,
+    RedirectLink
 } from "./macro";
 import { basename, extname, dirname, format, join, relative } from "path/posix";
 
@@ -216,7 +217,8 @@ const macro = {
     GFMTexBlock,
     TexInline,
     PunctuationCompression,
-    Descript
+    Descript,
+    RedirectLink
 };
 
 type MacroName = keyof typeof macro;
@@ -236,6 +238,7 @@ type MacrosMetadatas = [
 const forceMacro: { name: MacroName, arg?: string }[] = [
     { name: "Title" },
     { name: "HighlightFenceCode" },
+    { name: "RedirectLink" }
 ];
 
 new Articles("article").process(macro, forceMacro).output("page", ".").done();

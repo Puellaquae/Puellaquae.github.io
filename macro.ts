@@ -27,6 +27,10 @@ const HighlightFenceCode: Macro = {
     func(node: Node, metadata: Map<string, unknown>): NodeData | null {
         if (node.type === "fenceCode") {
             easyMap<Metadata>(metadata).entry("hasCodeBlock").or(true);
+            let tooLong = node.data.code.split("\n").find(l => l.length > 80);
+            if (tooLong) {
+                console.error("Code line too much long:", tooLong);
+            }
             let code = highligt.highlight(node.data.code, { language: node.data.codetype }).value;
             return {
                 type: "rawHtml",
@@ -275,6 +279,29 @@ const Descript: Macro = {
 
 type DescriptMetadata = { descript: string };
 
+const RedirectLink: Macro = {
+    filter: ["link"],
+    func: function (node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
+        if (node.type == "link") {
+            if (node.data.url.endsWith(".md")) {
+                return {
+                    type: "link",
+                    data: {
+                        name: node.data.name,
+                        url: node.data.url.substring(0, node.data.url.length - 2) + "html"
+                    }
+                }
+            } else {
+                return {
+                    type: "link",
+                    data: node.data
+                }
+            }
+        }
+        return null;
+    }
+}
+
 export {
     Title, TitleMetadata,
     HighlightInlineCode, HighlightInlineCodeMetadata,
@@ -285,5 +312,6 @@ export {
     GFMTexBlock, GFMTexBlockMetadata,
     TexInline, TexInlineMetadata,
     PunctuationCompression,
-    Descript, DescriptMetadata
+    Descript, DescriptMetadata,
+    RedirectLink
 };

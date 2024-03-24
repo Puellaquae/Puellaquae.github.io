@@ -2,6 +2,8 @@
 
 [__网页版本__](https://puellaquae.github.io/) | [TODO](article/roadmap.md) | [关于](article/about.md)
 
+- [监听子进程输出](article/linux/stdio-monitor.md)
+- [阻止 Ctrl C 杀死父进程](article/linux/sigint-handler.md)
 - [fork：像线程一样使用进程](article/linux/fork-usage.md)
 - [四川之行（WIP）](article/thought/suchuan.md)
 - [Crypto-wasi 开发记录（WIP）](article/project/crypto-wasi.md)

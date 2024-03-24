@@ -32,6 +32,9 @@ CSS 的选择器与 `<input>` 标签的联用可以代替 JS 实现一些简单�
 <div class="item tag1 tag2">item with tag1 tag2</div>
 ```
 
+<!M Exclude>
+<!--
+
 <!M RawHtml>
 ```html
 <div class="interact" id="interact1">
@@ -79,9 +82,15 @@ CSS 的选择器与 `<input>` 标签的联用可以代替 JS 实现一些简单�
 </div>
 ```
 
+<!M Exclude>
+-->
+
 ## 拓展
 
 `<label>` 元素也可以根据 `:checked` 显示或隐藏，从而实现类似 `radio` 与 `checkbox` 相结合的效果。
+
+<!M Exclude>
+<!--
 
 <!M RawHtml>
 ```html
@@ -191,9 +200,15 @@ CSS 的选择器与 `<input>` 标签的联用可以代替 JS 实现一些简单�
 </div>
 ```
 
+<!M Exclude>
+-->
+
 当然，这种作法是不推荐用于实际情况的，`n` 个标签就需要 `2^n` 个 `radio` 记录状态和 `n2^n` 个label控制状态的转移。这会导致代码十分冗长，而且标签的切换需要频繁地重排页面，以及伪类选择器的大量使用（属性选择器可以预先展开为 id 选择器），都会降低页面的性能。
 
 根据这个原理，只要是可以抽象为有限状态机模型的理论上都是可以利用用 CSS 实现的，此外利用 animation 产生时间差切换显示不同的label还可以模拟出伪随机的状态游走（效果会受限于浏览器的时间精度和刷新策略）。
+
+<!M Exclude>
+<!--
 
 <!M RawHtml>
 ```html
@@ -284,6 +299,9 @@ CSS 的选择器与 `<input>` 标签的联用可以代替 JS 实现一些简单�
     </div>
 </div>
 ```
+
+<!M Exclude>
+-->
 
 HTML + CSS3 是被认为图灵完备的，因为它可以实现元胞自动机 [Rule 110](https://en.wikipedia.org/wiki/Rule_110)，这里有一个[实现的例子](http://eli.fox-epste.in/rule110-full.html)。因为无论是 HTML 还是 CSS 都无法自行改变元素的属性，所以每一步计算都需要人为介入，十分繁琐。
 

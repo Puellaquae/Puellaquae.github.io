@@ -23,7 +23,7 @@
         <div class="archive">
             <h1>Crypto-wasi 开发记录（WIP）</h1>
             <div class="modified date">
-                2023年10月10日
+                2024年3月24日
             </div>
             <div class="create date">
                 2023年3月5日
@@ -81,7 +81,7 @@
 <span class="hljs-built_in">EVP_PKEY_CTX_set1_hkdf_salt</span>(ctx, salt.<span class="hljs-built_in">data</span>(), salt.<span class="hljs-built_in">size</span>());
 <span class="hljs-function">std::vector&lt;<span class="hljs-type">uint8_t</span>&gt; <span class="hljs-title">out</span><span class="hljs-params">(<span class="hljs-number">32</span>)</span></span>;
 <span class="hljs-type">size_t</span> out_size;
-<span class="hljs-built_in">EVP_PKEY_derive</span>(ctx, out.<span class="hljs-built_in">data</span>(), &amp;out_ize);</code></pre></div><p>所以对于 ikm 为零长度的情况调用 hmac 代替 extract。</p><h2>pbkdf2</h2><p>pbkdf2 是一个多次调用伪随机函数为基础的函数，这里主要是基于 HMAC。</p><h2>scrypt</h2><p>scrypt 在 wasi-crypto 中并没有提供相应的接口，这里采用了纯代码的实现。</p><h2>cipher 和 decipher</h2><p>这一块 wasi-crypto 提供了 <code>AES-128-GCM</code>，<code>AES-256-GCM</code> 和 <code>CHACHA20-POLY1305</code> 这两种对称加密算法。</p><p></p>
+<span class="hljs-built_in">EVP_PKEY_derive</span>(ctx, out.<span class="hljs-built_in">data</span>(), &amp;out_ize);</code></pre></div><p>所以对于 ikm 为零长度的情况调用 hmac 代替 extract。</p><h2>pbkdf2</h2><p>pbkdf2 是一个多次调用伪随机函数为基础的函数，这里主要是基于 HMAC。</p><h2>scrypt</h2><p>scrypt 在 wasi-crypto 中并没有提供相应的接口，这里采用了纯代码的实现。</p><h2>cipher 和 decipher</h2><p>这一块 wasi-crypto 提供了 AES-128-GCM，AES-256-GCM 和 CHACHA20-POLY1305 这两种对称加密算法。</p><p></p>
             </div>
         </div>
     </div>

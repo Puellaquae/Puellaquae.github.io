@@ -97,4 +97,4 @@ scrypt 在 wasi-crypto 中并没有提供相应的接口，这里采用了纯代
 
 ## cipher 和 decipher
 
-这一块 wasi-crypto 提供了 `AES-128-GCM`，`AES-256-GCM` 和 `CHACHA20-POLY1305` 这两种对称加密算法。
+这一块 wasi-crypto 提供了 AES-128-GCM，AES-256-GCM 和 CHACHA20-POLY1305 这两种对称加密算法。

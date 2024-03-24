@@ -16,11 +16,11 @@
 
 ```cpp
 template <class Task, class Ret, size_t TaskCnt> struct ProcessPool {
-#if defined(ATOMIC_INT_LOCK_FREE)
+#if ATOMIC_INT_LOCK_FREE == 2
     using AtomicLockFreeType = std::atomic<int>;
-#elif defined(ATOMIC_LONG_LOCK_FREE)
+#elif ATOMIC_LONG_LOCK_FREE == 2
     using AtomicLockFreeType = std::atomic<long>;
-#elif defined(ATOMIC_LLONG_LOCK_FREE)
+#elif ATOMIC_LLONG_LOCK_FREE == 2
     using AtomicLockFreeType = std::atomic<long long>;
 #endif
 
@@ -43,13 +43,13 @@ template <class Task, class Ret, size_t TaskCnt> struct ProcessPool {
     void CreateProc() {
         pid_t pid = fork();
         if (pid == -1) {
-            printf("fork fail: %s\n", strerror(errno));
+            perror("fork");
             exit(-1);
         }
         if (pid == 0) {
             shmp = (SharedMemory *)shmat(shmid, NULL, 0);
             if ((void *)shmp == (void *)-1) {
-                printf("shmat fail: %s\n", strerror(errno));
+                perror("shmat");
                 exit(-1);
             }
             pid_t mine = getpid();
@@ -66,7 +66,7 @@ template <class Task, class Ret, size_t TaskCnt> struct ProcessPool {
             }
             int ret = shmdt(shmp);
             if (ret == -1) {
-                printf("shmdt fail: %s\n", strerror(errno));
+                perror("shmdt");
                 exit(-1);
             }
             exit(0);
@@ -80,13 +80,13 @@ template <class Task, class Ret, size_t TaskCnt> struct ProcessPool {
         : tasks(tasks), func(fn) {
         shmid = shmget(IPC_PRIVATE, sizeof(SharedMemory), IPC_CREAT | 0600);
         if (shmid == -1) {
-            printf("shmget fail: %s\n", strerror(errno));
+            perror("shmget");
             exit(-1);
         }
 
         shmp = (SharedMemory *)shmat(shmid, NULL, 0);
         if ((void *)shmp == (void *)-1) {
-            printf("shmat fail: %s\n", strerror(errno));
+            perror("shmat");
             exit(-1);
         }
         new (&shmp->tasksTopIdx) decltype(shmp->tasksTopIdx);
@@ -134,4 +134,10 @@ template <class Task, class Ret, size_t TaskCnt> struct ProcessPool {
 };
 ```
 
-核心的思想就是利用 fork 创建一个进程来执行传入的函数，利用一个下标来分配任务，函数的结果直接写入共享内容（这里对返回值的类型有要求，因为数据通信使用的是直接内存拷贝）。这里我开发的时候 `shmget` 的 `key` 得是 `IPC_PRIVATE`，否则会会报 `Permission denied`，暂时不清楚是什么原因。父进程等到所有的子进程都推出后返回所有的输入，如果发现有子进程意外结束，就记录进程退出的状态码，然后重新拉起一个进程。
+核心的思想就是利用 fork 创建一个进程来执行传入的函数，利用一个下标来分配任务，函数的结果直接写入共享内容（这里对返回值的类型有要求，因为数据通信使用的是直接内存拷贝）。这里我开发的时候 shmget 的 key 得是 IPC_PRIVATE，否则会会报 Permission denied，暂时不清楚是什么原因。父进程等到所有的子进程都推出后返回所有的输入，如果发现有子进程意外结束，就记录进程退出的状态码，然后重新拉起一个进程。
+
+## 后日谈
+
+Linux 上还存在一个更符合我原始想象的函数 **clone**，直接从函数启动一个进程。对 fork 的调用等同于对 clone(2) 使用标志 SIGCHLD 的调用。
+
+后续：[阻止 Ctrl C 杀死父进程](./sigint-handler.md)

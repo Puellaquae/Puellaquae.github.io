@@ -23,7 +23,7 @@
         <div class="archive">
             <h1>正则表达式转化为自动机</h1>
             <div class="modified date">
-                2024年3月22日
+                2024年3月24日
             </div>
             <div class="create date">
                 2021年10月15日
@@ -130,7 +130,7 @@ in -&gt; |   | &lt;---+
     nfa.<span class="hljs-title function_ invoke__">add_edge</span>(idx, e_start);
     nfa.<span class="hljs-title function_ invoke__">add_edge</span>(e_out, idx);
     stack.<span class="hljs-title function_ invoke__">push</span>((idx, idx));
-}</code></pre></div><p>最后栈里剩下的一个块就是完整的图了，两个下标分别就是 NFA 的初始状态和接收状态，后缀表达式到 NFA 的转化就做完了。</p><h2>NFA 转 DFA</h2><p>NFA 转 DFA 使用子集构造法，这需要为 NFA 增加一个 <code>get_reach</code> 函数计算一个状态消耗一个字符可到达的状态的集合。另外 DFA 没有采用 NFA 一样的数据结构，而是直接使用了一个二维数组表示。</p><div class='codeblock'><pre><code><span class="hljs-keyword">pub</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">DFA</span> {
+}</code></pre></div><p>最后栈里剩下的一个块就是完整的图了，两个下标分别就是 NFA 的初始状态和接收状态，后缀表达式到 NFA 的转化就做完了。</p><h2>NFA 转 DFA</h2><p>NFA 转 DFA 使用子集构造法，这需要为 NFA 增加一个 get_reach 函数计算一个状态消耗一个字符可到达的状态的集合。另外 DFA 没有采用 NFA 一样的数据结构，而是直接使用了一个二维数组表示。</p><div class='codeblock'><pre><code><span class="hljs-keyword">pub</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">DFA</span> {
     <span class="hljs-keyword">pub</span> accepts: <span class="hljs-type">Vec</span>&lt;<span class="hljs-type">char</span>&gt;,
     <span class="hljs-keyword">pub</span> table: <span class="hljs-type">Vec</span>&lt;<span class="hljs-type">Vec</span>&lt;<span class="hljs-type">Option</span>&lt;<span class="hljs-type">usize</span>&gt;&gt;&gt;,
     <span class="hljs-keyword">pub</span> start: <span class="hljs-type">usize</span>,
