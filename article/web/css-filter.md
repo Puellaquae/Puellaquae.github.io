@@ -6,7 +6,7 @@ tags = ["CSS"]
 # CSS 选择器与 input 标签的联用
 
 <!M Exclude>
-**本文有交互式内容，建议前往[网面版本](https://puellaquae.github.io/page/css-filter.html)查看**
+**本文有交互式内容，建议前往[网面版本](https://puellaquae.github.io/page/web/css-filter.html)查看**
 
 CSS 的选择器与 `<input>` 标签的联用可以代替 JS 实现一些简单功能，如标签筛选、可折叠菜单栏等。
 

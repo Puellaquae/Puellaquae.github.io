@@ -27,7 +27,7 @@ const HighlightFenceCode: Macro = {
     func(node: Node, metadata: Map<string, unknown>): NodeData | null {
         if (node.type === "fenceCode") {
             easyMap<Metadata>(metadata).entry("hasCodeBlock").or(true);
-            let tooLong = node.data.code.split("\n").find(l => l.length > 80);
+            let tooLong = node.data.code.split("\n").find(l => l.length > 100);
             if (tooLong) {
                 console.error("Code line too much long:", tooLong);
             }

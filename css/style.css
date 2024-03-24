@@ -305,6 +305,11 @@ body {
     font-family: var(--codeFont);
 }
 
+.archive .codeblock {
+    font-size: 0.75em;
+    font-family: var(--codeFont);
+}
+
 .archive q {
     font-style: italic;
 }
