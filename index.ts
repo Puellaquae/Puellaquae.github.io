@@ -142,7 +142,8 @@ class Articles {
         if (dirname(rawdir) !== ".") {
             let sub = basename(rawdir);
             const specSubName: { [key: string]: string } = {
-                "os": "OS"
+                "os": "OS",
+                "mlsys": "MLsys"
             }
             if (Object.keys(specSubName).includes(sub)) {
                 sub = specSubName[sub]

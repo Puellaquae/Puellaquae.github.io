@@ -118,6 +118,8 @@ a {
     text-decoration: none;
     color: var(--linkerColor);
     cursor: pointer;
+    transition-duration: 0.25s;
+    transition-property: color;
 }
 
 .post a {
@@ -146,6 +148,7 @@ a {
 
 a:hover {
     color: var(--highlightColor);
+    transition: cubic-bezier(0, 1, 0, 1);
 }
 
 .entry a {
@@ -329,10 +332,13 @@ body {
 label[for="timeLine"] {
     cursor: pointer;
     outline: none;
+    transition-duration: 0.25s;
 }
 
 label[for="timeLine"]:hover {
     color: var(--highlightColor);
+    transition: cubic-bezier(0, 1, 0, 1);
+    transition-duration: 0.25s;
 }
 
 label[for="timeLine"]::before {

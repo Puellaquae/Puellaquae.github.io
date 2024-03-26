@@ -6,6 +6,14 @@
   <link>https://puellaquae.github.io</link>
   <description>Puelloc</description>
   <item>
+    <title>Ring AllReduce</title>
+    <link>https://puellaquae.github.io/page/mlsys/ring-allreduce.html</link>
+    <description></description>
+    <pubData>2024/03/26</pubData>
+    <lastBuildDate>2024/03/26</lastBuildDate>
+    <category>MLsys</category>
+  </item>
+  <item>
     <title>监听子进程输出</title>
     <link>https://puellaquae.github.io/page/linux/stdio-monitor.html</link>
     <description></description>
