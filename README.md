@@ -6,8 +6,6 @@
 - [监听子进程输出](article/linux/stdio-monitor.md)
 - [阻止 Ctrl C 杀死父进程](article/linux/sigint-handler.md)
 - [fork：像线程一样使用进程](article/linux/fork-usage.md)
-- [四川之行（WIP）](article/thought/suchuan.md)
-- [Crypto-wasi 开发记录（WIP）](article/project/crypto-wasi.md)
 - [低代码开发的特点和挑战：来自从业者的视角](article/paper/low-code-practitioners-view.cn.md)
 - [2022 回顾](article/thought/2022-review.md)
 - [C++ 小知识](article/cpp/cpp-tricky.md)

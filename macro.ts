@@ -1,10 +1,10 @@
 import { easyMap, Macro, Node, NodeData, Ptm } from "jsptm";
 import { Metadata } from "./metadata";
-import highligt from "highlight.js";
 import { spawnSync } from "child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "fs";
 import path from "path";
 import { customAlphabet } from "nanoid";
+import { codeToHtml } from "shiki";
 
 const HighlightInlineCode: Macro = {
     filter: ["inlineCode"],
@@ -13,7 +13,7 @@ const HighlightInlineCode: Macro = {
             easyMap<Metadata>(metadata).entry("hasInlineCode").or(true);
             return {
                 type: "rawHtml",
-                data: { html: "<code>" + highligt.highlightAuto(node.data.code).value + "</code>" },
+                data: { html: "<code>" + node.data.code + "</code>" },
             }
         }
         return null;
@@ -24,17 +24,27 @@ type HighlightInlineCodeMetadata = { hasInlineCode: boolean };
 
 const HighlightFenceCode: Macro = {
     filter: ["fenceCode"],
-    func(node: Node, metadata: Map<string, unknown>): NodeData | null {
+    async func(node: Node, metadata: Map<string, unknown>): Promise<NodeData | null> {
         if (node.type === "fenceCode") {
             easyMap<Metadata>(metadata).entry("hasCodeBlock").or(true);
             let tooLong = node.data.code.split("\n").find(l => l.length > 100);
             if (tooLong) {
                 console.error("Code line too much long:", tooLong);
             }
-            let code = highligt.highlight(node.data.code, { language: node.data.codetype }).value;
+            let ctype = node.data.codetype;
+            const TypeMap: { [key: string]: string } = {
+                "x86asm": "asm"
+            };
+            if (Object.keys(TypeMap).includes(ctype)) {
+                ctype = TypeMap[ctype];
+            }
+            let code = await codeToHtml(node.data.code, {
+                lang: ctype,
+                theme: "github-light"
+            });
             return {
                 type: "rawHtml",
-                data: { html: `<div class='codeblock'><pre><code>${code}</code></pre></div>` },
+                data: { html: `<div class='codeblock'>${code}</div>` },
             }
 
         }

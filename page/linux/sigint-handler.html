@@ -7,7 +7,6 @@
     <meta name="description" content="阻止 Ctrl C 杀死父进程">
     <title>阻止 Ctrl C 杀死父进程</title>
     <link rel="stylesheet" href="../../css/style.css" />
-    <link rel="stylesheet" href="../../css/codecolor.css" />
 </head>
 
 <body>
@@ -30,174 +29,174 @@
             </div>
             
             <div class="entry">
-                <p>接着<a href="./fork-usage.html">fork：像线程一样使用进程</a>这篇文章，有时某一个子进程卡死了，只能用 Ctrl C 杀死，但是父进程也会被一起杀死，就无法得到已经运行结束进程的结果了；或者我不想继续运行了，但我仍然想要得到已经完成的结果。</p><h2>做什么</h2><p>父进程需要能够处理 Ctrl C 事件，同时有额外的参数记录进程的情况：进程正常退出，进程意外退出，进程未完成；这里没有区分进程是没有开始还是运行到一半人为停止了。当 Ctrl C 按下后，停止所有的子进程，对于未启动的子进程也不再运行了，直接收集子进程的运行结果。</p><h2>怎么做</h2><p>首先要能够感知到 SIGINT（Ctrl C）事件，使用 sigaction 函数可以切换信号的处理函数，sigaction 会返回旧的处理函数，需要保留下来以便处理结束后恢复回原始的处理函数。不过这个处理函数是 <code>(int signal) -&gt; void</code>，没法传递自己的参数，好在可以利用全局函数指针解决一下。</p><p>这里只需要父进程使用我们的处理函数，子进程并不需要，因为按照需求父进程需要把所有的子进程杀死，直接让子进程收到 SIGINT 自己结束就可以了。所以在 fork 后再使用 sigcation 切换会原始的处理函数。</p><p>因为子进程没有修改 SIGINT 处理函数，所以杀死进程时可以直接使用 SIGINT 将其杀死，然后父进程中监听退出原因是否是 SIGINT 来判断子进程是被父进程杀死的还是自己奔溃了。</p><div class='codeblock'><pre><code><span class="hljs-keyword">enum</span> {
-    PROCESS_POOL_TASK_UNFIN = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">7</span>,
-    PROCESS_POOL_TASK_FIN = <span class="hljs-number">2</span> &lt;&lt; <span class="hljs-number">7</span>,
-    PROCESS_POOL_TASK_CRASH = <span class="hljs-number">3</span> &lt;&lt; <span class="hljs-number">7</span>,
-};
-
-<span class="hljs-function"><span class="hljs-keyword">inline</span> std::function&lt;<span class="hljs-title">void</span><span class="hljs-params">()</span>&gt; &amp;<span class="hljs-title">SuiteTestOnSignalEvent</span><span class="hljs-params">()</span> </span>{
-    <span class="hljs-type">static</span> std::function&lt;<span class="hljs-type">void</span>()&gt; fn = <span class="hljs-literal">nullptr</span>;
-    <span class="hljs-keyword">return</span> fn;
-};
-
-<span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">void</span> <span class="hljs-title">SuiteTestSignalHandler</span><span class="hljs-params">(<span class="hljs-type">int</span> signal)</span> </span>{
-    <span class="hljs-keyword">auto</span> &amp;fn = <span class="hljs-built_in">SuiteTestOnSignalEvent</span>();
-    <span class="hljs-keyword">if</span> (fn != <span class="hljs-literal">nullptr</span>) {
-        <span class="hljs-built_in">fn</span>();
-    } <span class="hljs-keyword">else</span> {
-        <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);
-    }
-}
-
-<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">Task</span>, <span class="hljs-keyword">class</span> <span class="hljs-title class_">Ret</span>, <span class="hljs-type">size_t</span> TaskCnt&gt; <span class="hljs-keyword">struct</span> <span class="hljs-title class_">ProcessPool</span> {
-<span class="hljs-meta">#<span class="hljs-keyword">if</span> ATOMIC_INT_LOCK_FREE == 2</span>
-    <span class="hljs-keyword">using</span> AtomicLockFreeType = std::atomic&lt;<span class="hljs-type">int</span>&gt;;
-<span class="hljs-meta">#<span class="hljs-keyword">elif</span> ATOMIC_LONG_LOCK_FREE == 2</span>
-    <span class="hljs-keyword">using</span> AtomicLockFreeType = std::atomic&lt;<span class="hljs-type">long</span>&gt;;
-<span class="hljs-meta">#<span class="hljs-keyword">elif</span> ATOMIC_LLONG_LOCK_FREE == 2</span>
-    <span class="hljs-keyword">using</span> AtomicLockFreeType = std::atomic&lt;<span class="hljs-type">long</span> <span class="hljs-type">long</span>&gt;;
-<span class="hljs-meta">#<span class="hljs-keyword">endif</span></span>
-
-    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">SharedMemory</span> {
-        AtomicLockFreeType tasksTopIdx;
-        Ret rets[TaskCnt];
-        <span class="hljs-type">pid_t</span> whom[TaskCnt];
-        <span class="hljs-type">int</span> taskStatus[TaskCnt];
-    };
-
-    <span class="hljs-built_in">static_assert</span>(std::is_trivial_v&lt;Ret&gt; &amp;&amp; std::is_standard_layout_v&lt;Ret&gt;,
-                  <span class="hljs-string">&quot;Ret require trivial and standard_layout&quot;</span>);
-
-    std::vector&lt;Task&gt; tasks;
-    <span class="hljs-type">int</span> shmid;
-    SharedMemory *shmp = <span class="hljs-literal">nullptr</span>;
-    std::vector&lt;<span class="hljs-type">pid_t</span>&gt; child_process;
-    std::function&lt;Ret(Task)&gt; func;
-    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">sigaction</span> system_handler;
-    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">sigaction</span> self_handler;
-    std::unordered_set&lt;<span class="hljs-type">pid_t</span>&gt; exited_process;
-
-    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CreateProc</span><span class="hljs-params">()</span> </span>{
-        <span class="hljs-type">pid_t</span> pid = fork();
-        <span class="hljs-keyword">if</span> (pid == <span class="hljs-number">-1</span>) {
-            <span class="hljs-built_in">perror</span>(<span class="hljs-string">&quot;fork&quot;</span>);
-            <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
-        }
-        <span class="hljs-keyword">if</span> (pid == <span class="hljs-number">0</span>) {
-            <span class="hljs-built_in">sigaction</span>(SIGINT, &amp;system_handler, <span class="hljs-literal">nullptr</span>);
-            shmp = (SharedMemory *)<span class="hljs-built_in">shmat</span>(shmid, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>);
-            <span class="hljs-keyword">if</span> ((<span class="hljs-type">void</span> *)shmp == (<span class="hljs-type">void</span> *)<span class="hljs-number">-1</span>) {
-                <span class="hljs-built_in">perror</span>(<span class="hljs-string">&quot;shmat&quot;</span>);
-                <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
-            }
-            <span class="hljs-type">pid_t</span> mine = <span class="hljs-built_in">getpid</span>();
-            <span class="hljs-keyword">do</span> {
-                <span class="hljs-type">size_t</span> curTask = shmp-&gt;tasksTopIdx.<span class="hljs-built_in">fetch_add</span>(<span class="hljs-number">1</span>);
-                <span class="hljs-keyword">if</span> (curTask &gt;= TaskCnt) {
-                    <span class="hljs-keyword">break</span>;
-                }
-                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;child[%d] get task %ld\n&quot;</span>, mine, curTask);
-                shmp-&gt;whom[curTask] = mine;
-                Ret ret = <span class="hljs-built_in">func</span>(tasks[curTask]);
-                <span class="hljs-built_in">memcpy</span>(shmp-&gt;rets + curTask, &amp;ret, <span class="hljs-built_in">sizeof</span>(ret));
-                shmp-&gt;taskStatus[curTask] = PROCESS_POOL_TASK_FIN;
-            } <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);
-            <span class="hljs-type">int</span> ret = <span class="hljs-built_in">shmdt</span>(shmp);
-            <span class="hljs-keyword">if</span> (ret == <span class="hljs-number">-1</span>) {
-                <span class="hljs-built_in">perror</span>(<span class="hljs-string">&quot;shmdt&quot;</span>);
-                <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
-            }
-            <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);
-        } <span class="hljs-keyword">else</span> {
-            child_process.<span class="hljs-built_in">push_back</span>(pid);
-        }
-    }
-
-    <span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">class</span> <span class="hljs-title class_">Fn</span>&gt;
-    <span class="hljs-built_in">ProcessPool</span>(Fn fn, <span class="hljs-type">const</span> std::vector&lt;Task&gt; tasks, <span class="hljs-type">int</span> poolSize) 
-        : <span class="hljs-built_in">tasks</span>(tasks), <span class="hljs-built_in">func</span>(fn) {
-        shmid = <span class="hljs-built_in">shmget</span>(IPC_PRIVATE, <span class="hljs-built_in">sizeof</span>(SharedMemory), IPC_CREAT | <span class="hljs-number">0600</span>);
-        <span class="hljs-keyword">if</span> (shmid == <span class="hljs-number">-1</span>) {
-            <span class="hljs-built_in">perror</span>(<span class="hljs-string">&quot;shmget&quot;</span>);
-            <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
-        }
-
-        shmp = (SharedMemory *)<span class="hljs-built_in">shmat</span>(shmid, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>);
-        <span class="hljs-keyword">if</span> ((<span class="hljs-type">void</span> *)shmp == (<span class="hljs-type">void</span> *)<span class="hljs-number">-1</span>) {
-            <span class="hljs-built_in">perror</span>(<span class="hljs-string">&quot;shmat&quot;</span>);
-            <span class="hljs-built_in">exit</span>(<span class="hljs-number">-1</span>);
-        }
-        <span class="hljs-keyword">new</span> (&amp;shmp-&gt;tasksTopIdx) <span class="hljs-keyword">decltype</span>(shmp-&gt;tasksTopIdx);
-        <span class="hljs-keyword">for</span> (<span class="hljs-type">size_t</span> i = <span class="hljs-number">0</span>; i &lt; TaskCnt; i++) {
-            shmp-&gt;taskStatus[i] = PROCESS_POOL_TASK_UNFIN;
-        }
-        shmp-&gt;tasksTopIdx.<span class="hljs-built_in">store</span>(<span class="hljs-number">0</span>);
-
-        <span class="hljs-built_in">SuiteTestOnSignalEvent</span>() = [<span class="hljs-keyword">this</span>](){ <span class="hljs-keyword">this</span>-&gt;<span class="hljs-built_in">abort</span>(); };
-        self_handler.sa_handler = SuiteTestSignalHandler;
-        <span class="hljs-built_in">sigemptyset</span>(&amp;self_handler.sa_mask);
-        self_handler.sa_flags = <span class="hljs-number">0</span>;
-
-        <span class="hljs-built_in">sigaction</span>(SIGINT, &amp;self_handler, &amp;system_handler);
-        poolSize = std::<span class="hljs-built_in">min</span>(poolSize, (<span class="hljs-type">int</span>)TaskCnt);
-        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; poolSize; i++) {
-            <span class="hljs-built_in">CreateProc</span>();
-        }
-    }
-
-    std::vector&lt;std::tuple&lt;Ret, <span class="hljs-type">int</span>&gt;&gt; <span class="hljs-built_in">await</span>() {
-        <span class="hljs-type">size_t</span> exited_children = <span class="hljs-number">0</span>;
-        <span class="hljs-keyword">while</span> (exited_children &lt; child_process.<span class="hljs-built_in">size</span>()) {
-            <span class="hljs-type">int</span> status = <span class="hljs-number">0</span>;
-            <span class="hljs-type">pid_t</span> who = <span class="hljs-built_in">waitpid</span>(<span class="hljs-number">-1</span>, &amp;status, <span class="hljs-number">0</span>);
-            <span class="hljs-keyword">if</span> (who == <span class="hljs-number">-1</span>) {
-                <span class="hljs-keyword">break</span>;
-            }
-            exited_process.<span class="hljs-built_in">insert</span>(who);
-            <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">WIFEXITED</span>(status)) {
-                <span class="hljs-keyword">if</span> (<span class="hljs-built_in">WTERMSIG</span>(status) != SIGINT) {
-                    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;child[%d] killed, create new proc\n&quot;</span>, who);
-                    <span class="hljs-keyword">for</span> (<span class="hljs-type">size_t</span> i = <span class="hljs-number">0</span>; i &lt; TaskCnt; i++) {
-                        <span class="hljs-keyword">if</span> (shmp-&gt;whom[i] == who &amp;&amp; 
-                            shmp-&gt;taskStatus[i] == PROCESS_POOL_TASK_UNFIN) {
-                            shmp-&gt;taskStatus[i] = 
-                                (status &amp; <span class="hljs-number">0x7f</span>) | PROCESS_POOL_TASK_CRASH;
-                            <span class="hljs-keyword">break</span>;
-                        }
-                    }
-                    <span class="hljs-built_in">CreateProc</span>();
-                }
-            } <span class="hljs-keyword">else</span> {
-                <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;child[%d] finish\n&quot;</span>, who);
-            }
-            exited_children++;
-        }
-        std::vector&lt;std::tuple&lt;Ret, <span class="hljs-type">int</span>&gt;&gt; rets;
-        rets.<span class="hljs-built_in">reserve</span>(TaskCnt);
-        <span class="hljs-keyword">for</span> (<span class="hljs-type">size_t</span> i = <span class="hljs-number">0</span>; i &lt; TaskCnt; i++) {
-            rets.<span class="hljs-built_in">emplace_back</span>(shmp-&gt;rets[i], shmp-&gt;taskStatus[i]);
-        }
-        <span class="hljs-keyword">return</span> rets;
-    }
-
-    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">abort</span><span class="hljs-params">()</span> </span>{
-        std::vector&lt;<span class="hljs-type">pid_t</span>&gt; kill_list;
-        std::<span class="hljs-built_in">swap</span>(kill_list, child_process);
-        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> pid : kill_list) {
-            <span class="hljs-keyword">if</span> (exited_process.<span class="hljs-built_in">count</span>(pid) == <span class="hljs-number">0</span>) {
-                <span class="hljs-built_in">kill</span>(pid, SIGINT);
-            }
-        }
-    }
-
-    ~<span class="hljs-built_in">ProcessPool</span>() {
-        <span class="hljs-built_in">shmdt</span>(shmp);
-        shmid_ds ds;
-        <span class="hljs-built_in">shmctl</span>(shmid, IPC_RMID, &amp;ds);
-        <span class="hljs-built_in">sigaction</span>(SIGINT, &amp;system_handler, <span class="hljs-literal">nullptr</span>);
-    }
-};</code></pre></div><h2>后续</h2><p><a href="./stdio-monitor.html">监听子进程输出</a></p><p></p>
+                <p>接着<a href="./fork-usage.html">fork：像线程一样使用进程</a>这篇文章，有时某一个子进程卡死了，只能用 Ctrl C 杀死，但是父进程也会被一起杀死，就无法得到已经运行结束进程的结果了；或者我不想继续运行了，但我仍然想要得到已经完成的结果。</p><h2>做什么</h2><p>父进程需要能够处理 Ctrl C 事件，同时有额外的参数记录进程的情况：进程正常退出，进程意外退出，进程未完成；这里没有区分进程是没有开始还是运行到一半人为停止了。当 Ctrl C 按下后，停止所有的子进程，对于未启动的子进程也不再运行了，直接收集子进程的运行结果。</p><h2>怎么做</h2><p>首先要能够感知到 SIGINT（Ctrl C）事件，使用 sigaction 函数可以切换信号的处理函数，sigaction 会返回旧的处理函数，需要保留下来以便处理结束后恢复回原始的处理函数。不过这个处理函数是 <code>(int signal) -&gt; void</code>，没法传递自己的参数，好在可以利用全局函数指针解决一下。</p><p>这里只需要父进程使用我们的处理函数，子进程并不需要，因为按照需求父进程需要把所有的子进程杀死，直接让子进程收到 SIGINT 自己结束就可以了。所以在 fork 后再使用 sigcation 切换会原始的处理函数。</p><p>因为子进程没有修改 SIGINT 处理函数，所以杀死进程时可以直接使用 SIGINT 将其杀死，然后父进程中监听退出原因是否是 SIGINT 来判断子进程是被父进程杀死的还是自己奔溃了。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">enum</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#005CC5">    PROCESS_POOL_TASK_UNFIN</span><span style="color:#D73A49"> =</span><span style="color:#005CC5"> 1</span><span style="color:#D73A49"> &#x3C;&#x3C;</span><span style="color:#005CC5"> 7</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#005CC5">    PROCESS_POOL_TASK_FIN</span><span style="color:#D73A49"> =</span><span style="color:#005CC5"> 2</span><span style="color:#D73A49"> &#x3C;&#x3C;</span><span style="color:#005CC5"> 7</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#005CC5">    PROCESS_POOL_TASK_CRASH</span><span style="color:#D73A49"> =</span><span style="color:#005CC5"> 3</span><span style="color:#D73A49"> &#x3C;&#x3C;</span><span style="color:#005CC5"> 7</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#24292E">};</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">inline</span><span style="color:#6F42C1"> std</span><span style="color:#24292E">::</span><span style="color:#6F42C1">function</span><span style="color:#24292E">&#x3C;</span><span style="color:#D73A49">void</span><span style="color:#24292E">()> </span><span style="color:#D73A49">&#x26;</span><span style="color:#6F42C1">SuiteTestOnSignalEvent</span><span style="color:#24292E">() {</span></span>
+<span class="line"><span style="color:#D73A49">    static</span><span style="color:#6F42C1"> std</span><span style="color:#24292E">::function</span><span style="color:#D73A49">&#x3C;void</span><span style="color:#24292E">()</span><span style="color:#D73A49">></span><span style="color:#24292E"> fn </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> nullptr</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#D73A49">    return</span><span style="color:#24292E"> fn;</span></span>
+<span class="line"><span style="color:#24292E">};</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">inline</span><span style="color:#D73A49"> void</span><span style="color:#6F42C1"> SuiteTestSignalHandler</span><span style="color:#24292E">(</span><span style="color:#D73A49">int</span><span style="color:#E36209"> signal</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#D73A49">    auto</span><span style="color:#D73A49"> &#x26;</span><span style="color:#24292E">fn </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> SuiteTestOnSignalEvent</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">    if</span><span style="color:#24292E"> (fn </span><span style="color:#D73A49">!=</span><span style="color:#005CC5"> nullptr</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#6F42C1">        fn</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">    } </span><span style="color:#D73A49">else</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#6F42C1">        exit</span><span style="color:#24292E">(</span><span style="color:#005CC5">0</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">template</span><span style="color:#24292E"> &#x3C;</span><span style="color:#D73A49">class</span><span style="color:#6F42C1"> Task</span><span style="color:#24292E">, </span><span style="color:#D73A49">class</span><span style="color:#6F42C1"> Ret</span><span style="color:#24292E">, </span><span style="color:#D73A49">size_t</span><span style="color:#6F42C1"> TaskCnt</span><span style="color:#24292E">> </span><span style="color:#D73A49">struct</span><span style="color:#6F42C1"> ProcessPool</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">#if</span><span style="color:#6F42C1"> ATOMIC_INT_LOCK_FREE</span><span style="color:#D73A49"> ==</span><span style="color:#005CC5"> 2</span></span>
+<span class="line"><span style="color:#D73A49">    using</span><span style="color:#6F42C1"> AtomicLockFreeType</span><span style="color:#D73A49"> =</span><span style="color:#6F42C1"> std</span><span style="color:#24292E">::</span><span style="color:#6F42C1">atomic</span><span style="color:#24292E">&#x3C;</span><span style="color:#D73A49">int</span><span style="color:#24292E">>;</span></span>
+<span class="line"><span style="color:#D73A49">#elif</span><span style="color:#24292E"> ATOMIC_LONG_LOCK_FREE </span><span style="color:#D73A49">==</span><span style="color:#005CC5"> 2</span></span>
+<span class="line"><span style="color:#D73A49">    using</span><span style="color:#6F42C1"> AtomicLockFreeType</span><span style="color:#D73A49"> =</span><span style="color:#6F42C1"> std</span><span style="color:#24292E">::</span><span style="color:#6F42C1">atomic</span><span style="color:#24292E">&#x3C;</span><span style="color:#D73A49">long</span><span style="color:#24292E">>;</span></span>
+<span class="line"><span style="color:#D73A49">#elif</span><span style="color:#24292E"> ATOMIC_LLONG_LOCK_FREE </span><span style="color:#D73A49">==</span><span style="color:#005CC5"> 2</span></span>
+<span class="line"><span style="color:#D73A49">    using</span><span style="color:#6F42C1"> AtomicLockFreeType</span><span style="color:#D73A49"> =</span><span style="color:#6F42C1"> std</span><span style="color:#24292E">::</span><span style="color:#6F42C1">atomic</span><span style="color:#24292E">&#x3C;</span><span style="color:#D73A49">long</span><span style="color:#D73A49"> long</span><span style="color:#24292E">>;</span></span>
+<span class="line"><span style="color:#D73A49">#endif</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    struct</span><span style="color:#6F42C1"> SharedMemory</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#24292E">        AtomicLockFreeType tasksTopIdx;</span></span>
+<span class="line"><span style="color:#24292E">        Ret rets[TaskCnt];</span></span>
+<span class="line"><span style="color:#D73A49">        pid_t</span><span style="color:#24292E"> whom[TaskCnt];</span></span>
+<span class="line"><span style="color:#D73A49">        int</span><span style="color:#24292E"> taskStatus[TaskCnt];</span></span>
+<span class="line"><span style="color:#24292E">    };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    static_assert</span><span style="color:#24292E">(</span><span style="color:#6F42C1">std</span><span style="color:#24292E">::is_trivial_v</span><span style="color:#D73A49">&#x3C;</span><span style="color:#24292E">Ret</span><span style="color:#D73A49">></span><span style="color:#D73A49"> &#x26;&#x26;</span><span style="color:#6F42C1"> std</span><span style="color:#24292E">::is_standard_layout_v</span><span style="color:#D73A49">&#x3C;</span><span style="color:#24292E">Ret</span><span style="color:#D73A49">></span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#032F62">                  "Ret require trivial and standard_layout"</span><span style="color:#24292E">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1">    std</span><span style="color:#24292E">::vector</span><span style="color:#D73A49">&#x3C;</span><span style="color:#24292E">Task</span><span style="color:#D73A49">></span><span style="color:#24292E"> tasks;</span></span>
+<span class="line"><span style="color:#D73A49">    int</span><span style="color:#24292E"> shmid;</span></span>
+<span class="line"><span style="color:#24292E">    SharedMemory </span><span style="color:#D73A49">*</span><span style="color:#24292E">shmp </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> nullptr</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#6F42C1">    std</span><span style="color:#24292E">::vector</span><span style="color:#D73A49">&#x3C;pid_t></span><span style="color:#24292E"> child_process;</span></span>
+<span class="line"><span style="color:#6F42C1">    std</span><span style="color:#24292E">::function</span><span style="color:#D73A49">&#x3C;</span><span style="color:#6F42C1">Ret</span><span style="color:#24292E">(Task)</span><span style="color:#D73A49">></span><span style="color:#24292E"> func;</span></span>
+<span class="line"><span style="color:#D73A49">    struct</span><span style="color:#6F42C1"> sigaction</span><span style="color:#24292E"> system_handler;</span></span>
+<span class="line"><span style="color:#D73A49">    struct</span><span style="color:#6F42C1"> sigaction</span><span style="color:#24292E"> self_handler;</span></span>
+<span class="line"><span style="color:#6F42C1">    std</span><span style="color:#24292E">::unordered_set</span><span style="color:#D73A49">&#x3C;pid_t></span><span style="color:#24292E"> exited_process;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    void</span><span style="color:#6F42C1"> CreateProc</span><span style="color:#24292E">() {</span></span>
+<span class="line"><span style="color:#D73A49">        pid_t</span><span style="color:#24292E"> pid </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> fork</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">        if</span><span style="color:#24292E"> (pid </span><span style="color:#D73A49">==</span><span style="color:#D73A49"> -</span><span style="color:#005CC5">1</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#6F42C1">            perror</span><span style="color:#24292E">(</span><span style="color:#032F62">"fork"</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#6F42C1">            exit</span><span style="color:#24292E">(</span><span style="color:#D73A49">-</span><span style="color:#005CC5">1</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#D73A49">        if</span><span style="color:#24292E"> (pid </span><span style="color:#D73A49">==</span><span style="color:#005CC5"> 0</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#6F42C1">            sigaction</span><span style="color:#24292E">(SIGINT, </span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">system_handler, </span><span style="color:#005CC5">nullptr</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">            shmp </span><span style="color:#D73A49">=</span><span style="color:#24292E"> (SharedMemory </span><span style="color:#D73A49">*</span><span style="color:#24292E">)</span><span style="color:#6F42C1">shmat</span><span style="color:#24292E">(shmid, </span><span style="color:#005CC5">NULL</span><span style="color:#24292E">, </span><span style="color:#005CC5">0</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#D73A49">            if</span><span style="color:#24292E"> ((</span><span style="color:#D73A49">void</span><span style="color:#D73A49"> *</span><span style="color:#24292E">)shmp </span><span style="color:#D73A49">==</span><span style="color:#24292E"> (</span><span style="color:#D73A49">void</span><span style="color:#D73A49"> *</span><span style="color:#24292E">)</span><span style="color:#D73A49">-</span><span style="color:#005CC5">1</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#6F42C1">                perror</span><span style="color:#24292E">(</span><span style="color:#032F62">"shmat"</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#6F42C1">                exit</span><span style="color:#24292E">(</span><span style="color:#D73A49">-</span><span style="color:#005CC5">1</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#D73A49">            pid_t</span><span style="color:#24292E"> mine </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> getpid</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">            do</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">                size_t</span><span style="color:#24292E"> curTask </span><span style="color:#D73A49">=</span><span style="color:#24292E"> shmp->tasksTopIdx.</span><span style="color:#6F42C1">fetch_add</span><span style="color:#24292E">(</span><span style="color:#005CC5">1</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#D73A49">                if</span><span style="color:#24292E"> (curTask </span><span style="color:#D73A49">>=</span><span style="color:#24292E"> TaskCnt) {</span></span>
+<span class="line"><span style="color:#D73A49">                    break</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#24292E">                }</span></span>
+<span class="line"><span style="color:#6F42C1">                printf</span><span style="color:#24292E">(</span><span style="color:#032F62">"child[</span><span style="color:#005CC5">%d</span><span style="color:#032F62">] get task </span><span style="color:#005CC5">%ld\n</span><span style="color:#032F62">"</span><span style="color:#24292E">, mine, curTask);</span></span>
+<span class="line"><span style="color:#24292E">                shmp->whom[curTask] </span><span style="color:#D73A49">=</span><span style="color:#24292E"> mine;</span></span>
+<span class="line"><span style="color:#24292E">                Ret ret </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> func</span><span style="color:#24292E">(tasks[curTask]);</span></span>
+<span class="line"><span style="color:#6F42C1">                memcpy</span><span style="color:#24292E">(shmp->rets </span><span style="color:#D73A49">+</span><span style="color:#24292E"> curTask, </span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">ret, </span><span style="color:#D73A49">sizeof</span><span style="color:#24292E">(ret));</span></span>
+<span class="line"><span style="color:#24292E">                shmp->taskStatus[curTask] </span><span style="color:#D73A49">=</span><span style="color:#24292E"> PROCESS_POOL_TASK_FIN;</span></span>
+<span class="line"><span style="color:#24292E">            } </span><span style="color:#D73A49">while</span><span style="color:#24292E"> (</span><span style="color:#005CC5">true</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#D73A49">            int</span><span style="color:#24292E"> ret </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> shmdt</span><span style="color:#24292E">(shmp);</span></span>
+<span class="line"><span style="color:#D73A49">            if</span><span style="color:#24292E"> (ret </span><span style="color:#D73A49">==</span><span style="color:#D73A49"> -</span><span style="color:#005CC5">1</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#6F42C1">                perror</span><span style="color:#24292E">(</span><span style="color:#032F62">"shmdt"</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#6F42C1">                exit</span><span style="color:#24292E">(</span><span style="color:#D73A49">-</span><span style="color:#005CC5">1</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#6F42C1">            exit</span><span style="color:#24292E">(</span><span style="color:#005CC5">0</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">        } </span><span style="color:#D73A49">else</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#24292E">            child_process.</span><span style="color:#6F42C1">push_back</span><span style="color:#24292E">(pid);</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    template</span><span style="color:#24292E"> &#x3C;</span><span style="color:#D73A49">class</span><span style="color:#6F42C1"> Fn</span><span style="color:#24292E">></span></span>
+<span class="line"><span style="color:#6F42C1">    ProcessPool</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Fn</span><span style="color:#E36209"> fn</span><span style="color:#24292E">, </span><span style="color:#D73A49">const</span><span style="color:#6F42C1"> std</span><span style="color:#24292E">::</span><span style="color:#6F42C1">vector</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">Task</span><span style="color:#24292E">> </span><span style="color:#E36209">tasks</span><span style="color:#24292E">, </span><span style="color:#D73A49">int</span><span style="color:#E36209"> poolSize</span><span style="color:#24292E">) </span></span>
+<span class="line"><span style="color:#24292E">        : </span><span style="color:#6F42C1">tasks</span><span style="color:#24292E">(tasks), </span><span style="color:#6F42C1">func</span><span style="color:#24292E">(fn) {</span></span>
+<span class="line"><span style="color:#24292E">        shmid </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> shmget</span><span style="color:#24292E">(IPC_PRIVATE, </span><span style="color:#D73A49">sizeof</span><span style="color:#24292E">(SharedMemory), IPC_CREAT </span><span style="color:#D73A49">|</span><span style="color:#D73A49"> 0</span><span style="color:#005CC5">600</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#D73A49">        if</span><span style="color:#24292E"> (shmid </span><span style="color:#D73A49">==</span><span style="color:#D73A49"> -</span><span style="color:#005CC5">1</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#6F42C1">            perror</span><span style="color:#24292E">(</span><span style="color:#032F62">"shmget"</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#6F42C1">            exit</span><span style="color:#24292E">(</span><span style="color:#D73A49">-</span><span style="color:#005CC5">1</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E">        shmp </span><span style="color:#D73A49">=</span><span style="color:#24292E"> (SharedMemory </span><span style="color:#D73A49">*</span><span style="color:#24292E">)</span><span style="color:#6F42C1">shmat</span><span style="color:#24292E">(shmid, </span><span style="color:#005CC5">NULL</span><span style="color:#24292E">, </span><span style="color:#005CC5">0</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#D73A49">        if</span><span style="color:#24292E"> ((</span><span style="color:#D73A49">void</span><span style="color:#D73A49"> *</span><span style="color:#24292E">)shmp </span><span style="color:#D73A49">==</span><span style="color:#24292E"> (</span><span style="color:#D73A49">void</span><span style="color:#D73A49"> *</span><span style="color:#24292E">)</span><span style="color:#D73A49">-</span><span style="color:#005CC5">1</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#6F42C1">            perror</span><span style="color:#24292E">(</span><span style="color:#032F62">"shmat"</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#6F42C1">            exit</span><span style="color:#24292E">(</span><span style="color:#D73A49">-</span><span style="color:#005CC5">1</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#D73A49">        new</span><span style="color:#24292E"> (</span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">shmp->tasksTopIdx) </span><span style="color:#D73A49">decltype</span><span style="color:#24292E">(shmp->tasksTopIdx);</span></span>
+<span class="line"><span style="color:#D73A49">        for</span><span style="color:#24292E"> (</span><span style="color:#D73A49">size_t</span><span style="color:#24292E"> i </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> 0</span><span style="color:#24292E">; i </span><span style="color:#D73A49">&#x3C;</span><span style="color:#24292E"> TaskCnt; i</span><span style="color:#D73A49">++</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#24292E">            shmp->taskStatus[i] </span><span style="color:#D73A49">=</span><span style="color:#24292E"> PROCESS_POOL_TASK_UNFIN;</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#24292E">        shmp->tasksTopIdx.</span><span style="color:#6F42C1">store</span><span style="color:#24292E">(</span><span style="color:#005CC5">0</span><span style="color:#24292E">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1">        SuiteTestOnSignalEvent</span><span style="color:#24292E">() </span><span style="color:#D73A49">=</span><span style="color:#24292E"> [</span><span style="color:#005CC5">this</span><span style="color:#24292E">](){ </span><span style="color:#005CC5">this</span><span style="color:#24292E">-></span><span style="color:#6F42C1">abort</span><span style="color:#24292E">(); };</span></span>
+<span class="line"><span style="color:#24292E">        self_handler.sa_handler </span><span style="color:#D73A49">=</span><span style="color:#24292E"> SuiteTestSignalHandler;</span></span>
+<span class="line"><span style="color:#6F42C1">        sigemptyset</span><span style="color:#24292E">(</span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">self_handler.sa_mask);</span></span>
+<span class="line"><span style="color:#24292E">        self_handler.sa_flags </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> 0</span><span style="color:#24292E">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1">        sigaction</span><span style="color:#24292E">(SIGINT, </span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">self_handler, </span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">system_handler);</span></span>
+<span class="line"><span style="color:#24292E">        poolSize </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> std</span><span style="color:#24292E">::</span><span style="color:#6F42C1">min</span><span style="color:#24292E">(poolSize, (</span><span style="color:#D73A49">int</span><span style="color:#24292E">)TaskCnt);</span></span>
+<span class="line"><span style="color:#D73A49">        for</span><span style="color:#24292E"> (</span><span style="color:#D73A49">int</span><span style="color:#24292E"> i </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> 0</span><span style="color:#24292E">; i </span><span style="color:#D73A49">&#x3C;</span><span style="color:#24292E"> poolSize; i</span><span style="color:#D73A49">++</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#6F42C1">            CreateProc</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1">    std</span><span style="color:#24292E">::</span><span style="color:#6F42C1">vector</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">std</span><span style="color:#24292E">::</span><span style="color:#6F42C1">tuple</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">Ret</span><span style="color:#24292E">, </span><span style="color:#D73A49">int</span><span style="color:#24292E">>> </span><span style="color:#6F42C1">await</span><span style="color:#24292E">() {</span></span>
+<span class="line"><span style="color:#D73A49">        size_t</span><span style="color:#24292E"> exited_children </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> 0</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#D73A49">        while</span><span style="color:#24292E"> (exited_children </span><span style="color:#D73A49">&#x3C;</span><span style="color:#24292E"> child_process.</span><span style="color:#6F42C1">size</span><span style="color:#24292E">()) {</span></span>
+<span class="line"><span style="color:#D73A49">            int</span><span style="color:#24292E"> status </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> 0</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#D73A49">            pid_t</span><span style="color:#24292E"> who </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> waitpid</span><span style="color:#24292E">(</span><span style="color:#D73A49">-</span><span style="color:#005CC5">1</span><span style="color:#24292E">, </span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">status, </span><span style="color:#005CC5">0</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#D73A49">            if</span><span style="color:#24292E"> (who </span><span style="color:#D73A49">==</span><span style="color:#D73A49"> -</span><span style="color:#005CC5">1</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#D73A49">                break</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#24292E">            exited_process.</span><span style="color:#6F42C1">insert</span><span style="color:#24292E">(who);</span></span>
+<span class="line"><span style="color:#D73A49">            if</span><span style="color:#24292E"> (</span><span style="color:#D73A49">!</span><span style="color:#6F42C1">WIFEXITED</span><span style="color:#24292E">(status)) {</span></span>
+<span class="line"><span style="color:#D73A49">                if</span><span style="color:#24292E"> (</span><span style="color:#6F42C1">WTERMSIG</span><span style="color:#24292E">(status) </span><span style="color:#D73A49">!=</span><span style="color:#24292E"> SIGINT) {</span></span>
+<span class="line"><span style="color:#6F42C1">                    printf</span><span style="color:#24292E">(</span><span style="color:#032F62">"child[</span><span style="color:#005CC5">%d</span><span style="color:#032F62">] killed, create new proc</span><span style="color:#005CC5">\n</span><span style="color:#032F62">"</span><span style="color:#24292E">, who);</span></span>
+<span class="line"><span style="color:#D73A49">                    for</span><span style="color:#24292E"> (</span><span style="color:#D73A49">size_t</span><span style="color:#24292E"> i </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> 0</span><span style="color:#24292E">; i </span><span style="color:#D73A49">&#x3C;</span><span style="color:#24292E"> TaskCnt; i</span><span style="color:#D73A49">++</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#D73A49">                        if</span><span style="color:#24292E"> (shmp->whom[i] </span><span style="color:#D73A49">==</span><span style="color:#24292E"> who </span><span style="color:#D73A49">&#x26;&#x26;</span><span style="color:#24292E"> </span></span>
+<span class="line"><span style="color:#24292E">                            shmp->taskStatus[i] </span><span style="color:#D73A49">==</span><span style="color:#24292E"> PROCESS_POOL_TASK_UNFIN) {</span></span>
+<span class="line"><span style="color:#24292E">                            shmp->taskStatus[i] </span><span style="color:#D73A49">=</span><span style="color:#24292E"> </span></span>
+<span class="line"><span style="color:#24292E">                                (status </span><span style="color:#D73A49">&#x26;</span><span style="color:#D73A49"> 0x</span><span style="color:#005CC5">7f</span><span style="color:#24292E">) </span><span style="color:#D73A49">|</span><span style="color:#24292E"> PROCESS_POOL_TASK_CRASH;</span></span>
+<span class="line"><span style="color:#D73A49">                            break</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#24292E">                        }</span></span>
+<span class="line"><span style="color:#24292E">                    }</span></span>
+<span class="line"><span style="color:#6F42C1">                    CreateProc</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">                }</span></span>
+<span class="line"><span style="color:#24292E">            } </span><span style="color:#D73A49">else</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#6F42C1">                printf</span><span style="color:#24292E">(</span><span style="color:#032F62">"child[</span><span style="color:#005CC5">%d</span><span style="color:#032F62">] finish</span><span style="color:#005CC5">\n</span><span style="color:#032F62">"</span><span style="color:#24292E">, who);</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#24292E">            exited_children</span><span style="color:#D73A49">++</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#6F42C1">        std</span><span style="color:#24292E">::vector</span><span style="color:#D73A49">&#x3C;</span><span style="color:#6F42C1">std</span><span style="color:#24292E">::tuple</span><span style="color:#D73A49">&#x3C;</span><span style="color:#24292E">Ret, </span><span style="color:#D73A49">int>></span><span style="color:#24292E"> rets;</span></span>
+<span class="line"><span style="color:#24292E">        rets.</span><span style="color:#6F42C1">reserve</span><span style="color:#24292E">(TaskCnt);</span></span>
+<span class="line"><span style="color:#D73A49">        for</span><span style="color:#24292E"> (</span><span style="color:#D73A49">size_t</span><span style="color:#24292E"> i </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> 0</span><span style="color:#24292E">; i </span><span style="color:#D73A49">&#x3C;</span><span style="color:#24292E"> TaskCnt; i</span><span style="color:#D73A49">++</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#24292E">            rets.</span><span style="color:#6F42C1">emplace_back</span><span style="color:#24292E">(shmp->rets[i], shmp->taskStatus[i]);</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#D73A49">        return</span><span style="color:#24292E"> rets;</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    void</span><span style="color:#6F42C1"> abort</span><span style="color:#24292E">() {</span></span>
+<span class="line"><span style="color:#6F42C1">        std</span><span style="color:#24292E">::vector</span><span style="color:#D73A49">&#x3C;pid_t></span><span style="color:#24292E"> kill_list;</span></span>
+<span class="line"><span style="color:#6F42C1">        std</span><span style="color:#24292E">::</span><span style="color:#6F42C1">swap</span><span style="color:#24292E">(kill_list, child_process);</span></span>
+<span class="line"><span style="color:#D73A49">        for</span><span style="color:#24292E"> (</span><span style="color:#D73A49">auto</span><span style="color:#24292E"> pid : kill_list) {</span></span>
+<span class="line"><span style="color:#D73A49">            if</span><span style="color:#24292E"> (exited_process.</span><span style="color:#6F42C1">count</span><span style="color:#24292E">(pid) </span><span style="color:#D73A49">==</span><span style="color:#005CC5"> 0</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#6F42C1">                kill</span><span style="color:#24292E">(pid, SIGINT);</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1">    ~ProcessPool</span><span style="color:#24292E">() {</span></span>
+<span class="line"><span style="color:#6F42C1">        shmdt</span><span style="color:#24292E">(shmp);</span></span>
+<span class="line"><span style="color:#24292E">        shmid_ds ds;</span></span>
+<span class="line"><span style="color:#6F42C1">        shmctl</span><span style="color:#24292E">(shmid, IPC_RMID, </span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">ds);</span></span>
+<span class="line"><span style="color:#6F42C1">        sigaction</span><span style="color:#24292E">(SIGINT, </span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">system_handler, </span><span style="color:#005CC5">nullptr</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">};</span></span></code></pre></div><h2>后续</h2><p><a href="./stdio-monitor.html">监听子进程输出</a></p><p></p>
             </div>
         </div>
     </div>

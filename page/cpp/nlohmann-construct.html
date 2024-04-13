@@ -7,7 +7,6 @@
     <meta name="description" content="对 nlohmann-json 构造函数的分析">
     <title>对 nlohmann-json 构造函数的分析</title>
     <link rel="stylesheet" href="../../css/style.css" />
-    <link rel="stylesheet" href="../../css/codecolor.css" />
 </head>
 
 <body>
@@ -32,8 +31,8 @@
             <span class="meta">C++</span>
             
             <div class="entry">
-                <p>之前看到 nlohmann 的 json 库中 <code>json</code> 的构造函数实现的很有意思。可以实现 <code>json{{"Array":{"Str",1,2.0,false,nullptr}},{"Object",{}}}</code> 这种所见即所得的效果。</p><p>看了源码以及经过几次试验后发现这个构造函数的关键在于这两个重载：</p><div class='codeblock'><pre><code><span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span>... T&gt; <span class="hljs-title">Json</span><span class="hljs-params">(T...)</span></span>; <span class="hljs-comment">// 记为重载</span>
-<span class="hljs-built_in">Json</span>(initializer_list&lt;Json&gt;); <span class="hljs-comment">// 记为重载 2</span></code></pre></div><p>以 <code>Json{1,{2},{{nullptr,true},{}}}</code> 为例，根据程序输出的结果来看：首先因为花括号里的元素类型不一致，参数传入重载 1，但是这里我发现传递进去的参数包只会有零个或一个，所以 1 被传入，源对象变为 <code>{Json@1,{2},{{nullptr,true},{}}}</code>；</p><p>对于 <code>{2}</code> 先进入重载 1，花括号里类型全部变成 <code>Json</code> 类型，可以被重载 2 接受，源对象变为 <code>{Json@1,Json@list_Json@2,{{nullptr,true},{}}}</code>。</p><p>如此反复递归，直到最后花括号内类型全部转化为 <code>Json</code> 类型被重载 2 接受。</p><p></p>
+                <p>之前看到 nlohmann 的 json 库中 <code>json</code> 的构造函数实现的很有意思。可以实现 <code>json{{"Array":{"Str",1,2.0,false,nullptr}},{"Object",{}}}</code> 这种所见即所得的效果。</p><p>看了源码以及经过几次试验后发现这个构造函数的关键在于这两个重载：</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">template</span><span style="color:#24292E">&#x3C;</span><span style="color:#D73A49">class</span><span style="color:#24292E">... </span><span style="color:#6F42C1">T</span><span style="color:#24292E">> </span><span style="color:#6F42C1">Json</span><span style="color:#24292E">(T...);</span><span style="color:#6A737D"> // 记为重载</span></span>
+<span class="line"><span style="color:#6F42C1">Json</span><span style="color:#24292E">(initializer_list</span><span style="color:#D73A49">&#x3C;</span><span style="color:#24292E">Json</span><span style="color:#D73A49">></span><span style="color:#24292E">);</span><span style="color:#6A737D"> // 记为重载 2</span></span></code></pre></div><p>以 <code>Json{1,{2},{{nullptr,true},{}}}</code> 为例，根据程序输出的结果来看：首先因为花括号里的元素类型不一致，参数传入重载 1，但是这里我发现传递进去的参数包只会有零个或一个，所以 1 被传入，源对象变为 <code>{Json@1,{2},{{nullptr,true},{}}}</code>；</p><p>对于 <code>{2}</code> 先进入重载 1，花括号里类型全部变成 <code>Json</code> 类型，可以被重载 2 接受，源对象变为 <code>{Json@1,Json@list_Json@2,{{nullptr,true},{}}}</code>。</p><p>如此反复递归，直到最后花括号内类型全部转化为 <code>Json</code> 类型被重载 2 接受。</p><p></p>
             </div>
         </div>
     </div>

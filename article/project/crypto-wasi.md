@@ -1,3 +1,7 @@
+<!---
+hideIndex = "both"
+--->
+
 # Crypto-wasi 开发记录（WIP）
 
 项目开发记录。

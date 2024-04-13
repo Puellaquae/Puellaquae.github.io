@@ -7,7 +7,6 @@
     <meta name="description" content="C++ 多线程 volatile 限定符">
     <title>C++ 多线程 volatile 限定符</title>
     <link rel="stylesheet" href="../../css/style.css" />
-    <link rel="stylesheet" href="../../css/codecolor.css" />
 </head>
 
 <body>
@@ -32,15 +31,15 @@
             <span class="meta">C++</span>
             
             <div class="entry">
-                <p>有线程 A 和 B，线程 B 需要中断等待线程 A 触发特定条件，线程 B 只需保证不早于线程 A 触发特定条件继续执行即可。如果使用一个 <code>flag</code> 变量和 <code>while</code> 忙查，如下代码</p><div class='codeblock'><pre><code><span class="hljs-keyword">while</span>(flag)
-<span class="hljs-comment">//do something</span></code></pre></div><p>会导致编译不能检测到 <code>flag</code> 在线程 A 中的读写操作，而导致优化后的代码和源代码的表现不一致，每次判断都从寄存器里直接取值，变成一个死循环。</p><div class='codeblock'><pre><code><span class="hljs-comment">;000000 </span>
-<span class="hljs-keyword">mov</span>  <span class="hljs-built_in">eax</span>, <span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> [flag]
-<span class="hljs-comment">;000001</span>
-<span class="hljs-keyword">test</span> <span class="hljs-built_in">eax</span>, <span class="hljs-built_in">eax</span> 
-<span class="hljs-comment">;000002</span>
-<span class="hljs-keyword">je</span>   <span class="hljs-number">000001h</span>    <span class="hljs-comment">;这里只跳转到test指令处，没有从内存中更新值 </span>
-<span class="hljs-comment">;000003</span>
-<span class="hljs-keyword">nop</span>             <span class="hljs-comment">;do something</span></code></pre></div><p>对于这种情况，就需要在变量 <code>flag</code> 上加上 <code>volatile</code> 限定符，阻止编译器对此变量的优化。</p><blockquote><p>通过 volatile 限定的类型的泛左值表达式的每次访问（读或写操作、成员函数调用等），都被当作对于优化而言是可见的副作用（即在单个执行线程内，volatile 访问不能被优化掉，或者与另一按顺序早于或按顺序晚于该 volatile 访问的可见副作用进行重排序。这使得 volatile 对象适用于与信号处理函数之间的交流，但不适于与另一执行线程交流，参阅 std::memory_order）。试图通过非 volatile 泛左值涉指 volatile 对象（例如，通过到非 volatile 类型的引用或指针）会导致未定义行为。</p></blockquote><blockquote><p>Every access (read or write operation, member function call, etc.) made through a glvalue expression of volatile-qualified type is treated as a visible side-effect for the purposes of optimization (that is, within a single thread of execution, volatile accesses cannot be optimized out or reordered with another visible side effect that is sequenced-before or sequenced-after the volatile access. This makes volatile objects suitable for communication with a signal handler, but not with another thread of execution, see std::memory_order). Any attempt to refer to a volatile object through a non-volatile glvalue (e.g. through a reference or pointer to non-volatile type) results in undefined behavior.</p></blockquote><p>当然，<code>volatile</code> 在这里只是阻止编译器做优化的作用，并不能保证时序。</p><p></p>
+                <p>有线程 A 和 B，线程 B 需要中断等待线程 A 触发特定条件，线程 B 只需保证不早于线程 A 触发特定条件继续执行即可。如果使用一个 <code>flag</code> 变量和 <code>while</code> 忙查，如下代码</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">while</span><span style="color:#24292E">(flag)</span></span>
+<span class="line"><span style="color:#6A737D">//do something</span></span></code></pre></div><p>会导致编译不能检测到 <code>flag</code> 在线程 A 中的读写操作，而导致优化后的代码和源代码的表现不一致，每次判断都从寄存器里直接取值，变成一个死循环。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#6A737D">;000000 </span></span>
+<span class="line"><span style="color:#D73A49">mov</span><span style="color:#005CC5">  eax</span><span style="color:#24292E">, </span><span style="color:#D73A49">dword</span><span style="color:#24292E"> ptr [flag]</span></span>
+<span class="line"><span style="color:#6A737D">;000001</span></span>
+<span class="line"><span style="color:#D73A49">test</span><span style="color:#005CC5"> eax</span><span style="color:#24292E">, </span><span style="color:#005CC5">eax</span><span style="color:#24292E"> </span></span>
+<span class="line"><span style="color:#6A737D">;000002</span></span>
+<span class="line"><span style="color:#D73A49">je</span><span style="color:#005CC5">   000001h</span><span style="color:#6A737D">    ;这里只跳转到test指令处，没有从内存中更新值 </span></span>
+<span class="line"><span style="color:#6A737D">;000003</span></span>
+<span class="line"><span style="color:#D73A49">nop</span><span style="color:#6A737D">             ;do something</span></span></code></pre></div><p>对于这种情况，就需要在变量 <code>flag</code> 上加上 <code>volatile</code> 限定符，阻止编译器对此变量的优化。</p><blockquote><p>通过 volatile 限定的类型的泛左值表达式的每次访问（读或写操作、成员函数调用等），都被当作对于优化而言是可见的副作用（即在单个执行线程内，volatile 访问不能被优化掉，或者与另一按顺序早于或按顺序晚于该 volatile 访问的可见副作用进行重排序。这使得 volatile 对象适用于与信号处理函数之间的交流，但不适于与另一执行线程交流，参阅 std::memory_order）。试图通过非 volatile 泛左值涉指 volatile 对象（例如，通过到非 volatile 类型的引用或指针）会导致未定义行为。</p></blockquote><blockquote><p>Every access (read or write operation, member function call, etc.) made through a glvalue expression of volatile-qualified type is treated as a visible side-effect for the purposes of optimization (that is, within a single thread of execution, volatile accesses cannot be optimized out or reordered with another visible side effect that is sequenced-before or sequenced-after the volatile access. This makes volatile objects suitable for communication with a signal handler, but not with another thread of execution, see std::memory_order). Any attempt to refer to a volatile object through a non-volatile glvalue (e.g. through a reference or pointer to non-volatile type) results in undefined behavior.</p></blockquote><p>当然，<code>volatile</code> 在这里只是阻止编译器做优化的作用，并不能保证时序。</p><p></p>
             </div>
         </div>
     </div>

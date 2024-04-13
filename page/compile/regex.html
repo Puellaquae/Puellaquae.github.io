@@ -7,7 +7,6 @@
     <meta name="description" content="正则表达式转化为自动机">
     <title>正则表达式转化为自动机</title>
     <link rel="stylesheet" href="../../css/style.css" />
-    <link rel="stylesheet" href="../../css/codecolor.css" />
 </head>
 
 <body>
@@ -34,236 +33,236 @@
             <span class="meta">Regex</span>
             
             <div class="entry">
-                <p>正则文法，3-型文法，可用正则表达式描述，可被有限状态自动机接受。</p><p>一般，正则表达式到 DFA 转化分为三步：</p><ul><li>正则表达式转化为 NFA</li><li>NFA 转化 DFA</li><li>DFA 最小化</li></ul><h2>正则表达式转化为 NFA</h2><h3>正则表达式的定义</h3><p>本文只实现了最基础的正则表达式，仅支持连接 <code>ab</code>，选择 <code>a|b</code> 和 Kleene 星号 <code>a*</code> 运算。此外，因为没有做字符转义，所以 ε 将被特殊符号处理。程序未考虑运算优先级，没有使用括号指明的都当作 UB 考虑。</p><h3>预处理正则表达式</h3><p>根据 <em><a href="https://swtch.com/~rsc/regexp/regexp1.html">Regular Expression Matching Can Be Simple And Fast</a></em> 这篇文章。预先将正则表达式预处理为后缀表达式再转化到 NFA 更方便。对于省略的连接运算符，相邻两个字符，字符与括号，星号和字符之间都需要额外补上。例如 <code>aa(((bc)|(de))*)f</code> 补上省略的连接符（用加号表示）<code>a+a+(((b+c)|(d+e))*)+f</code>，转为后缀 <code>aabc+de+|*f+++</code>。</p><div class='codeblock'><pre><code><span class="hljs-keyword">pub</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">regex2post</span>(r: &amp;<span class="hljs-type">str</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Vec</span>&lt;RegexToken&gt; {
-    <span class="hljs-keyword">use</span> RegexToken::{Alter, Cat, Bracket, Closure, Char};
-    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">stack</span> = Vec::<span class="hljs-title function_ invoke__">new</span>();
-    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">post</span> = Vec::<span class="hljs-title function_ invoke__">new</span>();
-    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">add_cat</span> = <span class="hljs-literal">false</span>; <span class="hljs-comment">// 表示是否需要一个连接符</span>
-    <span class="hljs-keyword">for</span> <span class="hljs-variable">c</span> <span class="hljs-keyword">in</span> r.<span class="hljs-title function_ invoke__">chars</span>() {
-        <span class="hljs-keyword">match</span> c {
-            <span class="hljs-string">&#x27;|&#x27;</span> =&gt; {
-                add_cat = <span class="hljs-literal">false</span>; <span class="hljs-comment">// 新的双目运算符直接取代了连接符</span>
-                stack.<span class="hljs-title function_ invoke__">push</span>(Alter);
-            }
-            <span class="hljs-string">&#x27;(&#x27;</span> =&gt; {
-                <span class="hljs-keyword">if</span> add_cat {
-                    stack.<span class="hljs-title function_ invoke__">push</span>(Cat);
-                    add_cat = <span class="hljs-literal">false</span>; <span class="hljs-comment">// 一个左括号可以连接前面的，但不能连接后面的</span>
-                }
-                stack.<span class="hljs-title function_ invoke__">push</span>(Bracket);
-            }
-            <span class="hljs-string">&#x27;)&#x27;</span> =&gt; {
-                <span class="hljs-keyword">if</span> !add_cat { <span class="hljs-built_in">unreachable!</span>(); }
-                <span class="hljs-keyword">while</span> !matches!(stack.<span class="hljs-title function_ invoke__">last</span>(), <span class="hljs-title function_ invoke__">Some</span>(Bracket) | <span class="hljs-literal">None</span>) {
-                    post.<span class="hljs-title function_ invoke__">push</span>(stack.<span class="hljs-title function_ invoke__">pop</span>().<span class="hljs-title function_ invoke__">unwrap</span>());
-                }
-                stack.<span class="hljs-title function_ invoke__">pop</span>();
-            }
-            <span class="hljs-string">&#x27;*&#x27;</span> =&gt; { <span class="hljs-comment">// 单目运算符不影响状态</span>
-                post.<span class="hljs-title function_ invoke__">push</span>(Closure);
-            }
-            <span class="hljs-string">&#x27;ε&#x27;</span> =&gt; {
-                <span class="hljs-keyword">if</span> add_cat {
-                    stack.<span class="hljs-title function_ invoke__">push</span>(Cat);
-                }
-                add_cat = <span class="hljs-literal">true</span>;
-                post.<span class="hljs-title function_ invoke__">push</span>(Epsilon);
-            }
-            _ =&gt; {
-                <span class="hljs-keyword">if</span> add_cat {
-                    stack.<span class="hljs-title function_ invoke__">push</span>(Cat);
-                }
-                add_cat = <span class="hljs-literal">true</span>; <span class="hljs-comment">// 字符即可连接前面也可连接后面</span>
-                post.<span class="hljs-title function_ invoke__">push</span>(<span class="hljs-title function_ invoke__">Char</span>(c));
-            }
-        }
-    }
-    <span class="hljs-keyword">if</span> !add_cat { <span class="hljs-built_in">unreachable!</span>(); }
-    <span class="hljs-keyword">while</span> <span class="hljs-keyword">let</span> <span class="hljs-variable">Some</span>(r) = stack.<span class="hljs-title function_ invoke__">pop</span>() {
-        post.<span class="hljs-title function_ invoke__">push</span>(r);
-    }
-    post
-}</code></pre></div><h3>后缀表达式转 NFA</h3><p>rust 用指针不是很方便，所以这里用数组来存放 NFA 的图结构。</p><div class='codeblock'><pre><code><span class="hljs-keyword">pub</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">NFA</span> {
-    <span class="hljs-keyword">pub</span> nodes: <span class="hljs-type">Vec</span>&lt;<span class="hljs-type">Option</span>&lt;<span class="hljs-type">char</span>&gt;&gt;,
-    <span class="hljs-keyword">pub</span> edges: <span class="hljs-type">Vec</span>&lt;(<span class="hljs-type">usize</span>, <span class="hljs-type">usize</span>)&gt;,
-    <span class="hljs-keyword">pub</span> start: <span class="hljs-type">usize</span>,
-    <span class="hljs-keyword">pub</span> out: <span class="hljs-type">usize</span>,
-}</code></pre></div><p>用一个栈来存放后缀表达式转化到 NFA 中临时的图，使用边来表示（即想象将这个图的入口和出口用一条有向边直接连起来），暂且称之为块。</p><p>对于字符，直接向图中添加新节点，压入下标。</p><div class='codeblock'><pre><code>RegexToken::<span class="hljs-title function_ invoke__">Char</span>(c) =&gt; {
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">idx</span> = nfa.<span class="hljs-title function_ invoke__">add_node</span>(NFANode::<span class="hljs-title function_ invoke__">new</span>(<span class="hljs-title function_ invoke__">Some</span>(*c)));
-    stack.<span class="hljs-title function_ invoke__">push</span>((idx, idx));
-}
-
-RegexToken::Epsilon =&gt; {
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">idx</span> = nfa.<span class="hljs-title function_ invoke__">add_node</span>(NFANode::<span class="hljs-title function_ invoke__">new</span>(<span class="hljs-literal">None</span>));
-    stack.<span class="hljs-title function_ invoke__">push</span>((idx, idx));
-}</code></pre></div><p>对于连接符，弹出两个块，块甲和块乙（注意先后）。连接乙的出和甲的入（这条边是可以确定下来存入 NFA 中的），再压入乙的入和甲的出。</p><div class='codeblock'><pre><code>      +---+    +---+
-in -&gt; | B | -&gt; | A | -&gt; out 
-      +---+    +---+</code></pre></div><div class='codeblock'><pre><code>RegexToken::Cat =&gt; {
-    <span class="hljs-keyword">let</span> (e2_start, e2_out) = stack.<span class="hljs-title function_ invoke__">pop</span>().<span class="hljs-title function_ invoke__">unwrap</span>();
-    <span class="hljs-keyword">let</span> (e1_start, e1_out) = stack.<span class="hljs-title function_ invoke__">pop</span>().<span class="hljs-title function_ invoke__">unwrap</span>();
-    nfa.<span class="hljs-title function_ invoke__">add_edge</span>(e1_out, e2_start);
-    stack.<span class="hljs-title function_ invoke__">push</span>((e1_start, e2_out));
-}</code></pre></div><p>对于选择符，弹出两个块，需要两个新节点做辅助，并可确定四条边。</p><div class='codeblock'><pre><code>              +---+
-        +---&gt; | A | ---&gt;+
-      +---+   +---+   +---+
-in -&gt; |   |           |   | -&gt; out
-      +---+   +---+   +---+
-        +---&gt; | B | ---&gt;+
-              +---+</code></pre></div><div class='codeblock'><pre><code>RegexToken::Alter =&gt; {
-    <span class="hljs-keyword">let</span> (e2_start, e2_out) = stack.<span class="hljs-title function_ invoke__">pop</span>().<span class="hljs-title function_ invoke__">unwrap</span>();
-    <span class="hljs-keyword">let</span> (e1_start, e1_out) = stack.<span class="hljs-title function_ invoke__">pop</span>().<span class="hljs-title function_ invoke__">unwrap</span>();
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">a_start</span> = nfa.<span class="hljs-title function_ invoke__">add_node</span>(NFANode::<span class="hljs-title function_ invoke__">new</span>(<span class="hljs-literal">None</span>));
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">a_out</span> = nfa.<span class="hljs-title function_ invoke__">add_node</span>(NFANode::<span class="hljs-title function_ invoke__">new</span>(<span class="hljs-literal">None</span>));
-    nfa.<span class="hljs-title function_ invoke__">add_edge</span>(a_start, e1_start);
-    nfa.<span class="hljs-title function_ invoke__">add_edge</span>(a_start, e2_start);
-    nfa.<span class="hljs-title function_ invoke__">add_edge</span>(e1_out, a_out);
-    nfa.<span class="hljs-title function_ invoke__">add_edge</span>(e2_out, a_out);
-    stack.<span class="hljs-title function_ invoke__">push</span>((a_start, a_out));
-}</code></pre></div><p>对于星号，弹出一个块，需要一个新节点做辅助，并可确定两条边。</p><div class='codeblock'><pre><code>              +---+
-        +---&gt; | A |
-      +---+   +---+
-in -&gt; |   | &lt;---+  
-      +---+
-        +---&gt; out</code></pre></div><div class='codeblock'><pre><code>RegexToken::Closure =&gt; {
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">idx</span> = nfa.<span class="hljs-title function_ invoke__">add_node</span>(NFANode::<span class="hljs-title function_ invoke__">new</span>(<span class="hljs-literal">None</span>));
-    <span class="hljs-keyword">let</span> (e_start, e_out) = stack.<span class="hljs-title function_ invoke__">pop</span>().<span class="hljs-title function_ invoke__">unwrap</span>();
-    nfa.<span class="hljs-title function_ invoke__">add_edge</span>(idx, e_start);
-    nfa.<span class="hljs-title function_ invoke__">add_edge</span>(e_out, idx);
-    stack.<span class="hljs-title function_ invoke__">push</span>((idx, idx));
-}</code></pre></div><p>最后栈里剩下的一个块就是完整的图了，两个下标分别就是 NFA 的初始状态和接收状态，后缀表达式到 NFA 的转化就做完了。</p><h2>NFA 转 DFA</h2><p>NFA 转 DFA 使用子集构造法，这需要为 NFA 增加一个 get_reach 函数计算一个状态消耗一个字符可到达的状态的集合。另外 DFA 没有采用 NFA 一样的数据结构，而是直接使用了一个二维数组表示。</p><div class='codeblock'><pre><code><span class="hljs-keyword">pub</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">DFA</span> {
-    <span class="hljs-keyword">pub</span> accepts: <span class="hljs-type">Vec</span>&lt;<span class="hljs-type">char</span>&gt;,
-    <span class="hljs-keyword">pub</span> table: <span class="hljs-type">Vec</span>&lt;<span class="hljs-type">Vec</span>&lt;<span class="hljs-type">Option</span>&lt;<span class="hljs-type">usize</span>&gt;&gt;&gt;,
-    <span class="hljs-keyword">pub</span> start: <span class="hljs-type">usize</span>,
-    <span class="hljs-keyword">pub</span> out: <span class="hljs-type">Vec</span>&lt;<span class="hljs-type">usize</span>&gt;,
-}</code></pre></div><p>以 <code>nfa.get_reach(nfa.start, None)</code> 作为初始状态，求新的状态，直到没有新的状态产生为止。所有包含了原终结状态的新状态都作为 DFA 的终结状态。</p><div class='codeblock'><pre><code><span class="hljs-keyword">pub</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">determinize</span>(nfa: &amp;NFA) <span class="hljs-punctuation">-&gt;</span> DFA {
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">start</span> = nfa.<span class="hljs-title function_ invoke__">get_reach</span>(nfa.start, <span class="hljs-literal">None</span>);
-    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">table</span> = Vec::<span class="hljs-title function_ invoke__">new</span>();
-    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">states</span> = <span class="hljs-built_in">vec!</span>[start.<span class="hljs-title function_ invoke__">clone</span>()];
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">accepts</span>: <span class="hljs-type">Vec</span>&lt;_&gt; = nfa
-        .<span class="hljs-title function_ invoke__">get_accepts</span>()
-        .<span class="hljs-title function_ invoke__">into_iter</span>()
-        .<span class="hljs-title function_ invoke__">filter</span>(|x| matches!(x, <span class="hljs-title function_ invoke__">Some</span>(_)))
-        .<span class="hljs-title function_ invoke__">map</span>(|x| x.<span class="hljs-title function_ invoke__">unwrap</span>())
-        .<span class="hljs-title function_ invoke__">collect</span>(); <span class="hljs-comment">// 输入符号集合</span>
-    <span class="hljs-keyword">while</span> !states.<span class="hljs-title function_ invoke__">is_empty</span>() {
-        <span class="hljs-keyword">let</span> <span class="hljs-variable">state</span> = states.<span class="hljs-title function_ invoke__">pop</span>().<span class="hljs-title function_ invoke__">unwrap</span>();
-        <span class="hljs-keyword">let</span> <span class="hljs-variable">new_states</span>: <span class="hljs-type">Vec</span>&lt;_&gt; = accepts
-            .<span class="hljs-title function_ invoke__">iter</span>()
-            .<span class="hljs-title function_ invoke__">map</span>(|a| {
-                <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">new_state</span>: <span class="hljs-type">Vec</span>&lt;_&gt; = state
-                    .<span class="hljs-title function_ invoke__">iter</span>()
-                    .<span class="hljs-title function_ invoke__">map</span>(|s| nfa.<span class="hljs-title function_ invoke__">get_reach</span>(*s, <span class="hljs-title function_ invoke__">Some</span>(*a)))
-                    .<span class="hljs-title function_ invoke__">flatten</span>()
-                    .<span class="hljs-title function_ invoke__">collect</span>();
-                new_state.<span class="hljs-title function_ invoke__">sort_unstable</span>();
-                new_state.<span class="hljs-title function_ invoke__">dedup</span>();
-                new_state
-            })
-            .<span class="hljs-title function_ invoke__">collect</span>();
-        table.<span class="hljs-title function_ invoke__">push</span>((state, new_states.<span class="hljs-title function_ invoke__">clone</span>()));
-        <span class="hljs-keyword">for</span> <span class="hljs-variable">new_state</span> <span class="hljs-keyword">in</span> new_states {
-            <span class="hljs-keyword">if</span> !new_state.<span class="hljs-title function_ invoke__">is_empty</span>()
-                &amp;&amp; !table.<span class="hljs-title function_ invoke__">iter</span>().<span class="hljs-title function_ invoke__">any</span>(|s| s.<span class="hljs-number">0</span> == new_state)
-                &amp;&amp; !states.<span class="hljs-title function_ invoke__">contains</span>(&amp;new_state)
-            {
-                states.<span class="hljs-title function_ invoke__">push</span>(new_state) <span class="hljs-comment">// 只有新的状态才加入计算队列</span>
-            }
-        }
-    }
-
-    <span class="hljs-keyword">let</span> <span class="hljs-variable">rename</span>: HashMap&lt;<span class="hljs-type">Vec</span>&lt;<span class="hljs-type">usize</span>&gt;, <span class="hljs-type">usize</span>&gt; = table
-        .<span class="hljs-title function_ invoke__">iter</span>()
-        .<span class="hljs-title function_ invoke__">enumerate</span>()
-        .<span class="hljs-title function_ invoke__">map</span>(|(i, s)| (s.<span class="hljs-number">0</span>.<span class="hljs-title function_ invoke__">clone</span>(), i))
-        .<span class="hljs-title function_ invoke__">collect</span>();
-
-    DFA {
-        accepts,
-        table: table
-            .<span class="hljs-title function_ invoke__">into_iter</span>()
-            .<span class="hljs-title function_ invoke__">map</span>(|(_, ns)| {
-                ns.<span class="hljs-title function_ invoke__">iter</span>()
-                    .<span class="hljs-title function_ invoke__">map</span>(|n| rename.<span class="hljs-title function_ invoke__">get</span>(n).<span class="hljs-title function_ invoke__">copied</span>())
-                    .collect::&lt;<span class="hljs-type">Vec</span>&lt;_&gt;&gt;()
-            })
-            .<span class="hljs-title function_ invoke__">collect</span>(),
-        start: *rename.<span class="hljs-title function_ invoke__">get</span>(&amp;start).<span class="hljs-title function_ invoke__">unwrap</span>(),
-        out: rename
-            .<span class="hljs-title function_ invoke__">into_iter</span>()
-            .<span class="hljs-title function_ invoke__">filter</span>(|(s, _)| s.<span class="hljs-title function_ invoke__">contains</span>(&amp;nfa.out))
-            .<span class="hljs-title function_ invoke__">map</span>(|(_, i)| i)
-            .<span class="hljs-title function_ invoke__">collect</span>(),
-    }
-}</code></pre></div><h2>最小化 DFA</h2><p>最小化 DFA 使用的是 Hopcroft 算法，但是不同于网上算法，这里首先求出了状态的划分，再重新建立跳转表。划分状态首先要判断两个状态是否可区分（distinguish）,即能否有串能被甲状态接受而不被乙状态接受。如果甲、乙接受一个字符跳转到的状态丙、丁是可区分的，那么甲、乙是可区分的。根据定义，一个终结状态和一个非终结状态一定是可区分的（终结状态可接受 ε 而非终结状态不能）。由此可以递归地求出任意两个状态是否是可区分的。</p><p>例如：</p><div class='codeblock'><pre><code>   | a | b |
- 0 | 2 | 1 |
- 1 | 2 | 1 |
- 2 | 2 | 1 |</code></pre></div><p>其中 0 是初始状态，1 是终结状态。这里的 0 和 2 就是不可区分的两个状态，因为没有一个串可以被 0 接受而不被 2 接受。所以状态就被划分为 {0, 2} 和 1。</p><div class='codeblock'><pre><code><span class="hljs-keyword">pub</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">distinguishable</span>(&amp;<span class="hljs-keyword">self</span>, p: <span class="hljs-type">usize</span>, q: <span class="hljs-type">usize</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">bool</span> {
-        <span class="hljs-keyword">use</span> TransRes::{Accept, Next, Unaccept};
-        <span class="hljs-keyword">let</span> <span class="hljs-variable">p_out</span> = <span class="hljs-keyword">self</span>.out.<span class="hljs-title function_ invoke__">contains</span>(&amp;p);
-        <span class="hljs-keyword">let</span> <span class="hljs-variable">q_out</span> = <span class="hljs-keyword">self</span>.out.<span class="hljs-title function_ invoke__">contains</span>(&amp;q);
-        <span class="hljs-keyword">if</span> p_out ^ q_out {
-            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
-        }
-        <span class="hljs-keyword">if</span> p == q {
-            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
-        }
-        <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">accepts</span>: <span class="hljs-type">Vec</span>&lt;_&gt; = <span class="hljs-keyword">self</span>.accepts
-            .<span class="hljs-title function_ invoke__">iter</span>()
-            .<span class="hljs-title function_ invoke__">map</span>(|a| <span class="hljs-title function_ invoke__">Some</span>(*a))
-            .<span class="hljs-title function_ invoke__">collect</span>();
-        accepts.<span class="hljs-title function_ invoke__">push</span>(<span class="hljs-literal">None</span>);
-        <span class="hljs-keyword">for</span> <span class="hljs-variable">a</span> <span class="hljs-keyword">in</span> accepts {
-            <span class="hljs-keyword">let</span> <span class="hljs-variable">r</span> = <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">get_trans</span>(p, a);
-            <span class="hljs-keyword">let</span> <span class="hljs-variable">s</span> = <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">get_trans</span>(q, a);
-            <span class="hljs-title function_ invoke__">match</span> (r, s) {
-                (Accept, Accept) | (Unaccept, Unaccept) =&gt; {}
-                (Accept, _) | (_, Accept) | (Unaccept, _) | (_, Unaccept) =&gt; {
-                    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
-                }
-                (<span class="hljs-title function_ invoke__">Next</span>(rc), <span class="hljs-title function_ invoke__">Next</span>(sc)) =&gt; {
-                    <span class="hljs-keyword">if</span> <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">distinguishable</span>(rc, sc) {
-                        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
-                    }
-                }
-            }
-        }
-        <span class="hljs-literal">false</span>
-    }</code></pre></div><p>得到了新的一组状态后，需要重建跳转表。因为多个原状态被合并为了一个新状态，所有只要求任意一个原状态的跳转就可得出新状态的跳转了。</p><div class='codeblock'><pre><code><span class="hljs-keyword">pub</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">minimize</span>(&amp;<span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> DFA {
-        <span class="hljs-keyword">let</span> <span class="hljs-variable">states</span> = <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">get_nondistinguishable_states</span>();
-        <span class="hljs-keyword">let</span> <span class="hljs-variable">rename</span>: HashMap&lt;<span class="hljs-type">usize</span>, <span class="hljs-type">usize</span>&gt; = states
-            .<span class="hljs-title function_ invoke__">iter</span>()
-            .<span class="hljs-title function_ invoke__">enumerate</span>()
-            .<span class="hljs-title function_ invoke__">map</span>(|(i, x)| x.<span class="hljs-title function_ invoke__">iter</span>().<span class="hljs-title function_ invoke__">map</span>(<span class="hljs-keyword">move</span> |tx| (*tx, i)))
-            .<span class="hljs-title function_ invoke__">flatten</span>()
-            .<span class="hljs-title function_ invoke__">collect</span>();
-        <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">table</span> = Vec::<span class="hljs-title function_ invoke__">new</span>();
-        <span class="hljs-keyword">for</span> <span class="hljs-variable">s</span> <span class="hljs-keyword">in</span> states {
-            <span class="hljs-keyword">let</span> <span class="hljs-variable">state_trans</span> = <span class="hljs-keyword">self</span>
-                .accepts
-                .<span class="hljs-title function_ invoke__">iter</span>()
-                .<span class="hljs-title function_ invoke__">map</span>(|a| <span class="hljs-keyword">match</span> <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">get_trans</span>(*s.<span class="hljs-title function_ invoke__">first</span>().<span class="hljs-title function_ invoke__">unwrap</span>(), <span class="hljs-title function_ invoke__">Some</span>(*a)) {
-                    TransRes::Accept =&gt; <span class="hljs-built_in">unreachable!</span>(),
-                    TransRes::<span class="hljs-title function_ invoke__">Next</span>(ns) =&gt; <span class="hljs-title function_ invoke__">Some</span>(*rename.<span class="hljs-title function_ invoke__">get</span>(&amp;ns).<span class="hljs-title function_ invoke__">unwrap</span>()),
-                    TransRes::Unaccept =&gt; <span class="hljs-literal">None</span>,
-                })
-                .collect::&lt;<span class="hljs-type">Vec</span>&lt;_&gt;&gt;();
-            table.<span class="hljs-title function_ invoke__">push</span>(state_trans);
-        }
-        DFA {
-            accepts: <span class="hljs-keyword">self</span>.accepts.<span class="hljs-title function_ invoke__">clone</span>(),
-            table,
-            start: *rename.<span class="hljs-title function_ invoke__">get</span>(&amp;<span class="hljs-keyword">self</span>.start).<span class="hljs-title function_ invoke__">unwrap</span>(),
-            out: {
-                <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">o</span>: <span class="hljs-type">Vec</span>&lt;_&gt; = <span class="hljs-keyword">self</span>.out
-                    .<span class="hljs-title function_ invoke__">iter</span>()
-                    .<span class="hljs-title function_ invoke__">map</span>(|x| *rename.<span class="hljs-title function_ invoke__">get</span>(x).<span class="hljs-title function_ invoke__">unwrap</span>())
-                    .<span class="hljs-title function_ invoke__">collect</span>();
-                o.<span class="hljs-title function_ invoke__">sort_unstable</span>();
-                o.<span class="hljs-title function_ invoke__">dedup</span>();
-                o
-            },
-        }
-    }</code></pre></div><p></p>
+                <p>正则文法，3-型文法，可用正则表达式描述，可被有限状态自动机接受。</p><p>一般，正则表达式到 DFA 转化分为三步：</p><ul><li>正则表达式转化为 NFA</li><li>NFA 转化 DFA</li><li>DFA 最小化</li></ul><h2>正则表达式转化为 NFA</h2><h3>正则表达式的定义</h3><p>本文只实现了最基础的正则表达式，仅支持连接 <code>ab</code>，选择 <code>a|b</code> 和 Kleene 星号 <code>a*</code> 运算。此外，因为没有做字符转义，所以 ε 将被特殊符号处理。程序未考虑运算优先级，没有使用括号指明的都当作 UB 考虑。</p><h3>预处理正则表达式</h3><p>根据 <em><a href="https://swtch.com/~rsc/regexp/regexp1.html">Regular Expression Matching Can Be Simple And Fast</a></em> 这篇文章。预先将正则表达式预处理为后缀表达式再转化到 NFA 更方便。对于省略的连接运算符，相邻两个字符，字符与括号，星号和字符之间都需要额外补上。例如 <code>aa(((bc)|(de))*)f</code> 补上省略的连接符（用加号表示）<code>a+a+(((b+c)|(d+e))*)+f</code>，转为后缀 <code>aabc+de+|*f+++</code>。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">pub</span><span style="color:#D73A49"> fn</span><span style="color:#6F42C1"> regex2post</span><span style="color:#24292E">(r</span><span style="color:#D73A49">:</span><span style="color:#D73A49"> &#x26;</span><span style="color:#6F42C1">str</span><span style="color:#24292E">) </span><span style="color:#D73A49">-></span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">RegexToken</span><span style="color:#24292E">> {</span></span>
+<span class="line"><span style="color:#D73A49">    use</span><span style="color:#6F42C1"> RegexToken</span><span style="color:#D73A49">::</span><span style="color:#24292E">{</span><span style="color:#6F42C1">Alter</span><span style="color:#24292E">, </span><span style="color:#6F42C1">Cat</span><span style="color:#24292E">, </span><span style="color:#6F42C1">Bracket</span><span style="color:#24292E">, </span><span style="color:#6F42C1">Closure</span><span style="color:#24292E">, </span><span style="color:#6F42C1">Char</span><span style="color:#24292E">};</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#D73A49"> mut</span><span style="color:#24292E"> stack </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> Vec</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">new</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#D73A49"> mut</span><span style="color:#24292E"> post </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> Vec</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">new</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#D73A49"> mut</span><span style="color:#24292E"> add_cat </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> false</span><span style="color:#24292E">; </span><span style="color:#6A737D">// 表示是否需要一个连接符</span></span>
+<span class="line"><span style="color:#D73A49">    for</span><span style="color:#24292E"> c </span><span style="color:#D73A49">in</span><span style="color:#24292E"> r</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">chars</span><span style="color:#24292E">() {</span></span>
+<span class="line"><span style="color:#D73A49">        match</span><span style="color:#24292E"> c {</span></span>
+<span class="line"><span style="color:#032F62">            '|'</span><span style="color:#D73A49"> =></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#24292E">                add_cat </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> false</span><span style="color:#24292E">; </span><span style="color:#6A737D">// 新的双目运算符直接取代了连接符</span></span>
+<span class="line"><span style="color:#24292E">                stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Alter</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#032F62">            '('</span><span style="color:#D73A49"> =></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">                if</span><span style="color:#24292E"> add_cat {</span></span>
+<span class="line"><span style="color:#24292E">                    stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Cat</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">                    add_cat </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> false</span><span style="color:#24292E">; </span><span style="color:#6A737D">// 一个左括号可以连接前面的，但不能连接后面的</span></span>
+<span class="line"><span style="color:#24292E">                }</span></span>
+<span class="line"><span style="color:#24292E">                stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Bracket</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#032F62">            ')'</span><span style="color:#D73A49"> =></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">                if</span><span style="color:#D73A49"> !</span><span style="color:#24292E">add_cat { </span><span style="color:#6F42C1">unreachable!</span><span style="color:#24292E">(); }</span></span>
+<span class="line"><span style="color:#D73A49">                while</span><span style="color:#D73A49"> !</span><span style="color:#6F42C1">matches!</span><span style="color:#24292E">(stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">last</span><span style="color:#24292E">(), </span><span style="color:#6F42C1">Some</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Bracket</span><span style="color:#24292E">) </span><span style="color:#D73A49">|</span><span style="color:#6F42C1"> None</span><span style="color:#24292E">) {</span></span>
+<span class="line"><span style="color:#24292E">                    post</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">pop</span><span style="color:#24292E">()</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">());</span></span>
+<span class="line"><span style="color:#24292E">                }</span></span>
+<span class="line"><span style="color:#24292E">                stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">pop</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#032F62">            '*'</span><span style="color:#D73A49"> =></span><span style="color:#24292E"> { </span><span style="color:#6A737D">// 单目运算符不影响状态</span></span>
+<span class="line"><span style="color:#24292E">                post</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Closure</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#032F62">            'ε'</span><span style="color:#D73A49"> =></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">                if</span><span style="color:#24292E"> add_cat {</span></span>
+<span class="line"><span style="color:#24292E">                    stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Cat</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">                }</span></span>
+<span class="line"><span style="color:#24292E">                add_cat </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> true</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#24292E">                post</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Epsilon</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#24292E">            _ </span><span style="color:#D73A49">=></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">                if</span><span style="color:#24292E"> add_cat {</span></span>
+<span class="line"><span style="color:#24292E">                    stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Cat</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#24292E">                }</span></span>
+<span class="line"><span style="color:#24292E">                add_cat </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> true</span><span style="color:#24292E">; </span><span style="color:#6A737D">// 字符即可连接前面也可连接后面</span></span>
+<span class="line"><span style="color:#24292E">                post</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Char</span><span style="color:#24292E">(c));</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#D73A49">    if</span><span style="color:#D73A49"> !</span><span style="color:#24292E">add_cat { </span><span style="color:#6F42C1">unreachable!</span><span style="color:#24292E">(); }</span></span>
+<span class="line"><span style="color:#D73A49">    while</span><span style="color:#D73A49"> let</span><span style="color:#6F42C1"> Some</span><span style="color:#24292E">(r) </span><span style="color:#D73A49">=</span><span style="color:#24292E"> stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">pop</span><span style="color:#24292E">() {</span></span>
+<span class="line"><span style="color:#24292E">        post</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(r);</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">    post</span></span>
+<span class="line"><span style="color:#24292E">}</span></span></code></pre></div><h3>后缀表达式转 NFA</h3><p>rust 用指针不是很方便，所以这里用数组来存放 NFA 的图结构。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">pub</span><span style="color:#D73A49"> struct</span><span style="color:#6F42C1"> NFA</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">    pub</span><span style="color:#24292E"> nodes</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">Option</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">char</span><span style="color:#24292E">>>,</span></span>
+<span class="line"><span style="color:#D73A49">    pub</span><span style="color:#24292E"> edges</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;(</span><span style="color:#6F42C1">usize</span><span style="color:#24292E">, </span><span style="color:#6F42C1">usize</span><span style="color:#24292E">)>,</span></span>
+<span class="line"><span style="color:#D73A49">    pub</span><span style="color:#24292E"> start</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> usize</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#D73A49">    pub</span><span style="color:#24292E"> out</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> usize</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#24292E">}</span></span></code></pre></div><p>用一个栈来存放后缀表达式转化到 NFA 中临时的图，使用边来表示（即想象将这个图的入口和出口用一条有向边直接连起来），暂且称之为块。</p><p>对于字符，直接向图中添加新节点，压入下标。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#6F42C1">RegexToken</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">Char</span><span style="color:#24292E">(c) </span><span style="color:#D73A49">=></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> idx </span><span style="color:#D73A49">=</span><span style="color:#24292E"> nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_node</span><span style="color:#24292E">(</span><span style="color:#6F42C1">NFANode</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">new</span><span style="color:#24292E">(</span><span style="color:#6F42C1">Some</span><span style="color:#24292E">(</span><span style="color:#D73A49">*</span><span style="color:#24292E">c)));</span></span>
+<span class="line"><span style="color:#24292E">    stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">((idx, idx));</span></span>
+<span class="line"><span style="color:#24292E">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1">RegexToken</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">Epsilon</span><span style="color:#D73A49"> =></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> idx </span><span style="color:#D73A49">=</span><span style="color:#24292E"> nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_node</span><span style="color:#24292E">(</span><span style="color:#6F42C1">NFANode</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">new</span><span style="color:#24292E">(</span><span style="color:#6F42C1">None</span><span style="color:#24292E">));</span></span>
+<span class="line"><span style="color:#24292E">    stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">((idx, idx));</span></span>
+<span class="line"><span style="color:#24292E">}</span></span></code></pre></div><p>对于连接符，弹出两个块，块甲和块乙（注意先后）。连接乙的出和甲的入（这条边是可以确定下来存入 NFA 中的），再压入乙的入和甲的出。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span>      +---+    +---+</span></span>
+<span class="line"><span>in -> | B | -> | A | -> out </span></span>
+<span class="line"><span>      +---+    +---+</span></span></code></pre></div><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#6F42C1">RegexToken</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">Cat</span><span style="color:#D73A49"> =></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> (e2_start, e2_out) </span><span style="color:#D73A49">=</span><span style="color:#24292E"> stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">pop</span><span style="color:#24292E">()</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> (e1_start, e1_out) </span><span style="color:#D73A49">=</span><span style="color:#24292E"> stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">pop</span><span style="color:#24292E">()</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">    nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_edge</span><span style="color:#24292E">(e1_out, e2_start);</span></span>
+<span class="line"><span style="color:#24292E">    stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">((e1_start, e2_out));</span></span>
+<span class="line"><span style="color:#24292E">}</span></span></code></pre></div><p>对于选择符，弹出两个块，需要两个新节点做辅助，并可确定四条边。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span>              +---+</span></span>
+<span class="line"><span>        +---> | A | --->+</span></span>
+<span class="line"><span>      +---+   +---+   +---+</span></span>
+<span class="line"><span>in -> |   |           |   | -> out</span></span>
+<span class="line"><span>      +---+   +---+   +---+</span></span>
+<span class="line"><span>        +---> | B | --->+</span></span>
+<span class="line"><span>              +---+</span></span></code></pre></div><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#6F42C1">RegexToken</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">Alter</span><span style="color:#D73A49"> =></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> (e2_start, e2_out) </span><span style="color:#D73A49">=</span><span style="color:#24292E"> stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">pop</span><span style="color:#24292E">()</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> (e1_start, e1_out) </span><span style="color:#D73A49">=</span><span style="color:#24292E"> stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">pop</span><span style="color:#24292E">()</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> a_start </span><span style="color:#D73A49">=</span><span style="color:#24292E"> nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_node</span><span style="color:#24292E">(</span><span style="color:#6F42C1">NFANode</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">new</span><span style="color:#24292E">(</span><span style="color:#6F42C1">None</span><span style="color:#24292E">));</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> a_out </span><span style="color:#D73A49">=</span><span style="color:#24292E"> nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_node</span><span style="color:#24292E">(</span><span style="color:#6F42C1">NFANode</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">new</span><span style="color:#24292E">(</span><span style="color:#6F42C1">None</span><span style="color:#24292E">));</span></span>
+<span class="line"><span style="color:#24292E">    nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_edge</span><span style="color:#24292E">(a_start, e1_start);</span></span>
+<span class="line"><span style="color:#24292E">    nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_edge</span><span style="color:#24292E">(a_start, e2_start);</span></span>
+<span class="line"><span style="color:#24292E">    nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_edge</span><span style="color:#24292E">(e1_out, a_out);</span></span>
+<span class="line"><span style="color:#24292E">    nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_edge</span><span style="color:#24292E">(e2_out, a_out);</span></span>
+<span class="line"><span style="color:#24292E">    stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">((a_start, a_out));</span></span>
+<span class="line"><span style="color:#24292E">}</span></span></code></pre></div><p>对于星号，弹出一个块，需要一个新节点做辅助，并可确定两条边。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span>              +---+</span></span>
+<span class="line"><span>        +---> | A |</span></span>
+<span class="line"><span>      +---+   +---+</span></span>
+<span class="line"><span>in -> |   | &#x3C;---+  </span></span>
+<span class="line"><span>      +---+</span></span>
+<span class="line"><span>        +---> out</span></span></code></pre></div><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#6F42C1">RegexToken</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">Closure</span><span style="color:#D73A49"> =></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> idx </span><span style="color:#D73A49">=</span><span style="color:#24292E"> nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_node</span><span style="color:#24292E">(</span><span style="color:#6F42C1">NFANode</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">new</span><span style="color:#24292E">(</span><span style="color:#6F42C1">None</span><span style="color:#24292E">));</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> (e_start, e_out) </span><span style="color:#D73A49">=</span><span style="color:#24292E"> stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">pop</span><span style="color:#24292E">()</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">    nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_edge</span><span style="color:#24292E">(idx, e_start);</span></span>
+<span class="line"><span style="color:#24292E">    nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">add_edge</span><span style="color:#24292E">(e_out, idx);</span></span>
+<span class="line"><span style="color:#24292E">    stack</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">((idx, idx));</span></span>
+<span class="line"><span style="color:#24292E">}</span></span></code></pre></div><p>最后栈里剩下的一个块就是完整的图了，两个下标分别就是 NFA 的初始状态和接收状态，后缀表达式到 NFA 的转化就做完了。</p><h2>NFA 转 DFA</h2><p>NFA 转 DFA 使用子集构造法，这需要为 NFA 增加一个 get_reach 函数计算一个状态消耗一个字符可到达的状态的集合。另外 DFA 没有采用 NFA 一样的数据结构，而是直接使用了一个二维数组表示。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">pub</span><span style="color:#D73A49"> struct</span><span style="color:#6F42C1"> DFA</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">    pub</span><span style="color:#24292E"> accepts</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">char</span><span style="color:#24292E">>,</span></span>
+<span class="line"><span style="color:#D73A49">    pub</span><span style="color:#24292E"> table</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">Vec</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">Option</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">usize</span><span style="color:#24292E">>>>,</span></span>
+<span class="line"><span style="color:#D73A49">    pub</span><span style="color:#24292E"> start</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> usize</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#D73A49">    pub</span><span style="color:#24292E"> out</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">usize</span><span style="color:#24292E">>,</span></span>
+<span class="line"><span style="color:#24292E">}</span></span></code></pre></div><p>以 <code>nfa.get_reach(nfa.start, None)</code> 作为初始状态，求新的状态，直到没有新的状态产生为止。所有包含了原终结状态的新状态都作为 DFA 的终结状态。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">pub</span><span style="color:#D73A49"> fn</span><span style="color:#6F42C1"> determinize</span><span style="color:#24292E">(nfa</span><span style="color:#D73A49">:</span><span style="color:#D73A49"> &#x26;</span><span style="color:#005CC5">NFA</span><span style="color:#24292E">) </span><span style="color:#D73A49">-></span><span style="color:#005CC5"> DFA</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> start </span><span style="color:#D73A49">=</span><span style="color:#24292E"> nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get_reach</span><span style="color:#24292E">(nfa</span><span style="color:#D73A49">.</span><span style="color:#24292E">start, </span><span style="color:#6F42C1">None</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#D73A49"> mut</span><span style="color:#24292E"> table </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> Vec</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">new</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#D73A49"> mut</span><span style="color:#24292E"> states </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> vec!</span><span style="color:#24292E">[start</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">clone</span><span style="color:#24292E">()];</span></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> accepts</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;_> </span><span style="color:#D73A49">=</span><span style="color:#24292E"> nfa</span></span>
+<span class="line"><span style="color:#D73A49">        .</span><span style="color:#6F42C1">get_accepts</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">        .</span><span style="color:#6F42C1">into_iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">        .</span><span style="color:#6F42C1">filter</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">x</span><span style="color:#D73A49">|</span><span style="color:#6F42C1"> matches!</span><span style="color:#24292E">(x, </span><span style="color:#6F42C1">Some</span><span style="color:#24292E">(_)))</span></span>
+<span class="line"><span style="color:#D73A49">        .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">x</span><span style="color:#D73A49">|</span><span style="color:#24292E"> x</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">())</span></span>
+<span class="line"><span style="color:#D73A49">        .</span><span style="color:#6F42C1">collect</span><span style="color:#24292E">(); </span><span style="color:#6A737D">// 输入符号集合</span></span>
+<span class="line"><span style="color:#D73A49">    while</span><span style="color:#D73A49"> !</span><span style="color:#24292E">states</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">is_empty</span><span style="color:#24292E">() {</span></span>
+<span class="line"><span style="color:#D73A49">        let</span><span style="color:#24292E"> state </span><span style="color:#D73A49">=</span><span style="color:#24292E"> states</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">pop</span><span style="color:#24292E">()</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">        let</span><span style="color:#24292E"> new_states</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;_> </span><span style="color:#D73A49">=</span><span style="color:#24292E"> accepts</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">a</span><span style="color:#D73A49">|</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">                let</span><span style="color:#D73A49"> mut</span><span style="color:#24292E"> new_state</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;_> </span><span style="color:#D73A49">=</span><span style="color:#24292E"> state</span></span>
+<span class="line"><span style="color:#D73A49">                    .</span><span style="color:#6F42C1">iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">                    .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">s</span><span style="color:#D73A49">|</span><span style="color:#24292E"> nfa</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get_reach</span><span style="color:#24292E">(</span><span style="color:#D73A49">*</span><span style="color:#24292E">s, </span><span style="color:#6F42C1">Some</span><span style="color:#24292E">(</span><span style="color:#D73A49">*</span><span style="color:#24292E">a)))</span></span>
+<span class="line"><span style="color:#D73A49">                    .</span><span style="color:#6F42C1">flatten</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">                    .</span><span style="color:#6F42C1">collect</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">                new_state</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">sort_unstable</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">                new_state</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">dedup</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">                new_state</span></span>
+<span class="line"><span style="color:#24292E">            })</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">collect</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">        table</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">((state, new_states</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">clone</span><span style="color:#24292E">()));</span></span>
+<span class="line"><span style="color:#D73A49">        for</span><span style="color:#24292E"> new_state </span><span style="color:#D73A49">in</span><span style="color:#24292E"> new_states {</span></span>
+<span class="line"><span style="color:#D73A49">            if</span><span style="color:#D73A49"> !</span><span style="color:#24292E">new_state</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">is_empty</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">                &#x26;&#x26;</span><span style="color:#D73A49"> !</span><span style="color:#24292E">table</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">iter</span><span style="color:#24292E">()</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">any</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">s</span><span style="color:#D73A49">|</span><span style="color:#24292E"> s</span><span style="color:#D73A49">.</span><span style="color:#005CC5">0</span><span style="color:#D73A49"> ==</span><span style="color:#24292E"> new_state)</span></span>
+<span class="line"><span style="color:#D73A49">                &#x26;&#x26;</span><span style="color:#D73A49"> !</span><span style="color:#24292E">states</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">contains</span><span style="color:#24292E">(</span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">new_state)</span></span>
+<span class="line"><span style="color:#24292E">            {</span></span>
+<span class="line"><span style="color:#24292E">                states</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(new_state) </span><span style="color:#6A737D">// 只有新的状态才加入计算队列</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">    let</span><span style="color:#24292E"> rename</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> HashMap</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">Vec</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">usize</span><span style="color:#24292E">>, </span><span style="color:#6F42C1">usize</span><span style="color:#24292E">> </span><span style="color:#D73A49">=</span><span style="color:#24292E"> table</span></span>
+<span class="line"><span style="color:#D73A49">        .</span><span style="color:#6F42C1">iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">        .</span><span style="color:#6F42C1">enumerate</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">        .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">(i, s)</span><span style="color:#D73A49">|</span><span style="color:#24292E"> (s</span><span style="color:#D73A49">.</span><span style="color:#005CC5">0.</span><span style="color:#6F42C1">clone</span><span style="color:#24292E">(), i))</span></span>
+<span class="line"><span style="color:#D73A49">        .</span><span style="color:#6F42C1">collect</span><span style="color:#24292E">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#005CC5">    DFA</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#24292E">        accepts,</span></span>
+<span class="line"><span style="color:#24292E">        table</span><span style="color:#D73A49">:</span><span style="color:#24292E"> table</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">into_iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">(_, ns)</span><span style="color:#D73A49">|</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#24292E">                ns</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">                    .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">n</span><span style="color:#D73A49">|</span><span style="color:#24292E"> rename</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get</span><span style="color:#24292E">(n)</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">copied</span><span style="color:#24292E">())</span></span>
+<span class="line"><span style="color:#D73A49">                    .</span><span style="color:#6F42C1">collect</span><span style="color:#D73A49">::</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">Vec</span><span style="color:#24292E">&#x3C;_>>()</span></span>
+<span class="line"><span style="color:#24292E">            })</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">collect</span><span style="color:#24292E">(),</span></span>
+<span class="line"><span style="color:#24292E">        start</span><span style="color:#D73A49">:</span><span style="color:#D73A49"> *</span><span style="color:#24292E">rename</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get</span><span style="color:#24292E">(</span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">start)</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">(),</span></span>
+<span class="line"><span style="color:#24292E">        out</span><span style="color:#D73A49">:</span><span style="color:#24292E"> rename</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">into_iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">filter</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">(s, _)</span><span style="color:#D73A49">|</span><span style="color:#24292E"> s</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">contains</span><span style="color:#24292E">(</span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">nfa</span><span style="color:#D73A49">.</span><span style="color:#24292E">out))</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">(_, i)</span><span style="color:#D73A49">|</span><span style="color:#24292E"> i)</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">collect</span><span style="color:#24292E">(),</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span>
+<span class="line"><span style="color:#24292E">}</span></span></code></pre></div><h2>最小化 DFA</h2><p>最小化 DFA 使用的是 Hopcroft 算法，但是不同于网上算法，这里首先求出了状态的划分，再重新建立跳转表。划分状态首先要判断两个状态是否可区分（distinguish）,即能否有串能被甲状态接受而不被乙状态接受。如果甲、乙接受一个字符跳转到的状态丙、丁是可区分的，那么甲、乙是可区分的。根据定义，一个终结状态和一个非终结状态一定是可区分的（终结状态可接受 ε 而非终结状态不能）。由此可以递归地求出任意两个状态是否是可区分的。</p><p>例如：</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span>   | a | b |</span></span>
+<span class="line"><span> 0 | 2 | 1 |</span></span>
+<span class="line"><span> 1 | 2 | 1 |</span></span>
+<span class="line"><span> 2 | 2 | 1 |</span></span></code></pre></div><p>其中 0 是初始状态，1 是终结状态。这里的 0 和 2 就是不可区分的两个状态，因为没有一个串可以被 0 接受而不被 2 接受。所以状态就被划分为 {0, 2} 和 1。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">pub</span><span style="color:#D73A49"> fn</span><span style="color:#6F42C1"> distinguishable</span><span style="color:#24292E">(</span><span style="color:#D73A49">&#x26;</span><span style="color:#005CC5">self</span><span style="color:#24292E">, p</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> usize</span><span style="color:#24292E">, q</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> usize</span><span style="color:#24292E">) </span><span style="color:#D73A49">-></span><span style="color:#6F42C1"> bool</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">        use</span><span style="color:#6F42C1"> TransRes</span><span style="color:#D73A49">::</span><span style="color:#24292E">{</span><span style="color:#6F42C1">Accept</span><span style="color:#24292E">, </span><span style="color:#6F42C1">Next</span><span style="color:#24292E">, </span><span style="color:#6F42C1">Unaccept</span><span style="color:#24292E">};</span></span>
+<span class="line"><span style="color:#D73A49">        let</span><span style="color:#24292E"> p_out </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> self</span><span style="color:#D73A49">.</span><span style="color:#24292E">out</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">contains</span><span style="color:#24292E">(</span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">p);</span></span>
+<span class="line"><span style="color:#D73A49">        let</span><span style="color:#24292E"> q_out </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> self</span><span style="color:#D73A49">.</span><span style="color:#24292E">out</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">contains</span><span style="color:#24292E">(</span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">q);</span></span>
+<span class="line"><span style="color:#D73A49">        if</span><span style="color:#24292E"> p_out </span><span style="color:#D73A49">^</span><span style="color:#24292E"> q_out {</span></span>
+<span class="line"><span style="color:#D73A49">            return</span><span style="color:#005CC5"> true</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#D73A49">        if</span><span style="color:#24292E"> p </span><span style="color:#D73A49">==</span><span style="color:#24292E"> q {</span></span>
+<span class="line"><span style="color:#D73A49">            return</span><span style="color:#005CC5"> false</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#D73A49">        let</span><span style="color:#D73A49"> mut</span><span style="color:#24292E"> accepts</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;_> </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> self</span><span style="color:#D73A49">.</span><span style="color:#24292E">accepts</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">a</span><span style="color:#D73A49">|</span><span style="color:#6F42C1"> Some</span><span style="color:#24292E">(</span><span style="color:#D73A49">*</span><span style="color:#24292E">a))</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">collect</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">        accepts</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(</span><span style="color:#6F42C1">None</span><span style="color:#24292E">);</span></span>
+<span class="line"><span style="color:#D73A49">        for</span><span style="color:#24292E"> a </span><span style="color:#D73A49">in</span><span style="color:#24292E"> accepts {</span></span>
+<span class="line"><span style="color:#D73A49">            let</span><span style="color:#24292E"> r </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> self</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get_trans</span><span style="color:#24292E">(p, a);</span></span>
+<span class="line"><span style="color:#D73A49">            let</span><span style="color:#24292E"> s </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> self</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get_trans</span><span style="color:#24292E">(q, a);</span></span>
+<span class="line"><span style="color:#D73A49">            match</span><span style="color:#24292E"> (r, s) {</span></span>
+<span class="line"><span style="color:#24292E">                (</span><span style="color:#6F42C1">Accept</span><span style="color:#24292E">, </span><span style="color:#6F42C1">Accept</span><span style="color:#24292E">) </span><span style="color:#D73A49">|</span><span style="color:#24292E"> (</span><span style="color:#6F42C1">Unaccept</span><span style="color:#24292E">, </span><span style="color:#6F42C1">Unaccept</span><span style="color:#24292E">) </span><span style="color:#D73A49">=></span><span style="color:#24292E"> {}</span></span>
+<span class="line"><span style="color:#24292E">                (</span><span style="color:#6F42C1">Accept</span><span style="color:#24292E">, _) </span><span style="color:#D73A49">|</span><span style="color:#24292E"> (_, </span><span style="color:#6F42C1">Accept</span><span style="color:#24292E">) </span><span style="color:#D73A49">|</span><span style="color:#24292E"> (</span><span style="color:#6F42C1">Unaccept</span><span style="color:#24292E">, _) </span><span style="color:#D73A49">|</span><span style="color:#24292E"> (_, </span><span style="color:#6F42C1">Unaccept</span><span style="color:#24292E">) </span><span style="color:#D73A49">=></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">                    return</span><span style="color:#005CC5"> true</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#24292E">                }</span></span>
+<span class="line"><span style="color:#24292E">                (</span><span style="color:#6F42C1">Next</span><span style="color:#24292E">(rc), </span><span style="color:#6F42C1">Next</span><span style="color:#24292E">(sc)) </span><span style="color:#D73A49">=></span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">                    if</span><span style="color:#005CC5"> self</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">distinguishable</span><span style="color:#24292E">(rc, sc) {</span></span>
+<span class="line"><span style="color:#D73A49">                        return</span><span style="color:#005CC5"> true</span><span style="color:#24292E">;</span></span>
+<span class="line"><span style="color:#24292E">                    }</span></span>
+<span class="line"><span style="color:#24292E">                }</span></span>
+<span class="line"><span style="color:#24292E">            }</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#005CC5">        false</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span></code></pre></div><p>得到了新的一组状态后，需要重建跳转表。因为多个原状态被合并为了一个新状态，所有只要求任意一个原状态的跳转就可得出新状态的跳转了。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">pub</span><span style="color:#D73A49"> fn</span><span style="color:#6F42C1"> minimize</span><span style="color:#24292E">(</span><span style="color:#D73A49">&#x26;</span><span style="color:#005CC5">self</span><span style="color:#24292E">) </span><span style="color:#D73A49">-></span><span style="color:#005CC5"> DFA</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">        let</span><span style="color:#24292E"> states </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> self</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get_nondistinguishable_states</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">        let</span><span style="color:#24292E"> rename</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> HashMap</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">usize</span><span style="color:#24292E">, </span><span style="color:#6F42C1">usize</span><span style="color:#24292E">> </span><span style="color:#D73A49">=</span><span style="color:#24292E"> states</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">enumerate</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">(i, x)</span><span style="color:#D73A49">|</span><span style="color:#24292E"> x</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">iter</span><span style="color:#24292E">()</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">move</span><span style="color:#D73A49"> |</span><span style="color:#24292E">tx</span><span style="color:#D73A49">|</span><span style="color:#24292E"> (</span><span style="color:#D73A49">*</span><span style="color:#24292E">tx, i)))</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">flatten</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">            .</span><span style="color:#6F42C1">collect</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">        let</span><span style="color:#D73A49"> mut</span><span style="color:#24292E"> table </span><span style="color:#D73A49">=</span><span style="color:#6F42C1"> Vec</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">new</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#D73A49">        for</span><span style="color:#24292E"> s </span><span style="color:#D73A49">in</span><span style="color:#24292E"> states {</span></span>
+<span class="line"><span style="color:#D73A49">            let</span><span style="color:#24292E"> state_trans </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> self</span></span>
+<span class="line"><span style="color:#D73A49">                .</span><span style="color:#24292E">accepts</span></span>
+<span class="line"><span style="color:#D73A49">                .</span><span style="color:#6F42C1">iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">                .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">a</span><span style="color:#D73A49">|</span><span style="color:#D73A49"> match</span><span style="color:#005CC5"> self</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get_trans</span><span style="color:#24292E">(</span><span style="color:#D73A49">*</span><span style="color:#24292E">s</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">first</span><span style="color:#24292E">()</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">(), </span><span style="color:#6F42C1">Some</span><span style="color:#24292E">(</span><span style="color:#D73A49">*</span><span style="color:#24292E">a)) {</span></span>
+<span class="line"><span style="color:#6F42C1">                    TransRes</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">Accept</span><span style="color:#D73A49"> =></span><span style="color:#6F42C1"> unreachable!</span><span style="color:#24292E">(),</span></span>
+<span class="line"><span style="color:#6F42C1">                    TransRes</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">Next</span><span style="color:#24292E">(ns) </span><span style="color:#D73A49">=></span><span style="color:#6F42C1"> Some</span><span style="color:#24292E">(</span><span style="color:#D73A49">*</span><span style="color:#24292E">rename</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get</span><span style="color:#24292E">(</span><span style="color:#D73A49">&#x26;</span><span style="color:#24292E">ns)</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">()),</span></span>
+<span class="line"><span style="color:#6F42C1">                    TransRes</span><span style="color:#D73A49">::</span><span style="color:#6F42C1">Unaccept</span><span style="color:#D73A49"> =></span><span style="color:#6F42C1"> None</span><span style="color:#24292E">,</span></span>
+<span class="line"><span style="color:#24292E">                })</span></span>
+<span class="line"><span style="color:#D73A49">                .</span><span style="color:#6F42C1">collect</span><span style="color:#D73A49">::</span><span style="color:#24292E">&#x3C;</span><span style="color:#6F42C1">Vec</span><span style="color:#24292E">&#x3C;_>>();</span></span>
+<span class="line"><span style="color:#24292E">            table</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">push</span><span style="color:#24292E">(state_trans);</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#005CC5">        DFA</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#24292E">            accepts</span><span style="color:#D73A49">:</span><span style="color:#005CC5"> self</span><span style="color:#D73A49">.</span><span style="color:#24292E">accepts</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">clone</span><span style="color:#24292E">(),</span></span>
+<span class="line"><span style="color:#24292E">            table,</span></span>
+<span class="line"><span style="color:#24292E">            start</span><span style="color:#D73A49">:</span><span style="color:#D73A49"> *</span><span style="color:#24292E">rename</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get</span><span style="color:#24292E">(</span><span style="color:#D73A49">&#x26;</span><span style="color:#005CC5">self</span><span style="color:#D73A49">.</span><span style="color:#24292E">start)</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">(),</span></span>
+<span class="line"><span style="color:#24292E">            out</span><span style="color:#D73A49">:</span><span style="color:#24292E"> {</span></span>
+<span class="line"><span style="color:#D73A49">                let</span><span style="color:#D73A49"> mut</span><span style="color:#24292E"> o</span><span style="color:#D73A49">:</span><span style="color:#6F42C1"> Vec</span><span style="color:#24292E">&#x3C;_> </span><span style="color:#D73A49">=</span><span style="color:#005CC5"> self</span><span style="color:#D73A49">.</span><span style="color:#24292E">out</span></span>
+<span class="line"><span style="color:#D73A49">                    .</span><span style="color:#6F42C1">iter</span><span style="color:#24292E">()</span></span>
+<span class="line"><span style="color:#D73A49">                    .</span><span style="color:#6F42C1">map</span><span style="color:#24292E">(</span><span style="color:#D73A49">|</span><span style="color:#24292E">x</span><span style="color:#D73A49">|</span><span style="color:#D73A49"> *</span><span style="color:#24292E">rename</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">get</span><span style="color:#24292E">(x)</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">unwrap</span><span style="color:#24292E">())</span></span>
+<span class="line"><span style="color:#D73A49">                    .</span><span style="color:#6F42C1">collect</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">                o</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">sort_unstable</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">                o</span><span style="color:#D73A49">.</span><span style="color:#6F42C1">dedup</span><span style="color:#24292E">();</span></span>
+<span class="line"><span style="color:#24292E">                o</span></span>
+<span class="line"><span style="color:#24292E">            },</span></span>
+<span class="line"><span style="color:#24292E">        }</span></span>
+<span class="line"><span style="color:#24292E">    }</span></span></code></pre></div><p></p>
             </div>
         </div>
     </div>

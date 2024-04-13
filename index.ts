@@ -1,6 +1,7 @@
 import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { Macro, Ptm, easyMap, MacroCall, CacheData, jsonToCacheData, cacheDataToJson } from "jsptm";
-import { configure } from "nunjucks";
+import pkg from 'nunjucks';
+const { configure } = pkg;
 import { spawnSync } from "child_process";
 import { Metadata } from "./metadata";
 import {
@@ -175,7 +176,7 @@ class Articles {
         }
     }
 
-    done() {
+    async done() {
         let ptms = [];
         for (const { dir, name } of this.articles) {
             process.stdout.write(`process ${dir}/${name} `);
@@ -185,7 +186,7 @@ class Articles {
             meta.set("rawdir", dir);
             meta.set("rawfilename", name);
             const cacheData = loadCache(join(dir, name));
-            const newCache = ptm.applyMacroWithCache(this.macro, this.forceMacro, cacheData);
+            const newCache = await ptm.applyMacroWithCache(this.macro, this.forceMacro, cacheData);
             saveCache(join(dir, name), newCache);
             this.prepareMetadata(ptm);
             const t1 = performance.now();
@@ -196,12 +197,13 @@ class Articles {
         ptms.sort((a, b) => (a.metadata.get("createDate")! as Date) < (b.metadata.get("createDate")! as Date) ? 1 : -1);
         for (let ptm of ptms) {
             let meta = easyMap<Metadata>(ptm.metadata);
-            const file = applyTemplate(ptm, ptms)
+            let file = applyTemplate(ptm, ptms)
             const outdir = meta.get("outdir")!;
             if (!existsSync(outdir)) {
                 mkdirSync(outdir, { recursive: true });
             }
-            const outfilepath = join(this.rootDir, outdir, meta.get("outfilename")!);
+            const outfilename = meta.get("outfilename")!;
+            const outfilepath = join(this.rootDir, outdir, outfilename);
             writeFileSync(outfilepath, file, { encoding: "utf-8" });
             console.log(`${meta.get("rawdir")}/${meta.get("rawfilename")} gened to ${outfilepath}`);
         }

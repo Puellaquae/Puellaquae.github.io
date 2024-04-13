@@ -7,7 +7,6 @@
     <meta name="description" content="C++ 的 const 限定">
     <title>C++ 的 const 限定</title>
     <link rel="stylesheet" href="../../css/style.css" />
-    <link rel="stylesheet" href="../../css/codecolor.css" />
 </head>
 
 <body>
@@ -32,15 +31,15 @@
             <span class="meta">C++</span>
             
             <div class="entry">
-                <p>我在 StackOverflow 看到了这样一个问题，大意是为什么下面的模板函数会特化失败。</p><div class='codeblock'><pre><code><span class="hljs-function"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">class</span> T&gt;
-<span class="hljs-type">void</span> <span class="hljs-title">func</span><span class="hljs-params">(<span class="hljs-type">const</span> T&amp; val)</span></span>;
-
-<span class="hljs-keyword">template</span>&lt;&gt;
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span> *&amp; val)</span></span>;</code></pre></div><p>然后发现我也不会。我把特化的函数删掉，然后传入一个 <code>const char *</code> 的值，此时 <code>T</code> 是 <code>const char *</code> 没错，但是函数的签名确是 <code>void func&lt;const char *&gt;(const char *const& val)</code>。这也就是说对 <code>T *</code> 追加 const 限定后的类型其实是 <code>T *const</code> 而不是 <code>const T *</code>。我马上去看了一下 <code>add_const</code> 函数，发现样例中正好有一个就是对 <code>const int *</code> 追加 const 限定。</p><p>其实这才对，const 限定是限定自身不可变。<code>const T *</code> 只是指向不可变。进而，考虑到 <code>const T</code> 也可以写作 <code>T const</code>, 那么如果一律将 const 写在右侧的话，就可以非常简单的写出复杂的指针类型了。真正体现追加。</p><div class='codeblock'><pre><code><span class="hljs-type">int</span> x;          <span class="hljs-comment">//                  data</span>
-<span class="hljs-type">int</span> <span class="hljs-type">const</span> cx;   <span class="hljs-comment">//            const data</span>
-<span class="hljs-type">int</span> *px;        <span class="hljs-comment">//       pointer to data</span>
-<span class="hljs-type">int</span> <span class="hljs-type">const</span> *pcx; <span class="hljs-comment">// pointer to const data</span>
-<span class="hljs-type">int</span> * <span class="hljs-type">const</span> cpx <span class="hljs-comment">// const pointer to data</span></code></pre></div><p>此外，我才知道原来 <code>const T &</code> 是不算有 const 限定的，根据 <a href="https://timsong-cpp.github.io/cppwp/dcl.ref#1">[dcl.ref]/1</a>（翻译来自 <a href="https://zh.cppreference.com/w/cpp/language/reference">cppreference</a>）</p><blockquote><p>引用类型不能在顶层有 cv 限定；声明中没有为此而设的语法，如果在 typedef 名、decltype 说明符 (C++11 起)或类型模板形参上添加了该限定符，它将会被忽略。</p></blockquote><p>也就是说，因为引用本身是没有规定需要真实在内存中存在的，而且引用初始化就必须绑定。所以对于引用是没有可变和不可变之说的，只能说是引用了可变的数据或不可变的数据。所有如果用 is_const 去测试一个引用类型永远都是 false 的。</p><p>C++ 还是太复杂了，怪不得只有 C++ 需要语言律师。</p><p></p>
+                <p>我在 StackOverflow 看到了这样一个问题，大意是为什么下面的模板函数会特化失败。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">template</span><span style="color:#24292E">&#x3C;</span><span style="color:#D73A49">class</span><span style="color:#6F42C1"> T</span><span style="color:#24292E">></span></span>
+<span class="line"><span style="color:#D73A49">void</span><span style="color:#6F42C1"> func</span><span style="color:#24292E">(</span><span style="color:#D73A49">const</span><span style="color:#6F42C1"> T</span><span style="color:#D73A49">&#x26;</span><span style="color:#E36209"> val</span><span style="color:#24292E">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49">template</span><span style="color:#24292E">&#x3C;></span></span>
+<span class="line"><span style="color:#D73A49">void</span><span style="color:#6F42C1"> func</span><span style="color:#24292E">(</span><span style="color:#D73A49">const</span><span style="color:#D73A49"> char</span><span style="color:#D73A49"> *&#x26;</span><span style="color:#E36209"> val</span><span style="color:#24292E">);</span></span></code></pre></div><p>然后发现我也不会。我把特化的函数删掉，然后传入一个 <code>const char *</code> 的值，此时 <code>T</code> 是 <code>const char *</code> 没错，但是函数的签名确是 <code>void func&lt;const char *&gt;(const char *const& val)</code>。这也就是说对 <code>T *</code> 追加 const 限定后的类型其实是 <code>T *const</code> 而不是 <code>const T *</code>。我马上去看了一下 <code>add_const</code> 函数，发现样例中正好有一个就是对 <code>const int *</code> 追加 const 限定。</p><p>其实这才对，const 限定是限定自身不可变。<code>const T *</code> 只是指向不可变。进而，考虑到 <code>const T</code> 也可以写作 <code>T const</code>, 那么如果一律将 const 写在右侧的话，就可以非常简单的写出复杂的指针类型了。真正体现追加。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">int</span><span style="color:#24292E"> x;</span><span style="color:#6A737D">          //                  data</span></span>
+<span class="line"><span style="color:#D73A49">int</span><span style="color:#D73A49"> const</span><span style="color:#24292E"> cx;</span><span style="color:#6A737D">   //            const data</span></span>
+<span class="line"><span style="color:#D73A49">int</span><span style="color:#D73A49"> *</span><span style="color:#24292E">px;</span><span style="color:#6A737D">        //       pointer to data</span></span>
+<span class="line"><span style="color:#D73A49">int</span><span style="color:#D73A49"> const</span><span style="color:#D73A49"> *</span><span style="color:#24292E">pcx;</span><span style="color:#6A737D"> // pointer to const data</span></span>
+<span class="line"><span style="color:#D73A49">int</span><span style="color:#D73A49"> *</span><span style="color:#D73A49"> const</span><span style="color:#24292E"> cpx</span><span style="color:#6A737D"> // const pointer to data</span></span></code></pre></div><p>此外，我才知道原来 <code>const T &</code> 是不算有 const 限定的，根据 <a href="https://timsong-cpp.github.io/cppwp/dcl.ref#1">[dcl.ref]/1</a>（翻译来自 <a href="https://zh.cppreference.com/w/cpp/language/reference">cppreference</a>）</p><blockquote><p>引用类型不能在顶层有 cv 限定；声明中没有为此而设的语法，如果在 typedef 名、decltype 说明符 (C++11 起)或类型模板形参上添加了该限定符，它将会被忽略。</p></blockquote><p>也就是说，因为引用本身是没有规定需要真实在内存中存在的，而且引用初始化就必须绑定。所以对于引用是没有可变和不可变之说的，只能说是引用了可变的数据或不可变的数据。所有如果用 is_const 去测试一个引用类型永远都是 false 的。</p><p>C++ 还是太复杂了，怪不得只有 C++ 需要语言律师。</p><p></p>
             </div>
         </div>
     </div>
