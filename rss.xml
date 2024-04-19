@@ -98,7 +98,7 @@
     <link>https://puellaquae.github.io/page/changelog.html</link>
     <description></description>
     <pubData>2022/04/01</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <lastBuildDate>2024/04/20</lastBuildDate>
     <category></category>
   </item>
   <item>
@@ -126,12 +126,12 @@
     <category>Cpp</category>
   </item>
   <item>
-    <title>错误与弯路集</title>
-    <link>https://puellaquae.github.io/page/bugs-and-fail.html</link>
+    <title>漫漫 OSDEV 之路</title>
+    <link>https://puellaquae.github.io/page/os/osdev.html</link>
     <description></description>
     <pubData>2020/08/21</pubData>
-    <lastBuildDate>2022/04/08</lastBuildDate>
-    <category></category>
+    <lastBuildDate>2024/04/20</lastBuildDate>
+    <category>OS</category>
   </item>
   <item>
     <title>CSS 选择器与 input 标签的联用</title>

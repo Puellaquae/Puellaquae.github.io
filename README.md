@@ -17,7 +17,7 @@
 - [Pintos 实验记录](article/os/pintos.md)
 - [正则表达式转化为自动机](article/compile/regex.md)
 - [对 nlohmann-json 构造函数的分析](article/cpp/nlohmann-construct.md)
-- [错误与弯路集](article/bugs-and-fail.md)
+- [漫漫 OSDEV 之路](article/os/osdev.md)
 - [CSS 选择器与 input 标签的联用](article/web/css-filter.md)
 - [C++ 多线程 std::thread join 与 detach](article/cpp/std-thread.md)
 - [C++ 多线程 volatile 限定符](article/cpp/multithread-1.md)

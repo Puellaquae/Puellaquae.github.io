@@ -44,10 +44,13 @@
         counter-reset: h2-id h3-id h4-id;
     }
 
+    h2 {
+        counter-reset: h3-id;
+        counter-increment: h2-id;
+    }
+
     h2::before {
         visibility: hidden;
-        counter-increment: h2-id;
-        counter-reset: h3-id;
         content: counter(h2-id) ".";
         position: absolute;
         right: calc((100% + var(--ContainWidth))/2);
@@ -57,9 +60,13 @@
         visibility: visible;
     }
 
+    h3 {
+        counter-reset: h4-id;
+        counter-increment: h3-id;
+    }
+
     h3::before {
         visibility: hidden;
-        counter-increment: h3-id;
         content: counter(h2-id) "." counter(h3-id) ".";
         position: absolute;
         right: calc((100% + var(--ContainWidth))/2);
@@ -69,9 +76,12 @@
         visibility: visible;
     }
 
+    h4 {
+        counter-increment: h4-id;
+    }
+
     h4::before {
         visibility: hidden;
-        counter-increment: h4-id;
         content: counter(h2-id) "." counter(h3-id) "." counter(h4-id) ".";
         position: absolute;
         right: calc((100% + var(--ContainWidth))/2);
@@ -101,12 +111,22 @@
 */
 
 html {
-    scrollbar-width: none;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
 }
 
-html::-webkit-scrollbar {
-    display: none;
+h2 {
+    scroll-margin-top: 2.5em;
 }
+
+/* .toc {
+    position: fixed;
+    left: 0;
+    text-align: left;
+    width: calc((100vw - var(--ContainWidth) - 12rem) / 2);
+    background-color: var(--tagBgColor);
+} */
 
 ::selection {
     fill: var(--selectedFontColor);
@@ -358,7 +378,6 @@ label[for="timeLine"]::before {
     border: none;
 }
 
-#timeLine:checked~#filter-on:checked~* .posts .post,
 #timeLine:checked~* .posts .post .meta {
     display: none;
 }
@@ -367,11 +386,6 @@ label[for="timeLine"]::before {
     font-size: 1em;
     padding: 0px 1em 1px 0px;
     order: -1;
-}
-
-#timeLine:checked~* .posts .post .date:before {
-    content: "\2022";
-    padding-right: 0.2em;
 }
 
 #timeLine:checked~* .posts .post a {
