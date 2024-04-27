@@ -276,7 +276,7 @@ const PunctuationCompression: Macro = {
 const Descript: Macro = {
     filter: ["para"],
     func: function (node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
-        if (node.type == "para" && !easyMap<Metadata>(metadata).has("descript")) {
+        if (node.type === "para" && !easyMap<Metadata>(metadata).has("descript")) {
             easyMap<Metadata>(metadata).set("descript", node.rawData);
             return {
                 type: "void",
@@ -292,7 +292,7 @@ type DescriptMetadata = { descript: string };
 const RedirectLink: Macro = {
     filter: ["link"],
     func: function (node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
-        if (node.type == "link") {
+        if (node.type === "link") {
             if (node.data.url.endsWith(".md")) {
                 return {
                     type: "link",
@@ -312,6 +312,21 @@ const RedirectLink: Macro = {
     }
 }
 
+const CustomImgRender: Macro = {
+    filter: ["image"],
+    func: function (node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
+        if (node.type === "image") {
+            return {
+                type: "rawHtml",
+                data: {
+                    html: `<span class="img-container" title="${node.data.alt}"><img alt="${node.data.alt}" title="${node.data.alt}" src="${node.data.url}"/></span>`
+                }
+            }
+        }
+        return null;
+    }
+}
+
 export {
     Title, TitleMetadata,
     HighlightInlineCode, HighlightInlineCodeMetadata,
@@ -323,5 +338,6 @@ export {
     TexInline, TexInlineMetadata,
     PunctuationCompression,
     Descript, DescriptMetadata,
-    RedirectLink
+    RedirectLink,
+    CustomImgRender
 };

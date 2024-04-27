@@ -486,3 +486,17 @@ img {
     position: relative;
     left: -2em;
 }
+
+span.img-container {
+    display: block;
+    text-align: center;
+}
+
+span.img-container::after {
+    content: attr(title);
+    font-size: 0.75em;
+    line-height: 0.75em;
+    display: block;
+    width: 100%;
+    text-align: center;
+}

@@ -56,9 +56,7 @@ Forrester Research 于 2014 年首次向公众介绍了“低代码”一词 \[1
 
 我们根据目标-问题-度量方法（Goal-Question-Metric）\[3] 设定了本研究的目标：**为了**得到从从业者的**角度**对 LCD 的各个方面的特定的看法，**结合** SO 和 Reddit 上有关 LCD 的帖子，**分析**业界对 LCD 的见解。在下面的小节中，我们将阐述待研究的问题、设计问题的理由以及研究过程（参见图 1）。
 
-![Figure 1: Overview of the research process](../../figure/paper/low-code-practitioners-view/1.png)
-
-图 1：研究过程的总览
+![图 1：研究过程的总览](../../figure/paper/low-code-practitioners-view/1.png)
 
 ### 研究的问题
 
@@ -271,9 +269,7 @@ Forrester Research 于 2014 年首次向公众介绍了“低代码”一词 \[1
 
 我们总共发现 21 篇帖子提到了开发人员用于 LCD 的编程语言。五位开发人员提到他们用 Java 练习 LCD，正如一篇帖子所说：“*我正在使用企业版‘低代码’工具为我们公司构建应用程序。有些部分可以用 Java 和其他语言编写*”，而另外五位从业者表示他们在 LCD 中使用 JavaScript。还有三位开发人员分别在 LCD 中使用了 *C#* 和 *Python*。两位开发人员评论说他们将 LCD 与 *HTML* 和 *CSS* 结合使用，例如，一位开发人员表示“*我的建议是使用 webflow - 很简单就能配合 HTML 和 CSS 使用*”。*Objective C*、*PHP* 和 *C++* 在一篇文章中分别被提及。
 
-![Figure 2: Programming languages used in LCD](../../figure/paper/low-code-practitioners-view/2.png)
-
-图 2：LCD 中使用的编程语言
+![图 2：LCD 中使用的编程语言](../../figure/paper/low-code-practitioners-view/2.png)
 
 **问题 4：LCD 主要的实现单元是什么**
 
@@ -281,9 +277,7 @@ Forrester Research 于 2014 年首次向公众介绍了“低代码”一词 \[1
 
 我们从所有帖子中提取了 137 份数据，其中 47 个是基于 API 的，正如一篇帖子所述“*应用程序所做的是根据输入参数调用不同的 Salesforce（低代码平台）API，包括 REST 和 SOAP，并且基于之前的一些调用结果*”。有 34 个*基于模板*。有 25 个基于组件的 LCD 平台。在其余提到的 31 个平台中，15 个 LCD 平台基于*服务*，8 个基于*框架*，7 个基于*微件*，其余 1 个基于*SDK*。作为基于框架的 LCD 平台的一个例子，一篇帖子说“*Loopback 是一个很棒的框架，它可以零代码为所有 CRUD 可用操作提供完整的 REST API。*”
 
-![Figure 3: Implementation units in LCD](../../figure/paper/low-code-practitioners-view/3.png)
-
-图 3：LCD 的实现单元
+![图 3：LCD 的实现单元](../../figure/paper/low-code-practitioners-view/3.png)
 
 **问题 5：LCD 使用了哪些底层技术**
 
@@ -297,9 +291,7 @@ Forrester Research 于 2014 年首次向公众介绍了“低代码”一词 \[1
 
 如图 4 所示，通过 LCD 开发了 31 个*移动应用程序*、28 个*网络应用程序*和 1 个*集成工具*。有 10 个应用程序被归类为*其他*，因为帖子只提到“应用程序”而没有进一步的信息，它们不能明确地归类为上述类型之一。
 
-![Figure 4: 应用类型s developed by LCD](../../figure/paper/low-code-practitioners-view/4.png)
-
-图 4：由 LCD 开发的应用类型
+![图 4：由 LCD 开发的应用类型](../../figure/paper/low-code-practitioners-view/4.png)
 
 **问题 7：使用 LCD 的领域有哪些**
 
@@ -307,9 +299,7 @@ Forrester Research 于 2014 年首次向公众介绍了“低代码”一词 \[1
 
 结果显示，LCD 使用最多的领域是*电子商务*，包括企业对企业（B2B）和企业对消费者（B2C）领域，共提及9次。*业务流程管理（BPM）*和*社交媒体*各被提及 7 次，其中*社交媒体*具体包括聚会、聊天、约会和博客应用等。*客户关系管理（CRM）*被提及 4 次 次，*内容管理系统（CMS）*讨论了 3 次。*提取转换加载（Extract-Transform-Load，ETL）*和*娱乐领域*分别出现了 2 次。在娱乐领域，有关于使用低代码游戏引擎开发游戏的帖子。最后，*机器人流程自动化（RPA）* 和*医疗*分别被提及一次。
 
-![Figure 5: Application domains that use LCD](../../figure/paper/low-code-practitioners-view/5.png)
-
-图 5：使用 LCD 的应用领域
+![图 5：使用 LCD 的应用领域](../../figure/paper/low-code-practitioners-view/5.png)
 
 **问题 8：LCD 的优势有哪些**
 

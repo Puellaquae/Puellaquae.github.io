@@ -24,7 +24,8 @@ import {
     PunctuationCompression,
     Descript,
     DescriptMetadata,
-    RedirectLink
+    RedirectLink,
+    CustomImgRender
 } from "./macro";
 import { basename, extname, dirname, format, join, relative } from "path/posix";
 
@@ -221,7 +222,8 @@ const macro = {
     TexInline,
     PunctuationCompression,
     Descript,
-    RedirectLink
+    RedirectLink,
+    CustomImgRender
 };
 
 type MacroName = keyof typeof macro;
@@ -241,7 +243,8 @@ type MacrosMetadatas = [
 const forceMacro: { name: MacroName, arg?: string }[] = [
     { name: "Title" },
     { name: "HighlightFenceCode" },
-    { name: "RedirectLink" }
+    { name: "RedirectLink" },
+    { name: "CustomImgRender" }
 ];
 
 new Articles("article").process(macro, forceMacro).output("page", ".").done();
