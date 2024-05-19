@@ -319,7 +319,7 @@ const CustomImgRender: Macro = {
             return {
                 type: "rawHtml",
                 data: {
-                    html: `<span class="img-container" title="${node.data.alt}"><img alt="${node.data.alt}" title="${node.data.alt}" src="${node.data.url}"/></span>`
+                    html: `<span class="img-container" title="${node.data.alt}"><img alt="${node.data.alt}" title="${node.data.alt}" src="${node.data.url}" loading="lazy"/></span>`
                 }
             }
         }
