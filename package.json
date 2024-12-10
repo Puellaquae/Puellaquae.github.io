@@ -16,7 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "jsptm": "^0.0.16",
-    "nanoid": "^5.0.7",
+    "nanoid": "^5.0.9",
     "nunjucks": "^3.2.4",
     "shiki": "^1.3.0"
   },
