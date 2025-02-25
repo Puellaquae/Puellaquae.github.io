@@ -44,7 +44,7 @@ const HighlightFenceCode: Macro = {
             });
             return {
                 type: "rawHtml",
-                data: { html: `<div class='codeblock'>${code}</div>` },
+                data: { html: `<div class='codeblock'><pre>${code.substring(89)}</div>` },
             }
 
         }

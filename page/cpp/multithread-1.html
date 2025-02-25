@@ -31,8 +31,8 @@
             <span class="meta">C++</span>
             
             <div class="entry">
-                <p>有线程 A 和 B，线程 B 需要中断等待线程 A 触发特定条件，线程 B 只需保证不早于线程 A 触发特定条件继续执行即可。如果使用一个 <code>flag</code> 变量和 <code>while</code> 忙查，如下代码</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#D73A49">while</span><span style="color:#24292E">(flag)</span></span>
-<span class="line"><span style="color:#6A737D">//do something</span></span></code></pre></div><p>会导致编译不能检测到 <code>flag</code> 在线程 A 中的读写操作，而导致优化后的代码和源代码的表现不一致，每次判断都从寄存器里直接取值，变成一个死循环。</p><div class='codeblock'><pre class="shiki github-light" style="background-color:#fff;color:#24292e" tabindex="0"><code><span class="line"><span style="color:#6A737D">;000000 </span></span>
+                <p>有线程 A 和 B，线程 B 需要中断等待线程 A 触发特定条件，线程 B 只需保证不早于线程 A 触发特定条件继续执行即可。如果使用一个 <code>flag</code> 变量和 <code>while</code> 忙查，如下代码</p><div class='codeblock'><pre><code><span class="line"><span style="color:#D73A49">while</span><span style="color:#24292E">(flag)</span></span>
+<span class="line"><span style="color:#6A737D">//do something</span></span></code></pre></div><p>会导致编译不能检测到 <code>flag</code> 在线程 A 中的读写操作，而导致优化后的代码和源代码的表现不一致，每次判断都从寄存器里直接取值，变成一个死循环。</p><div class='codeblock'><pre><code><span class="line"><span style="color:#6A737D">;000000 </span></span>
 <span class="line"><span style="color:#D73A49">mov</span><span style="color:#005CC5">  eax</span><span style="color:#24292E">, </span><span style="color:#D73A49">dword</span><span style="color:#24292E"> ptr [flag]</span></span>
 <span class="line"><span style="color:#6A737D">;000001</span></span>
 <span class="line"><span style="color:#D73A49">test</span><span style="color:#005CC5"> eax</span><span style="color:#24292E">, </span><span style="color:#005CC5">eax</span><span style="color:#24292E"> </span></span>
@@ -47,7 +47,7 @@
     <div class="footer">
         <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
         <p rel="contact">
-            <a href="mailto:shentukeqin@hotmail.com">Mail</a>
+            <a href="mailto:puellaquae@outlook.com">Mail</a>
             <a href="https://github.com/Puellaquae">Github</a>
         </p>
     </div>

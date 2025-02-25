@@ -155,7 +155,7 @@ a {
 }
 
 .header section[sub].title::before {
-    content: 'p.';
+    content: 'P\'';
 }
 
 .header section[sub=""].title::before {
