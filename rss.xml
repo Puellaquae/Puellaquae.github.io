@@ -6,6 +6,14 @@
   <link>https://puellaquae.github.io</link>
   <description>Puelloc</description>
   <item>
+    <title>2023 &amp; 2024 回顾</title>
+    <link>https://puellaquae.github.io/page/thought/2023-2024-review.html</link>
+    <description></description>
+    <pubData>2025/02/26</pubData>
+    <lastBuildDate>2025/03/19</lastBuildDate>
+    <category>Thought</category>
+  </item>
+  <item>
     <title>Ring AllReduce</title>
     <link>https://puellaquae.github.io/page/mlsys/ring-allreduce.html</link>
     <description></description>

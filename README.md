@@ -2,6 +2,7 @@
 
 [__网页版本__](https://puellaquae.github.io/) | [TODO](article/roadmap.md) | [关于](article/about.md)
 
+- [2023 & 2024 回顾](article/thought/2023-2024-review.md)
 - [Ring AllReduce](article/mlsys/ring-allreduce.md)
 - [监听子进程输出](article/linux/stdio-monitor.md)
 - [阻止 Ctrl C 杀死父进程](article/linux/sigint-handler.md)
