@@ -3,7 +3,7 @@ import { Macro, Ptm, easyMap, MacroCall, CacheData, jsonToCacheData, cacheDataTo
 import pkg from 'nunjucks';
 const { configure } = pkg;
 import { spawnSync } from "child_process";
-import { Metadata } from "./metadata";
+import { Metadata } from "./metadata.js";
 import {
     Exclude,
     ExcludeMetadata,
@@ -26,7 +26,7 @@ import {
     DescriptMetadata,
     RedirectLink,
     CustomImgRender
-} from "./macro";
+} from "./macro.js";
 import { basename, extname, dirname, format, join, relative } from "path/posix";
 
 function getAllFiles(dir: string): { dir: string, name: string }[] {

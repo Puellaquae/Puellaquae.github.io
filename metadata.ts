@@ -1,4 +1,4 @@
-import { BasicMetadata, MacrosMetadatas } from "./index";
+import { BasicMetadata, MacrosMetadatas } from "./index.js";
 
 type Intersection<A, B> = A extends B ? A : never;
 type SameProperty<A, B> = Intersection<keyof A, keyof B>;

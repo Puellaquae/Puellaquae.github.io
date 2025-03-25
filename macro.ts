@@ -1,10 +1,12 @@
 import { easyMap, Macro, Node, NodeData, Ptm } from "jsptm";
-import { Metadata } from "./metadata";
-import { spawnSync } from "child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "fs";
-import path from "path";
-import { customAlphabet } from "nanoid";
+import { Metadata } from "./metadata.js";
 import { codeToHtml } from "shiki";
+import { mathjax } from "mathjax-full/js/mathjax.js"
+import { TeX } from "mathjax-full/js/input/tex.js"
+import { SVG } from 'mathjax-full/js/output/svg.js';
+import { liteAdaptor } from 'mathjax-full/js/adaptors/liteAdaptor.js';
+import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages.js';
+import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html.js';
 
 const HighlightInlineCode: Macro = {
     filter: ["inlineCode"],
@@ -107,53 +109,19 @@ const RawHtml: Macro = {
 
 type RawHtmlMetadata = { hasRawHTML: boolean };
 
-function RenderTexCodeToSvg(tex: string, args: string[]): string {
-    const tmpdir = mkdtempSync(path.join(path.resolve("tmp"), "tex-"));
-    const texfile = path.join(tmpdir, "doc.tex");
-    writeFileSync(texfile, tex, { encoding: "utf-8" });
-    const cwd = process.cwd();
-    process.chdir(tmpdir);
-    const xelatexOutput = spawnSync("latex", ["--halt-on-error", texfile]).stdout.toString("utf-8");
-    const dvifile = path.join(tmpdir, "doc.dvi");
-    if (!existsSync(dvifile)) {
-        process.chdir(cwd);
-        rmSync(tmpdir, { recursive: true });
-        throw xelatexOutput;
-    }
-    const fixedSize = !args.includes("noFixedSize")
-    let dvisvgmExtarArgs: string[] = [];
-    if (!fixedSize) {
-        dvisvgmExtarArgs = ["--exact-bbox", "--zoom=-1"];
-    }
-    const dvisvgmOutput = spawnSync("dvisvgm", ["-f", "woff2", ...dvisvgmExtarArgs, "--no-style", dvifile]);
-    const svgfile = path.join(tmpdir, "doc.svg");
-    if (!existsSync(svgfile)) {
-        process.chdir(cwd);
-        rmSync(tmpdir, { recursive: true });
-        throw dvisvgmOutput;
-    }
-    let svg = readFileSync(svgfile, { encoding: "utf-8" });
-    if (fixedSize) {
-        svg = svg.replace(/width='(.*?)pt' height='(.*?)pt'/, (_match, _p1, p2) => {
-            return `height='calc(2em * (${p2} / 10.49993))'`;
-        })
-    }
-    if (args.includes("randomFontName")) {
-        const fontRename = new Map<string, string>();
-        const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 8);
-        svg = svg.replaceAll(/font-family:(.+?);/g, (_match, p1) => {
-            const id = nanoid();
-            const rename = `${id}${p1}`;
-            fontRename.set(p1, rename);
-            return `font-family:${rename};`;
-        });
-        svg = svg.replaceAll(/font-family='(.+?)'/g, (_match, p1) => {
-            const rename = fontRename.get(p1)!;
-            return `font-family='${rename}'`;
-        })
-    }
-    process.chdir(cwd);
-    rmSync(tmpdir, { recursive: true });
+const adaptor = liteAdaptor();
+const handler = RegisterHTMLHandler(adaptor);
+const tex = new TeX({ packages: AllPackages });
+const svg = new SVG({ fontCache: 'none' });
+const tex2svg = mathjax.document('', { InputJax: tex, OutputJax: svg });
+
+function RenderTexCodeToSvg(tex: string, args: string[], inline: boolean): string {
+    console.log(tex);
+    const node = tex2svg.convert(tex, {
+        display: !inline
+    });
+    const svg = adaptor.innerHTML(node);
+    console.log(svg);
     return svg;
 }
 
@@ -164,10 +132,8 @@ const TexBlock: Macro = {
             if (node.data.codetype === "tex") {
                 const args = arg.split(",").map(a => a.trim());
                 easyMap<Metadata>(metadata).entry("hasTexBlock").or(true);
-                const tex = '\\documentclass{standalone}\n\\usepackage[UTF8]{ctex}\n\\usepackage{amsmath}\n\\begin{document}\n$\\displaystyle\n'
-                    + node.data.code +
-                    '\n$\n\\end{document}';
-                const svg = RenderTexCodeToSvg(tex, args);
+                const tex = node.data.code;
+                const svg = RenderTexCodeToSvg(tex, args, false);
                 const texnode: NodeData = {
                     type: "rawHtml",
                     data: { html: `<div class="latex-block">${svg}</div>` },
@@ -197,10 +163,8 @@ const GFMTexBlock: Macro = {
             if (node.rawData.startsWith("$$\n") && node.rawData.endsWith("\n$$")) {
                 const args = arg.split(",").map(a => a.trim());
                 easyMap<Metadata>(metadata).entry("hasTexBlock").or(true);
-                const tex = '\\documentclass{standalone}\n\\usepackage[UTF8]{ctex}\n\\usepackage{amsmath}\n\\begin{document}\n$\\displaystyle\n'
-                    + node.rawData.slice(3, node.rawData.length - 3) +
-                    '\n$\n\\end{document}';
-                const svg = RenderTexCodeToSvg(tex, args);
+                const tex = node.rawData.slice(3, node.rawData.length - 3);
+                const svg = RenderTexCodeToSvg(tex, args, false);
                 const texnode: NodeData = {
                     type: "rawHtml",
                     data: { html: `<div class="latex-block">${svg}</div>` },
@@ -230,10 +194,8 @@ const TexInline: Macro = {
             if (node.data.code.startsWith("$ ") && node.data.code.endsWith(" $")) {
                 const args = arg.split(",").map(a => a.trim());
                 easyMap<Metadata>(metadata).entry("hasTexBlock").or(true);
-                const tex = '\\documentclass{standalone}\n\\usepackage[UTF8]{ctex}\n\\usepackage{amsmath}\n\\begin{document}\n$\n'
-                    + node.data.code.slice(2, node.data.code.length - 2) +
-                    '\n$\n\\end{document}';
-                const svg = RenderTexCodeToSvg(tex, args);
+                const tex = node.data.code.slice(2, node.data.code.length - 2);
+                const svg = RenderTexCodeToSvg(tex, args, true);
                 const texnode: NodeData = {
                     type: "rawHtml",
                     data: { html: `<span class="latex-inline">${svg}</span>` },
