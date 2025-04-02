@@ -11,7 +11,7 @@
     --evenTableBackgroungColor: #ffeadc;
     --tableHeaderBackgroungColor: #fbbe95;
     --pay: #74f466;
-    --nako: #ff6e90;
+    --quoteHintColor: #ff6e90;
     --lettleList: "小列表";
     --bigList: "大列表";
     --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans", "思源黑体", "Source Han Sans VF", "Noto Sans CJK SC", "Noto Sans", monospace;
@@ -328,6 +328,12 @@ body {
     font-family: var(--codeFont);
 }
 
+p code {
+    font-size: 0.8em;
+    position: relative;
+    top: -0.08em;
+}
+
 .archive .codeblock {
     font-size: 0.75em;
     font-family: var(--codeFont);
@@ -339,6 +345,12 @@ body {
 
 .archive summary {
     outline: none;
+}
+
+.archive blockquote {
+    border-left: var(--quoteHintColor) 0.25em solid;
+    margin-left: 0;
+    padding-left: 1em;
 }
 
 .create.date::before {
