@@ -14,8 +14,8 @@
     --quoteHintColor: #ff6e90;
     --lettleList: "小列表";
     --bigList: "大列表";
-    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans", "思源黑体", "Source Han Sans VF", "Noto Sans CJK SC", "Noto Sans", monospace;
-    --font: "Georgia Pro", "Source Han Serif", "思源宋体", "Source Han Serif VF", "Noto Serif CJK SC", "Noto Serif", serif;
+    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans VF", "Source Han Sans", monospace;
+    --font: "Georgia Pro", "Source Han Serif VF", "Source Han Serif", serif;
 }
 
 @media(min-width: 1220px) {
@@ -35,80 +35,44 @@
 @media(max-width: 832px) {
     :root {
         --ContainWidth: 94%;
-        --font: "Verdana Pro", "Source Han Sans", "思源黑体", "Noto Sans CJK SC", sans-serif;
+        --font: "Verdana Pro", "Source Han Sans VF", "Source Han Sans", sans-serif;
     }
 }
 
 @media(min-width: 1300px) or ((max-width: 1220px) and (min-width: 910px)) {
-    :root {
-        counter-reset: h2-id h3-id h4-id;
-    }
-
-    h2 {
-        counter-reset: h3-id;
-        counter-increment: h2-id;
-    }
-
     h2::before {
         visibility: hidden;
         content: counter(h2-id) ".";
         position: absolute;
-        right: calc((100% + var(--ContainWidth))/2);
+        right: calc((100% + var(--ContainWidth))/2 + 0.1rem);
     }
 
     h2:hover::before {
         visibility: visible;
     }
 
-    h3 {
-        counter-reset: h4-id;
-        counter-increment: h3-id;
-    }
-
     h3::before {
         visibility: hidden;
         content: counter(h2-id) "." counter(h3-id) ".";
         position: absolute;
-        right: calc((100% + var(--ContainWidth))/2);
+        right: calc((100% + var(--ContainWidth))/2 + 0.1rem);
     }
 
     h3:hover::before {
         visibility: visible;
     }
 
-    h4 {
-        counter-increment: h4-id;
-    }
-
     h4::before {
         visibility: hidden;
         content: counter(h2-id) "." counter(h3-id) "." counter(h4-id) ".";
         position: absolute;
-        right: calc((100% + var(--ContainWidth))/2);
+        right: calc((100% + var(--ContainWidth))/2 + 0.1rem);
     }
 
     h4:hover::before {
         visibility: visible;
     }
 }
-
-/*
-@media(prefers-color-scheme: dark) {
-    :root {
-        --navbarBgColor: #111;
-        --bgColor: #222;
-        --tagBgColor: #444;
-        --fontColor: #fafafa;
-        --selectedFontColor: #000;
-        --selectedBgColor: #f1f1f1;
-        --postTitleColor: #eee;
-        --linkerColor: #cdf;
-        --highlightColor: #cdf;
-        --splitLineHoverColor: #caa;
-        --splitLineColor: #888;
-    }
-}
-*/
 
 html {
     overflow-x: hidden;
@@ -118,15 +82,18 @@ html {
 
 h2 {
     scroll-margin-top: 2.5em;
+    counter-reset: h3-id;
+    counter-increment: h2-id;
 }
 
-/* .toc {
-    position: fixed;
-    left: 0;
-    text-align: left;
-    width: calc((100vw - var(--ContainWidth) - 12rem) / 2);
-    background-color: var(--tagBgColor);
-} */
+h3 {
+    counter-reset: h4-id;
+    counter-increment: h3-id;
+}
+
+h4 {
+    counter-increment: h4-id;
+}
 
 ::selection {
     fill: var(--selectedFontColor);
@@ -193,6 +160,7 @@ body {
     justify-content: center;
     align-items: center;
     background-color: var(--bgColor);
+    min-height: 100vh;
 }
 
 .header {
@@ -206,7 +174,7 @@ body {
     background-color: var(--navbarBgColor);
     z-index: 99999;
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(20px);
     box-shadow: 0px 0px 8px 0px var(--navbarBgColor);
 }
 

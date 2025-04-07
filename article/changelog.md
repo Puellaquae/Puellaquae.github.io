@@ -1,4 +1,10 @@
-# 博客系统编年史
+<!---
+hideIndex = "both"
+specialPosition = ["navbar-index", "readme"]
+specialShowName = "日志"
+--->
+
+# 博客系统编年史与未来计划
 
 虽然对于一个博客而言，内容才是关键，但我还是花了很多时间在博客系统上。
 
@@ -12,9 +18,9 @@
 
 ## 定制与造轮子
 
-2022 年年后，我才正式完成了 markdown 的定制草案，取名为 [Puelloc Tailored Markdown](https://github.com/Puellaquae/PuellocMark)，下称 PuellocMark。在 CommonMark 的基础上，我对削减了大部分不常见的语法，使 markdown 的解析工作可以尽可能的简单。并引入了 GFM 的表格扩展。对于 CommonMark 和 GFM 都没有的扩展，我都将其定义在 CommonMark 不可见的范围内。因为我希望原始的 markdown 文件在 Github 中打开也是可以阅读的。随后我大概花费了两到三周的时间完成了一份简单的[解析器](https://www.npmjs.com/package/jsptm)。然后就把网站的构建系统迁移到了 PuellocMark 上。因为 PuellocMark 的主要使用者（也可能使唯一使用者）就是我这个博客，所以之后 Bug 的发现修复或者新功能的添加都是随着博客构建系统的开发而进行。伴随着 PuellocMark 的引入，扩展功能可以与 markdown 的解析解耦，我可以更自由便捷地去添加新的扩展功能。
+2022 年年后，我正式完成了 markdown 的定制草案，取名为 [Puelloc Tailored Markdown](https://github.com/Puellaquae/PuellocMark)，下称 PuellocMark。在 CommonMark 的基础上，我对削减了大部分不常见的语法，使 markdown 的解析工作可以尽可能的简单。并引入了 GFM 的表格扩展。对于 CommonMark 和 GFM 都没有的扩展，我都将其定义在 CommonMark 不可见的范围内。因为我希望原始的 markdown 文件在 Github 中打开也是可以阅读的。随后我大概花费了两到三周的时间完成了一份简单的[解析器](https://www.npmjs.com/package/jsptm)。然后就把网站的构建系统迁移到了 PuellocMark 上。因为 PuellocMark 的就是针对我这个博客设计开发的，所以之后 Bug 的发现修复或者新功能的添加都是随着博客构建系统的开发而进行。伴随着 PuellocMark 的引入，扩展功能可以与 markdown 的解析解耦，我可以更自由便捷地去添加新的扩展功能。
 
-## HISTORY
+## 新功能与重构
 
 ### 使用 Shiki 做代码着色
 
@@ -25,3 +31,17 @@ fn some(a: StructA) -> StructB { StructB {} }
 ```
 
 highlight 它着不出函数参数里 StructA 那个色，在这个位置一眼就该知道是类型吧。于是就换了 Shiki 这个库，看作者应该是 Vue 的那群人做的。这个新世纪前端库，它是 style 直接写进返回的 html 里，没有弄一个 css 什么的。看了 Shiki 才知道原来 TypeScript 他们可以把代码提示一起带上去搞得就像在编辑器里一样的高级效果是用 TwoSlash 做出的。
+
+### 使用 MathJax 代替 LaTex
+
+最开始设计代码渲染功能的时候选择直接调用 LaTeX 程序的原因是可以使用像 TikZ 这样的包，但是这个代码功能做出了之后其实几乎都没有使用过，更不要说这个 TikZ 了。所以最后比较了一下 MathJax 和 KaTeX，选择了和 GitHub 一致的 MathJax。至于 TikZ，也有人用 WASM 搬上 js 了，虽然感觉我未来也没有这么复杂的需求。
+
+## 计划
+
+### 提供目录功能
+
+提供一个固定屏幕位置的目录来快捷跳转章节。
+
+### 需要支持多语种混排的语种划分
+
+这个主要是 CJK 的汉字同字不同形，为了指导浏览器能够显示正确字形，需要能够在生成的 HTML 标注上 lang 信息。

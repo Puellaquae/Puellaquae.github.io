@@ -19,7 +19,7 @@
             <label for="timeLine" tabindex="0"></label>
             {% for article in articles %}
             {%- if article["specialPosition"].includes("navbar-index") -%}
-            <a href="{{article['outdir']}}/{{article['outfilename']}}">{{article["title"]|e}}</a>
+            <a href="{{article['outdir']}}/{{article['outfilename']}}">{{article["specialShowName"]|e}}</a>
             {% endif %}
             {%- endfor -%}
         </section>

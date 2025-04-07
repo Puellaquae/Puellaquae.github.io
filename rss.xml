@@ -110,14 +110,6 @@
     <category></category>
   </item>
   <item>
-    <title>博客系统编年史</title>
-    <link>https://puellaquae.github.io/page/changelog.html</link>
-    <description></description>
-    <pubData>2022/04/01</pubData>
-    <lastBuildDate>2024/04/20</lastBuildDate>
-    <category></category>
-  </item>
-  <item>
     <title>Pintos 实验记录</title>
     <link>https://puellaquae.github.io/page/os/pintos.html</link>
     <description></description>

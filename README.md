@@ -1,6 +1,6 @@
 # Puelloc Blog
 
-[__网页版本__](https://puellaquae.github.io/) | [TODO](article/roadmap.md) | [关于](article/about.md)
+[__网页版本__](https://puellaquae.github.io/) | [日志](article/changelog.md) | [关于](article/about.md)
 
 - [2023 & 2024 回顾](article/thought/2023-2024-review.md)
 - [Ring AllReduce](article/mlsys/ring-allreduce.md)
@@ -15,7 +15,6 @@
 - [HTTP 缓存策略](article/web/http-cache.md)
 - [C++ 的 const 限定](article/cpp/cpp-const.md)
 - [安卓开发记录](article/android-dev.md)
-- [博客系统编年史](article/changelog.md)
 - [Pintos 实验记录](article/os/pintos.md)
 - [正则表达式转化为自动机](article/compile/regex.md)
 - [对 nlohmann-json 构造函数的分析](article/cpp/nlohmann-construct.md)

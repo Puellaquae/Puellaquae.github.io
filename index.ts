@@ -91,7 +91,8 @@ type BasicMetadata = {
     subtype: string,
     language: "zh" | "en",
     relativeRoot: string,
-    specialPosition: ("navbar-article" | "navbar-index" | "readme")[]
+    specialPosition: ("navbar-article" | "navbar-index" | "readme")[],
+    specialShowName: string
 }
 
 class Articles {
@@ -130,6 +131,7 @@ class Articles {
 
         em.entry("hideIndex").or("none");
         em.entry("specialPosition").or([]);
+        em.entry("specialShowName").or(em.get("title")!);
         const rawfilename = em.get("rawfilename")!;
         const basefilename = basename(rawfilename, extname(rawfilename));
         const ofn = format({

@@ -16,7 +16,7 @@
         <section class="navbar-right">
             {% for article in articles %}
             {%- if article["specialPosition"].includes("navbar-article") -%}
-            <a href="{{metadata['relativeRoot']}}/{{article['outdir']}}/{{article['outfilename']}}">{{article["title"]|e}}</a>
+            <a href="{{metadata['relativeRoot']}}/{{article['outdir']}}/{{article['outfilename']}}">{{article["specialShowName"]|e}}</a>
             {% endif %}
             {%- endfor -%}
         </section>
