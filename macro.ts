@@ -121,7 +121,6 @@ function RenderTexCodeToSvg(tex: string, args: string[], inline: boolean): strin
         display: !inline
     });
     const svg = adaptor.innerHTML(node);
-    console.log(svg);
     return svg;
 }
 

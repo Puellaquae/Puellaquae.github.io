@@ -2,6 +2,7 @@
 
 [__网页版本__](https://puellaquae.github.io/) | [日志](article/changelog.md) | [关于](article/about.md)
 
+- [Philox](article/math/philox.md)
 - [2023 & 2024 回顾](article/thought/2023-2024-review.md)
 - [Ring AllReduce](article/mlsys/ring-allreduce.md)
 - [监听子进程输出](article/linux/stdio-monitor.md)
