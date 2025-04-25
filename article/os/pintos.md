@@ -38,7 +38,7 @@ Process preempt 要求高优先级的进程就绪时，正在运行的低由优�
 
 ### MLFQS
 
-这里需要实现多级反馈队列调度（multilevel feedback queue scheduler），对于这个调度器的介绍可以去看 guide 中的[介绍](https://web.stanford.edu/class/cs140/projects/pintos/pintos_7.html#SEC131)。这个调度器不同于之前做的优先级调度（不依赖 priority donation），有一项 `-mlfqs` 参数控制是否使用这个调度机制。这里主要需要实现定点数运算（因为没有 pintos 开启浮点运算）。Guide 中给出了相关的 `priority` `nice` `load_avg` 计算公式和定点数计算的公式。
+这里需要实现多级反馈队列调度（multilevel feedback queue scheduler），对于这个调度器的介绍可以去看 guide 中的[介绍](https://web.stanford.edu/class/cs140/projects/pintos/pintos_7.html#SEC131)。这个调度器不同于之前做的优先级调度（不依赖 priority donation），有一项 `-mlfqs` 参数控制是否使用这个调度机制。这里主要需要实现定点数运算（因为没有 pintos 开启浮点运算）。Guide 中给出了相关的 `priority`、`nice` 和 `load_avg` 计算公式和定点数计算的公式。
 
 另外这部分的测试点程序编写着就需要 180 秒以上的时间，而学校的 autograder 只给了 180 秒去运行，基本就肯定会超时。所以需要修改 `devices/pic.c:pit_configure_channel` 这个函数的 `frequency` 参数，可以在调用时改，也可以直接改在函数体里。
 

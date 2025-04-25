@@ -29,7 +29,7 @@
             {% for article in articles %}
             {%- if article["hideIndex"] != "html" and article["hideIndex"] != "both" -%}
             <div class="post">
-                <a href="{{article['outdir']}}/{{article['outfilename']}}">{{article["title"]|e}}</a>
+                <a href="{{article['outdir']}}/{{article['outfilename']}}">{{article["titleHtml"]}}</a>
                 <div class="date" title="最后修改于 {{article['modifyDate'].toLocaleDateString('zh-CN', {year:'numeric', month:'2-digit', day:'2-digit'})}}">{{article["createDate"].toLocaleDateString("zh-CN", {year:"numeric", month:"2-digit", day:"2-digit"})}}</div>
                 {%- for tag in article["tags"] %}
                 <label class="meta">{{tag}}</label>

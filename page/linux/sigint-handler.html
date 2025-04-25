@@ -22,14 +22,14 @@
         <div class="archive">
             <h1>阻止 Ctrl C 杀死父进程</h1>
             <div class="modified date">
-                2024年3月24日
+                2025年4月26日
             </div>
             <div class="create date">
                 2024年3月24日
             </div>
             
             <div class="entry">
-                <p>接着<a href="./fork-usage.html">fork：像线程一样使用进程</a>这篇文章，有时某一个子进程卡死了，只能用 Ctrl C 杀死，但是父进程也会被一起杀死，就无法得到已经运行结束进程的结果了；或者我不想继续运行了，但我仍然想要得到已经完成的结果。</p><h2>做什么</h2><p>父进程需要能够处理 Ctrl C 事件，同时有额外的参数记录进程的情况：进程正常退出，进程意外退出，进程未完成；这里没有区分进程是没有开始还是运行到一半人为停止了。当 Ctrl C 按下后，停止所有的子进程，对于未启动的子进程也不再运行了，直接收集子进程的运行结果。</p><h2>怎么做</h2><p>首先要能够感知到 SIGINT（Ctrl C）事件，使用 sigaction 函数可以切换信号的处理函数，sigaction 会返回旧的处理函数，需要保留下来以便处理结束后恢复回原始的处理函数。不过这个处理函数是 <code>(int signal) -&gt; void</code>，没法传递自己的参数，好在可以利用全局函数指针解决一下。</p><p>这里只需要父进程使用我们的处理函数，子进程并不需要，因为按照需求父进程需要把所有的子进程杀死，直接让子进程收到 SIGINT 自己结束就可以了。所以在 fork 后再使用 sigcation 切换会原始的处理函数。</p><p>因为子进程没有修改 SIGINT 处理函数，所以杀死进程时可以直接使用 SIGINT 将其杀死，然后父进程中监听退出原因是否是 SIGINT 来判断子进程是被父进程杀死的还是自己奔溃了。</p><div class='codeblock'><pre><code><span class="line"><span style="color:#D73A49">enum</span><span style="color:#24292E"> {</span></span>
+                <p>接着 <a href="./fork-usage.html">fork：像线程一样使用进程</a>这篇文章，有时某一个子进程卡死了，只能用 Ctrl C 杀死，但是父进程也会被一起杀死，就无法得到已经运行结束进程的结果了；或者我不想继续运行了，但我仍然想要得到已经完成的结果。</p><h2>做什么</h2><p>父进程需要能够处理 Ctrl C 事件，同时有额外的参数记录进程的情况：进程正常退出，进程意外退出，进程未完成；这里没有区分进程是没有开始还是运行到一半人为停止了。当 Ctrl C 按下后，停止所有的子进程，对于未启动的子进程也不再运行了，直接收集子进程的运行结果。</p><h2>怎么做</h2><p>首先要能够感知到 SIGINT（Ctrl C）事件，使用 sigaction 函数可以切换信号的处理函数，sigaction 会返回旧的处理函数，需要保留下来以便处理结束后恢复回原始的处理函数。不过这个处理函数是 <code>(int signal) -&gt; void</code>，没法传递自己的参数，好在可以利用全局函数指针解决一下。</p><p>这里只需要父进程使用我们的处理函数，子进程并不需要，因为按照需求父进程需要把所有的子进程杀死，直接让子进程收到 SIGINT 自己结束就可以了。所以在 fork 后再使用 sigcation 切换会原始的处理函数。</p><p>因为子进程没有修改 SIGINT 处理函数，所以杀死进程时可以直接使用 SIGINT 将其杀死，然后父进程中监听退出原因是否是 SIGINT 来判断子进程是被父进程杀死的还是自己奔溃了。</p><div class='codeblock'><pre><code><span class="line"><span style="color:#D73A49">enum</span><span style="color:#24292E"> {</span></span>
 <span class="line"><span style="color:#005CC5">    PROCESS_POOL_TASK_UNFIN</span><span style="color:#D73A49"> =</span><span style="color:#005CC5"> 1</span><span style="color:#D73A49"> &#x3C;&#x3C;</span><span style="color:#005CC5"> 7</span><span style="color:#24292E">,</span></span>
 <span class="line"><span style="color:#005CC5">    PROCESS_POOL_TASK_FIN</span><span style="color:#D73A49"> =</span><span style="color:#005CC5"> 2</span><span style="color:#D73A49"> &#x3C;&#x3C;</span><span style="color:#005CC5"> 7</span><span style="color:#24292E">,</span></span>
 <span class="line"><span style="color:#005CC5">    PROCESS_POOL_TASK_CRASH</span><span style="color:#D73A49"> =</span><span style="color:#005CC5"> 3</span><span style="color:#D73A49"> &#x3C;&#x3C;</span><span style="color:#005CC5"> 7</span><span style="color:#24292E">,</span></span>

@@ -1,6 +1,3 @@
-<!M GFMTexBlock>
-<!M PunctuationCompression>
-
 # Philox
 
 Philox 是一种基于计数器（counter-based）的随机数生成算法，在 [Parallel Random Numbers: As Easy as 1, 2, 3](https://www.thesalmons.org/john/random123/papers/random123sc11.pdf) 这篇论文中提出。

@@ -1,5 +1,3 @@
-<!M PunctuationCompression>
-
 # 低代码开发的特点和挑战：来自从业者的视角
 
 **论文来自：**

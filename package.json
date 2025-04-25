@@ -15,7 +15,7 @@
   "author": "Puellaquae",
   "license": "ISC",
   "dependencies": {
-    "jsptm": "^0.0.16",
+    "jsptm": "^0.0.17",
     "mathjax-full": "^3.2.2",
     "nunjucks": "^3.2.4",
     "shiki": "^1.3.0"

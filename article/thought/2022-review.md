@@ -1,5 +1,3 @@
-<!M PunctuationCompression>
-
 # 2022 回顾
 
 ## 冬

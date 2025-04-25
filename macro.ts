@@ -1,4 +1,5 @@
 import { easyMap, Macro, Node, NodeData, Ptm } from "jsptm";
+import { node2html } from "jsptm/lib/render.js";
 import { Metadata } from "./metadata.js";
 import { codeToHtml } from "shiki";
 import { mathjax } from "mathjax-full/js/mathjax.js"
@@ -70,6 +71,7 @@ const Title: Macro = {
                 throw "h1 title should only contain single text if you not set title in metadata";
             }
             m.entry("title").or(node.rawData.substring(2));
+            m.entry("titleHtml").or(node.children.map((n) => node2html(n)).join(""));
             return {
                 type: "void",
                 data: null
@@ -79,7 +81,7 @@ const Title: Macro = {
     }
 }
 
-type TitleMetadata = { title: string, titleCount: number };
+type TitleMetadata = { title: string, titleHtml: string, titleCount: number };
 
 const Exclude: Macro = {
     filter: [],
@@ -217,12 +219,29 @@ const TexInline: Macro = {
 
 type TexInlineMetadata = { hasTexInline: boolean };
 
-const PunctuationCompression: Macro = {
+const CharAndTypesettingOpt: Macro = {
     filter: ["text"],
     func: function (node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
         if (node.type === "text") {
-            let text = node.data.text.replace(/([\p{Pe}。]+)([。，、；：])/gu, "<span class='halt'>$1</span>$2");
-            text = text.replace(/([。，、；：])([\p{Ps}。]+)/gu, "$1<span class='halt'>$2</span>");
+            const REG_SYM_LEFT = /([\p{Pe}。]+)([。，、；：])/gu;
+            const REG_SYM_RIGHT = /([。，、；：])([\p{Ps}。]+)/gu;
+            // regex from https://github.com/sivan/heti
+            const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
+            const A = 'A-Za-z\u0080-\u00ff\u0370-\u03ff';
+            const N = '0-9';
+            const S = '`~!@#\\$%\\^&\\*\\(\\)_=\\+\\[\\]{}\\\\\\|;:\'",<.>\\/\\?';
+            const ANS = `${A}${N}${S}`;
+            const REG_CJK_FULL = new RegExp(`(?<=[${CJK}])( *[${ANS}]+(?: +[${ANS}]+)* *)(?=[${CJK}])`, 'g');
+            const REG_CJK_START = new RegExp(`([${ANS}]+(?: +[${ANS}]+)* *)(?=[${CJK}])`, 'g');
+            const REG_CJK_END = new RegExp(`(?<=[${CJK}])( *[${ANS}]+(?: +[${ANS}]+)*)`, 'g');
+
+            let text = node.data.text.replace(/——/gu, "⸺")
+                .replace(REG_CJK_FULL, (match, ans) => ` ${ans.trim()} `)  // 全包围情况加空格
+                .replace(REG_CJK_START, (match, ans) => `${ans.trim()} `) // 尾部 ANS 加空格
+                .replace(REG_CJK_END, (match, ans) => ` ${ans.trim()}`)  // 头部 ANS 加空格
+                // TODO: 这里应当将 span 改为 node，并返回 multinode 以避免后续 macro 错误处理
+                .replace(REG_SYM_LEFT, "<span class='halt'>$1</span>$2") // 标点挤压
+                .replace(REG_SYM_RIGHT, "$1<span class='halt'>$2</span>");
             return {
                 type: "text",
                 data: {
@@ -297,8 +316,8 @@ export {
     TexBlock, TexBlockMetadata,
     GFMTexBlock, GFMTexBlockMetadata,
     TexInline, TexInlineMetadata,
-    PunctuationCompression,
     Descript, DescriptMetadata,
     RedirectLink,
-    CustomImgRender
+    CustomImgRender,
+    CharAndTypesettingOpt
 };

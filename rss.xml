@@ -10,7 +10,7 @@
     <link>https://puellaquae.github.io/page/math/philox.html</link>
     <description></description>
     <pubData>2025/04/20</pubData>
-    <lastBuildDate>2025/04/20</lastBuildDate>
+    <!--lastBuildDate>2025/04/26</lastBuildDate-->
     <category>Math</category>
   </item>
   <item>
@@ -18,7 +18,7 @@
     <link>https://puellaquae.github.io/page/thought/2023-2024-review.html</link>
     <description></description>
     <pubData>2025/02/26</pubData>
-    <lastBuildDate>2025/03/19</lastBuildDate>
+    <!--lastBuildDate>2025/04/26</lastBuildDate-->
     <category>Thought</category>
   </item>
   <item>
@@ -26,7 +26,7 @@
     <link>https://puellaquae.github.io/page/mlsys/ring-allreduce.html</link>
     <description></description>
     <pubData>2024/03/26</pubData>
-    <lastBuildDate>2024/03/26</lastBuildDate>
+    <!--lastBuildDate>2024/03/26</lastBuildDate-->
     <category>MLsys</category>
   </item>
   <item>
@@ -34,7 +34,7 @@
     <link>https://puellaquae.github.io/page/linux/stdio-monitor.html</link>
     <description></description>
     <pubData>2024/03/24</pubData>
-    <lastBuildDate>2024/03/24</lastBuildDate>
+    <!--lastBuildDate>2024/03/24</lastBuildDate-->
     <category>Linux</category>
   </item>
   <item>
@@ -42,7 +42,7 @@
     <link>https://puellaquae.github.io/page/linux/sigint-handler.html</link>
     <description></description>
     <pubData>2024/03/24</pubData>
-    <lastBuildDate>2024/03/24</lastBuildDate>
+    <!--lastBuildDate>2025/04/26</lastBuildDate-->
     <category>Linux</category>
   </item>
   <item>
@@ -50,7 +50,7 @@
     <link>https://puellaquae.github.io/page/linux/fork-usage.html</link>
     <description></description>
     <pubData>2023/10/10</pubData>
-    <lastBuildDate>2024/03/24</lastBuildDate>
+    <!--lastBuildDate>2024/03/24</lastBuildDate-->
     <category>Linux</category>
   </item>
   <item>
@@ -58,7 +58,7 @@
     <link>https://puellaquae.github.io/page/thought/sichuan.html</link>
     <description></description>
     <pubData>2023/08/10</pubData>
-    <lastBuildDate>2024/07/28</lastBuildDate>
+    <!--lastBuildDate>2025/04/26</lastBuildDate-->
     <category>Thought</category>
   </item>
   <item>
@@ -66,7 +66,7 @@
     <link>https://puellaquae.github.io/page/paper/low-code-practitioners-view.cn.html</link>
     <description></description>
     <pubData>2023/02/15</pubData>
-    <lastBuildDate>2024/04/27</lastBuildDate>
+    <!--lastBuildDate>2025/04/26</lastBuildDate-->
     <category>Paper</category>
   </item>
   <item>
@@ -74,7 +74,7 @@
     <link>https://puellaquae.github.io/page/thought/2022-review.html</link>
     <description></description>
     <pubData>2022/12/31</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <!--lastBuildDate>2025/04/26</lastBuildDate-->
     <category>Thought</category>
   </item>
   <item>
@@ -82,7 +82,7 @@
     <link>https://puellaquae.github.io/page/cpp/cpp-tricky.html</link>
     <description></description>
     <pubData>2022/12/05</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <!--lastBuildDate>2024/03/22</lastBuildDate-->
     <category>Cpp</category>
   </item>
   <item>
@@ -90,7 +90,7 @@
     <link>https://puellaquae.github.io/page/wd40purx.html</link>
     <description></description>
     <pubData>2022/07/24</pubData>
-    <lastBuildDate>2022/07/24</lastBuildDate>
+    <!--lastBuildDate>2022/07/24</lastBuildDate-->
     <category></category>
   </item>
   <item>
@@ -98,7 +98,7 @@
     <link>https://puellaquae.github.io/page/web/http-cache.html</link>
     <description></description>
     <pubData>2022/07/04</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <!--lastBuildDate>2024/03/22</lastBuildDate-->
     <category>Web</category>
   </item>
   <item>
@@ -106,7 +106,7 @@
     <link>https://puellaquae.github.io/page/cpp/cpp-const.html</link>
     <description></description>
     <pubData>2022/07/02</pubData>
-    <lastBuildDate>2024/03/24</lastBuildDate>
+    <!--lastBuildDate>2025/04/26</lastBuildDate-->
     <category>Cpp</category>
   </item>
   <item>
@@ -114,7 +114,7 @@
     <link>https://puellaquae.github.io/page/android-dev.html</link>
     <description></description>
     <pubData>2022/05/02</pubData>
-    <lastBuildDate>2022/06/08</lastBuildDate>
+    <!--lastBuildDate>2022/06/08</lastBuildDate-->
     <category></category>
   </item>
   <item>
@@ -122,7 +122,7 @@
     <link>https://puellaquae.github.io/page/os/pintos.html</link>
     <description></description>
     <pubData>2021/11/29</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <!--lastBuildDate>2025/04/26</lastBuildDate-->
     <category>OS</category>
   </item>
   <item>
@@ -130,7 +130,7 @@
     <link>https://puellaquae.github.io/page/compile/regex.html</link>
     <description></description>
     <pubData>2021/10/15</pubData>
-    <lastBuildDate>2024/03/24</lastBuildDate>
+    <!--lastBuildDate>2025/04/26</lastBuildDate-->
     <category>Compile</category>
   </item>
   <item>
@@ -138,7 +138,7 @@
     <link>https://puellaquae.github.io/page/cpp/nlohmann-construct.html</link>
     <description></description>
     <pubData>2021/01/30</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <!--lastBuildDate>2024/03/22</lastBuildDate-->
     <category>Cpp</category>
   </item>
   <item>
@@ -146,7 +146,7 @@
     <link>https://puellaquae.github.io/page/os/osdev.html</link>
     <description></description>
     <pubData>2020/08/21</pubData>
-    <lastBuildDate>2024/04/20</lastBuildDate>
+    <!--lastBuildDate>2025/04/26</lastBuildDate-->
     <category>OS</category>
   </item>
   <item>
@@ -154,7 +154,7 @@
     <link>https://puellaquae.github.io/page/web/css-filter.html</link>
     <description></description>
     <pubData>2020/08/14</pubData>
-    <lastBuildDate>2024/03/24</lastBuildDate>
+    <!--lastBuildDate>2024/03/24</lastBuildDate-->
     <category>Web</category>
   </item>
   <item>
@@ -162,7 +162,7 @@
     <link>https://puellaquae.github.io/page/cpp/std-thread.html</link>
     <description></description>
     <pubData>2020/08/07</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <!--lastBuildDate>2024/03/22</lastBuildDate-->
     <category>Cpp</category>
   </item>
   <item>
@@ -170,7 +170,7 @@
     <link>https://puellaquae.github.io/page/cpp/multithread-1.html</link>
     <description></description>
     <pubData>2020/07/27</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <!--lastBuildDate>2024/03/22</lastBuildDate-->
     <category>Cpp</category>
   </item>
   <item>
@@ -178,7 +178,7 @@
     <link>https://puellaquae.github.io/page/cpp/stl-in-crud.html</link>
     <description></description>
     <pubData>2020/07/15</pubData>
-    <lastBuildDate>2024/03/22</lastBuildDate>
+    <!--lastBuildDate>2024/03/22</lastBuildDate-->
     <category>Cpp</category>
   </item>
   </channel>

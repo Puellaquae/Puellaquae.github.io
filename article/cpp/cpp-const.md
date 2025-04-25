@@ -28,7 +28,7 @@ int * const cpx // const pointer to data
 
 此外，我才知道原来 `const T &` 是不算有 const 限定的，根据 [[dcl.ref]/1](https://timsong-cpp.github.io/cppwp/dcl.ref#1)（翻译来自 [cppreference](https://zh.cppreference.com/w/cpp/language/reference)）
 
-> 引用类型不能在顶层有 cv 限定；声明中没有为此而设的语法，如果在 typedef 名、decltype 说明符 (C++11 起)或类型模板形参上添加了该限定符，它将会被忽略。
+> 引用类型不能在顶层有 cv 限定；声明中没有为此而设的语法，如果在 typedef 名、decltype 说明符（C++11 起）或类型模板形参上添加了该限定符，它将会被忽略。
 
 也就是说，因为引用本身是没有规定需要真实在内存中存在的，而且引用初始化就必须绑定。所以对于引用是没有可变和不可变之说的，只能说是引用了可变的数据或不可变的数据。所有如果用 is_const 去测试一个引用类型永远都是 false 的。
 

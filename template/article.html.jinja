@@ -23,7 +23,7 @@
     </header>
     <div class="container">
         <div class="archive {%- if metadata['useIndent'] %} indent {%- endif %}">
-            <h1>{{metadata["title"]|e}}</h1>
+            <h1>{{metadata["titleHtml"]}}</h1>
             <div class="modified date">
                 {{metadata["modifyDate"].toLocaleDateString("zh-CN", {year:"numeric", month:"long", day:"numeric"})}}
             </div>

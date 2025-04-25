@@ -21,11 +21,11 @@ import {
     GFMTexBlockMetadata,
     TexInline,
     TexInlineMetadata,
-    PunctuationCompression,
     Descript,
     DescriptMetadata,
     RedirectLink,
-    CustomImgRender
+    CustomImgRender,
+    CharAndTypesettingOpt
 } from "./macro.js";
 import { basename, extname, dirname, format, join, relative } from "path/posix";
 
@@ -222,10 +222,10 @@ const macro = {
     TexBlock,
     GFMTexBlock,
     TexInline,
-    PunctuationCompression,
     Descript,
     RedirectLink,
-    CustomImgRender
+    CustomImgRender,
+    CharAndTypesettingOpt
 };
 
 type MacroName = keyof typeof macro;
@@ -246,7 +246,8 @@ const forceMacro: { name: MacroName, arg?: string }[] = [
     { name: "Title" },
     { name: "HighlightFenceCode" },
     { name: "RedirectLink" },
-    { name: "CustomImgRender" }
+    { name: "CustomImgRender" },
+    { name: "CharAndTypesettingOpt" },
 ];
 
 new Articles("article").process(macro, forceMacro).output("page", ".").done();

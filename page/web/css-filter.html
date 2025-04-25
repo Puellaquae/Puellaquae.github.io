@@ -190,7 +190,7 @@
     <div class="item atag1 atag2">item with tag1, tag2</div>
     <div class="item atag2 atag3">item with tag2, tag3</div>
     <div class="item atag1 atag2 atag3">item with tag1, tag2, tag3</div>
-</div><p>当然，这种作法是不推荐用于实际情况的，<code>n</code> 个标签就需要 <code>2^n</code> 个 <code>radio</code> 记录状态和 <code>n2^n</code> 个label控制状态的转移。这会导致代码十分冗长，而且标签的切换需要频繁地重排页面，以及伪类选择器的大量使用（属性选择器可以预先展开为 id 选择器），都会降低页面的性能。</p><p>根据这个原理，只要是可以抽象为有限状态机模型的理论上都是可以利用用 CSS 实现的，此外利用 animation 产生时间差切换显示不同的label还可以模拟出伪随机的状态游走（效果会受限于浏览器的时间精度和刷新策略）。</p><div class="interact" id="interact3">
+</div><p>当然，这种作法是不推荐用于实际情况的，<code>n</code> 个标签就需要 <code>2^n</code> 个 <code>radio</code> 记录状态和 <code>n2^n</code> 个 label 控制状态的转移。这会导致代码十分冗长，而且标签的切换需要频繁地重排页面，以及伪类选择器的大量使用（属性选择器可以预先展开为 id 选择器<span class='halt'>）</span>，都会降低页面的性能。</p><p>根据这个原理，只要是可以抽象为有限状态机模型的理论上都是可以利用用 CSS 实现的，此外利用 animation 产生时间差切换显示不同的 label 还可以模拟出伪随机的状态游走（效果会受限于浏览器的时间精度和刷新策略<span class='halt'>）</span>。</p><div class="interact" id="interact3">
     <style>
         #interact3 {
             display: flex;
