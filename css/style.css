@@ -22,6 +22,7 @@
     :root {
         --ContainWidth: 1200px;
         font-size: 24px;
+        font-weight: 450;
     }
 }
 
@@ -29,6 +30,7 @@
     :root {
         --ContainWidth: 800px;
         font-size: 20px;
+        font-weight: 450;
     }
 }
 
@@ -296,9 +298,13 @@ body {
     font-family: var(--codeFont);
 }
 
-p code {
+p code, li code {
     font-size: 0.9em;
+    /* font-weight: 400; */
     position: relative;
+    border-radius: 0.2em;
+    padding: 0 0.2em;
+    background-color: #f0f0f0;
 }
 
 .archive .codeblock {
