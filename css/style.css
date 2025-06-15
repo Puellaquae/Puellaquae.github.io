@@ -287,29 +287,20 @@ body {
 }
 
 .archive pre {
-    font-family: var(--codeFont);
-    padding: 0px 4px;
-    border-radius: 4px;
-    overflow: auto;
-}
-
-.archive code {
-    line-height: 1;
-    font-family: var(--codeFont);
-}
-
-p code, li code {
-    font-size: 0.9em;
-    /* font-weight: 400; */
-    position: relative;
-    border-radius: 0.2em;
     padding: 0 0.2em;
-    background-color: #f0f0f0;
+    overflow: auto;
+    line-height: 1.6;
+    font-size: 0.75em;
 }
 
-.archive .codeblock {
-    font-size: 0.75em;
+code {
     font-family: var(--codeFont);
+}
+
+.archive code.inlinecode {
+    font-family: "Iosevka Etoile", var(--codeFont);
+    font-size: 0.9em;
+    position: relative;
 }
 
 .archive q {
