@@ -204,6 +204,7 @@ body {
 .footer {
     background-color: var(--tagBgColor);
     width: 100vw;
+    z-index: 9999;
 }
 
 .footer p {
@@ -317,14 +318,6 @@ code {
     padding-left: 1em;
 }
 
-.create.date::before {
-    content: "创建于";
-}
-
-.modified.date::before {
-    content: "最后修改于";
-}
-
 label[for="timeLine"] {
     cursor: pointer;
     outline: none;
@@ -374,35 +367,6 @@ label[for="timeLine"]::before {
     box-shadow: none;
 }
 
-.footer>p[rel="using"] {
-    display: inline;
-}
-
-.footer>p[rel="using"]::before {
-    content: "Using: ";
-}
-
-.footer>p[rel="using"]+p[rel="license"] {
-    margin-left: 10px;
-    display: inline;
-}
-
-.footer>p[rel="license"] {
-    display: inline;
-}
-
-.footer>p[rel="license"]::before {
-    content: "License: ";
-}
-
-.footer>p[rel="contact"]::before {
-    content: "Contact Me: ";
-}
-
-.footer>p[rel="contact"] {
-    margin-top: 8px;
-}
-
 .footer a {
     margin-left: 0.6em;
 }
@@ -426,13 +390,15 @@ table {
     width: 100%;
 }
 
-td, th {
+td,
+th {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     border-left: var(--fontColor) 0.1rem solid;
 }
 
-td:first-child, th:first-child {
+td:first-child,
+th:first-child {
     border-left: none;
 }
 
@@ -469,4 +435,38 @@ span.img-container::after {
     display: block;
     width: 100%;
     text-align: center;
+}
+
+.toc-container {
+    width: max-content;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 999;
+}
+
+.toc:hover {
+    left: 0;
+}
+
+.toc {
+    position: relative;
+    top: 2rem;
+    padding-top: 1rem;
+    font-size: 0.8rem;
+    text-align: start;
+    left: calc(1em - 100%);
+    transition: left 0.5s ease;
+    backdrop-filter: blur(4px);
+    background-color: #7fc7fc55;
+    height: 100vh;
+    box-shadow: 0px 0px 4px 0px #7fc7fc55;
+}
+
+.toc menu {
+    padding: 0 1em;
+}
+
+.toc li {
+    list-style-type: none;
 }

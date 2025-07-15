@@ -24,11 +24,9 @@
     <div class="container">
         <div class="archive {%- if metadata['useIndent'] %} indent {%- endif %}">
             <h1>{{metadata["titleHtml"]}}</h1>
-            <div class="modified date">
-                {{metadata["modifyDate"].toLocaleDateString("zh-CN", {year:"numeric", month:"long", day:"numeric"})}}
-            </div>
-            <div class="create date">
-                {{metadata["createDate"].toLocaleDateString("zh-CN", {year:"numeric", month:"long", day:"numeric"})}}
+            <div class="date">
+                <span class="modified-date">最后修改于 {{metadata["modifyDate"].toLocaleDateString("zh-CN", {year:"numeric", month:"long", day:"numeric"})}}</span>
+                <span class="create-date">创建于 {{metadata["createDate"].toLocaleDateString("zh-CN", {year:"numeric", month:"long", day:"numeric"})}}</span>
             </div>
             {% for tag in metadata["tags"] %}
             <span class="meta">{{tag}}</span>
@@ -40,11 +38,7 @@
     </div>
 
     <div class="footer">
-        <p rel="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
-        <p rel="contact">
-            <a href="mailto:puellaquae@outlook.com">Mail</a>
-            <a href="https://github.com/Puellaquae">Github</a>
-        </p>
+        <p rel="license">License: <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
     </div>
 </body>
 
