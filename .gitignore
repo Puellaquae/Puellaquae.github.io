@@ -5,3 +5,4 @@ __pycache__/
 *.js
 cache/
 tmp/
+.DS_Store
