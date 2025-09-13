@@ -12,8 +12,8 @@
     --tableHeaderBackgroungColor: #fbbe95;
     --pay: #74f466;
     --quoteHintColor: #ff6e90;
-    --lettleList: "小列表";
-    --bigList: "大列表";
+    --lettleList: "≡";
+    --bigList: "▤";
     --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans VF", "Source Han Sans", monospace;
     --font: "Georgia Pro", "Source Han Serif VF", "Source Han Serif", serif;
 }
@@ -416,6 +416,7 @@ th {
 
 img {
     max-width: 100%;
+    height: auto;
 }
 
 .indent img {
@@ -428,8 +429,7 @@ span.img-container {
     text-align: center;
 }
 
-span.img-container::after {
-    content: attr(title);
+span.img-title {
     font-size: 0.75em;
     line-height: 0.75em;
     display: block;

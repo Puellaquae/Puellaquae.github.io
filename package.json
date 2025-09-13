@@ -15,6 +15,7 @@
   "author": "Puellaquae",
   "license": "ISC",
   "dependencies": {
+    "image-size": "^2.0.2",
     "jsptm": "^0.0.18",
     "mathjax-full": "^3.2.2",
     "nunjucks": "^3.2.4",

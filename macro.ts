@@ -8,6 +8,8 @@ import { SVG } from 'mathjax-full/js/output/svg.js';
 import { liteAdaptor } from 'mathjax-full/js/adaptors/liteAdaptor.js';
 import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages.js';
 import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html.js';
+import { imageSizeFromFile } from "image-size/fromFile";
+import { join } from "path";
 
 const HighlightInlineCode: Macro = {
     filter: ["inlineCode"],
@@ -294,12 +296,15 @@ const RedirectLink: Macro = {
 
 const CustomImgRender: Macro = {
     filter: ["image"],
-    func: function (node: Node, metadata: Map<string, unknown>, arg: string): NodeData | null {
+    func: async function (node: Node, metadata: Map<string, unknown>, arg: string): Promise<NodeData | null> {
         if (node.type === "image") {
+            const title = node.data.alt === '' ? '' : `<span class="img-title">${node.data.alt}</span>`;
+            const dir = easyMap<Metadata>(metadata).get("rawdir")!;
+            const size = await imageSizeFromFile(join(dir, node.data.url));
             return {
                 type: "rawHtml",
                 data: {
-                    html: `<span class="img-container" title="${node.data.alt}"><img alt="${node.data.alt}" title="${node.data.alt}" src="${node.data.url}" loading="lazy"/></span>`
+                    html: `<span class="img-container"><img aria-label="${node.data.alt}" src="${node.data.url}" loading="lazy" height="${size.height}" width="${size.width}"/>${title}</span>`
                 }
             }
         }
