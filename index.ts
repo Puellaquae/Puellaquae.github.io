@@ -246,8 +246,8 @@ const forceMacro: { name: MacroName, arg?: string }[] = [
     { name: "Title" },
     { name: "HighlightFenceCode" },
     { name: "RedirectLink" },
-    { name: "CustomImgRender" },
     { name: "CharAndTypesettingOpt" },
+    { name: "CustomImgRender" },
 ];
 
 new Articles("article").process(macro, forceMacro).output("page", ".").done();

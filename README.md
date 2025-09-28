@@ -3,6 +3,7 @@
 [__网页版本__](https://puellaquae.github.io/) | [日志](article/changelog.md) | [关于](article/about.md)
 
 - [播放杜比视界视频](article/dolby-vision.md)
+- [日本之行](article/thought/japan.md)
 - [Philox](article/math/philox.md)
 - [2023 & 2024 回顾](article/thought/2023-2024-review.md)
 - [Ring AllReduce](article/mlsys/ring-allreduce.md)
