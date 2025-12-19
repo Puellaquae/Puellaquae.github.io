@@ -1,28 +1,28 @@
 :root {
-    --navbarBgColor: #a0fff9cc;
-    --bgColor: #fdfdfd;
-    --tagBgColor: #f0f0f0;
-    --fontColor: #1f1f1f;
-    --selectedFontColor: #fff;
-    --selectedBgColor: #1f1f1f;
-    --postTitleColor: #141414;
-    --linkerColor: #0000a0;
-    --highlightColor: #ff7f27;
-    --evenTableBackgroungColor: #ffeadc;
-    --tableHeaderBackgroungColor: #fbbe95;
+    --navbarBgColor: oklch(0.9 0.1 200 / 85%);
+    --bgColor: oklch(0.99 0 0);
+    --tagBgColor: oklch(0.95 0 0);
+    --fontColor: oklch(0.01 0 0);
+    --selectedFontColor: oklch(0.95 0 0);
+    --selectedBgColor: oklch(0.05 0 0);
+    --postTitleColor: oklch(0.05 0 0);
+    --linkerColor: oklch(0.4 0.2 263);
+    --highlightColor: oklch(0.7 0.2 45);
+    --evenTableBackgroungColor: oklch(0.95 0.02 56);
+    --tableHeaderBackgroungColor: oklch(0.85 0.09 56);
     --pay: #74f466;
-    --quoteHintColor: #ff6e90;
+    --quoteHintColor: oklch(0.7 0.18 12);
     --lettleList: "≡";
     --bigList: "▤";
-    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans VF", "Source Han Sans", monospace;
-    --font: "Georgia Pro", "Source Han Serif VF", "Source Han Serif", serif;
+    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans VF", "Source Han Sans", ui-monospace;
+    --font: "Georgia Pro", "Source Han Serif VF", "Source Han Serif", ui-sans-serif;
 }
 
 @media(min-width: 1220px) {
     :root {
         --ContainWidth: 1200px;
         font-size: 24px;
-        font-weight: 450;
+        font-weight: 400;
     }
 }
 
@@ -30,14 +30,14 @@
     :root {
         --ContainWidth: 800px;
         font-size: 20px;
-        font-weight: 450;
+        font-weight: 400;
     }
 }
 
 @media(max-width: 832px) {
     :root {
         --ContainWidth: 94%;
-        --font: "Verdana Pro", "Source Han Sans VF", "Source Han Sans", sans-serif;
+        --font: "Verdana Pro", "Source Han Sans VF", "Source Han Sans", ui-sans-serif;
     }
 }
 
@@ -354,6 +354,7 @@ label[for="timeLine"]::before {
 #timeLine:checked~* .posts .post .date {
     font-size: 1em;
     padding: 0px 1em 1px 0px;
+    min-width: 9ch;
     order: -1;
 }
 
