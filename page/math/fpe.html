@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="格式保留加密">
+    <title>格式保留加密</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+</head>
+
+<body>
+    <header class="header">
+        <section sub="Math" class="navbar-left title">
+        </section>
+        <section class="navbar-right">
+            <a href="../.././index.html">首页</a>
+            <a href="../../page/about.html">关于</a>
+            </section>
+    </header>
+    <div class="container">
+        <div class="archive indent">
+            <h1>格式保留加密</h1>
+            <div class="date">
+                <span class="modified-date">最后修改于 2026年4月22日</span>
+                <span class="create-date">创建于 2026年4月22日</span>
+            </div>
+            
+            <div class="entry">
+                <p>本文是 <a href="./philox.html">Philox</a> 的扩展内容。</p><h2>问题</h2><p>我们需要并行化生成不重复的 index tensor 或者是 randperm 的做法。cpu 上朴素的洗牌算法肯定是不行的，一点也不并行；cuda 上的 randperm 是 sort 出来的，高效的并行化 sort 也是个大坑，当然他们的 sort 很快。所以最好还是可以和 philox 一样靠 index 与 seed 就直接得到对应随机数结果，而且不同的 index 下输出都是不重复的。</p><h2>启发</h2><p>在 philox 最后章讲到，philox 算法是一个双射，结果可以反推输入。那这不正是我们所需要的不同输入下输出都是不重复的函数吗，只是 philox 的输出范围有 128bit（或 64bit<span class='halt'>）</span>，这范围太大了，几乎没法直接在实际使用。所以需要一种可以使输出范围缩小的方法，这就本文所要讨论的：格式保留加密（Format-Preserving Encryption，FPE<span class='halt'>）</span>。</p><h2>FPE</h2><p>FPE 是指密文与明文格式保证一致的加密方法，例如原文密文都落在给定一个字母表或者整数区间内。在 FPE 的具体实现中，可以有这样两种构造方式：Feistel 网络和 Cycle Walking。</p><h3>Feistel 网络与 Luby-Rackoff 理论</h3><p>FF1（以及 FF3-1）等 NIST 标准 FPE 算法均采用平衡或不平衡的 Feistel 网络结构。其理论基石源于 Luby 和 Rackoff 在 1988 年证明的结论：对于一个使用真正随机函数（Round Function，轮函数，指 Philox 一文 Feistel 配图中的 Fk 函数）的 3 轮 Feistel 网络，其输出与一个真正随机置换在计算上不可区分；4 轮即可达到强伪随机置换的安全性。这为使用密码学强度足够的轮函数（如 AES、Philox）构建安全的 FPE 提供了理论保证。</p><p>FF1 是 10 轮以 AES 作为轮函数的 Feistel 结构。假设输入输出格式是 A 进制的 N 位数，FF1 使用的模加法将 R' 限制在 N/2 位 A 进制范围内，<span class='halt'>（</span>L' 是直接复制的，所以不会有位数变化<span class='halt'>）</span>，即 R' = (L + F(R)) % A<sup>N/2</sup> 。如此使得输出保持在 N 位数内，注意如果 N 不是偶数的话，每轮 R 的位数会是交替变化的。</p><h3>Cycle-walking</h3><p>cycle-walking 则是直接打回不符合范围的输出，重新作为输入，直到输出落在期待范围内为止。这是一个比较简单的方法，但如果原始输出的范围过大会导致重复迭代的次数过多。</p><h2>应用</h2><p>FF1 那种方法直接对应到我们需求的场景那就是输入输出格式为 Range 进制的 1 位数。对于我们单纯随机数需求，可以减少 Feistel 轮次以及换一个弱一些但性能更好的轮函数。但是对于位数为 1 的情况，会导致随机效果变差，例如 FF1 算法会要求位数至少为 2。对于 Range 不是质数的情况下，可以拆一个因数 F 出来，变成 F 进制的多位数。不过因数分解本身不简单，可以先假定个因数（比如 2，相当于所有的偶数都是可行的了<span class='halt'>）</span>，让 Range 向上取整，对于超出的一点情况在使用 Cycle-walking 做兜底。</p><p></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p rel="license">License: <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
+    </div>
+</body>
+
+</html>

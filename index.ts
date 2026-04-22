@@ -35,7 +35,7 @@ function getAllFiles(dir: string): { dir: string, name: string }[] {
     for (const file of files) {
         if (lstatSync(dir + "/" + file).isDirectory()) {
             res.push(...getAllFiles(dir + "/" + file));
-        } else {
+        } else if (!file.startsWith(".")) {
             res.push({ dir, name: file });
         }
     }

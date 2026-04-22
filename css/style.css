@@ -14,8 +14,8 @@
     --quoteHintColor: oklch(0.7 0.18 12);
     --lettleList: "≡";
     --bigList: "▤";
-    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans VF", "Source Han Sans", ui-monospace;
-    --font: "Georgia Pro", "Source Han Serif VF", "Source Han Serif", ui-sans-serif;
+    --codeFont: 'Fira Code', "Cascadia Code", "Source Han Sans VF", "Source Han Sans", monospace;
+    --font: "Georgia Pro", "Source Han Serif VF", "Source Han Serif", sans-serif;
 }
 
 @media(min-width: 1220px) {
@@ -37,7 +37,7 @@
 @media(max-width: 832px) {
     :root {
         --ContainWidth: 94%;
-        --font: "Verdana Pro", "Source Han Sans VF", "Source Han Sans", ui-sans-serif;
+        --font: "Verdana Pro", "Source Han Sans VF", "Source Han Sans", sans-serif;
     }
 }
 
@@ -470,4 +470,8 @@ span.img-title {
 
 .toc li {
     list-style-type: none;
+}
+
+.archive sup {
+    font-size: 0.7em;
 }
